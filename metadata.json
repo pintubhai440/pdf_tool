@@ -1,0 +1,8 @@
+{
+  "name": "PDF Fusion AI",
+  "description": "A powerful tool to merge, reorder, and organize PDF files with AI-powered insights and document analysis.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
