@@ -59,7 +59,7 @@ const generateContentWithRetry = async (modelName: string, params: any) => {
 export const analyzeDocumentImage = async (base64Image: string, mimeType: string): Promise<string> => {
   try {
     // Hum 'gemini-2.0-flash' use kar rahe hain jo fast aur stable hai
-    const response = await generateContentWithRetry('gemini-2.0-flash', {
+    const response = await generateContentWithRetry('gemini-2.5-flash', {
       contents: {
         parts: [
           {
@@ -93,7 +93,7 @@ export const getAiAssistance = async (
   // Logic: Complex prompts ke liye bhi abhi hum Flash use kar rahe hain reliability ke liye.
   // Agar future me Pro model chahiye ho, toh ternary operator uncomment kar sakte hain.
   const isComplex = /plan|strategy|organize|structure|complex|reason/i.test(prompt);
-  const modelName = 'Gemini-2.0-Flash'; // Filhal dono ke liye Flash rakha hai fast response ke liye
+  const modelName = 'gemini-2.5-flash'; // Filhal dono ke liye Flash rakha hai fast response ke liye
 
   try {
     // History aur current prompt ko format karein
