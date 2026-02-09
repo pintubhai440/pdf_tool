@@ -93,7 +93,7 @@ export const getAiAssistance = async (
   // Logic: Complex prompts ke liye bhi abhi hum Flash use kar rahe hain reliability ke liye.
   // Agar future me Pro model chahiye ho, toh ternary operator uncomment kar sakte hain.
   const isComplex = /plan|strategy|organize|structure|complex|reason/i.test(prompt);
-  const modelName = 'Gemini 2.0 Flash'; // Filhal dono ke liye Flash rakha hai fast response ke liye
+  const modelName = 'Gemini-2.0-Flash'; // Filhal dono ke liye Flash rakha hai fast response ke liye
 
   try {
     // History aur current prompt ko format karein
