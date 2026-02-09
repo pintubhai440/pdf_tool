@@ -13,7 +13,7 @@ import {
   ArrowRightLeft,
   Minimize2,
   Scaling,
-  LayoutGrid  // Added for Home icon
+  LayoutGrid
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,12 +25,14 @@ import { SplitTool } from './components/SplitTool';
 import { ConverterTool } from './components/ConverterTool';
 import { CompressTool } from './components/CompressTool';
 import { ResizeTool } from './components/ResizeTool';
-import { Home } from './components/Home';  // New Home component
+import { Home } from './components/Home';
+import { About } from './components/About';
+import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
 function App() {
-  const [mode, setMode] = useState<AppMode>('home');  // Changed default to 'home'
+  const [mode, setMode] = useState<AppMode>('home');
   const [files, setFiles] = useState<PdfFile[]>([]);
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
@@ -44,7 +46,7 @@ function App() {
       size: file.size,
     }));
     setFiles((prev) => [...prev, ...pdfFiles]);
-    setMergedPdfUrl(null); // Reset previous merge
+    setMergedPdfUrl(null);
   };
 
   const handleRemoveFile = (id: string) => {
@@ -114,106 +116,120 @@ function App() {
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Navigation Tabs */}
-        <div className="flex justify-center mb-8 overflow-x-auto">
-          <div className="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner whitespace-nowrap">
-             {/* Home Button */}
-             <button
-               onClick={() => setMode('home')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'home' 
+        {/* Navigation Tabs - Hide on About, Contact, Policy pages */}
+        {!['about', 'contact', 'policy'].includes(mode) && (
+          <div className="flex justify-center mb-8 overflow-x-auto">
+            <div className="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner whitespace-nowrap">
+              {/* Home Button */}
+              <button
+                onClick={() => setMode('home')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'home' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <LayoutGrid size={18} />
                 Home
-             </button>
-             
-             <button
-               onClick={() => setMode('merge')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'merge' 
+              </button>
+              
+              <button
+                onClick={() => setMode('merge')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'merge' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <Files size={18} />
                 Merge
-             </button>
-             <button
-               onClick={() => setMode('split')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'split' 
+              </button>
+              <button
+                onClick={() => setMode('split')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'split' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <Scissors size={18} />
                 Split
-             </button>
-             <button
-               onClick={() => setMode('convert')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'convert' 
+              </button>
+              <button
+                onClick={() => setMode('convert')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'convert' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <ArrowRightLeft size={18} />
                 Convert
-             </button>
-             <button
-               onClick={() => setMode('compress')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'compress' 
+              </button>
+              <button
+                onClick={() => setMode('compress')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'compress' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <Minimize2 size={18} />
                 Compress
-             </button>
-             <button
-               onClick={() => setMode('resize')}
-               className={clsx(
-                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                 mode === 'resize' 
+              </button>
+              <button
+                onClick={() => setMode('resize')}
+                className={clsx(
+                  "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                  mode === 'resize' 
                     ? "bg-white text-primary-700 shadow-sm" 
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-               )}
-             >
+                )}
+              >
                 <Scaling size={18} />
                 Resize
-             </button>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Dynamic Content */}
+        {/* Dynamic Content Switching */}
         {mode === 'home' ? (
           <Home setMode={setMode} />
+        ) : mode === 'about' ? (
+          <About />
+        ) : mode === 'contact' ? (
+          <div className="text-center py-20">
+            <h2 className="text-3xl font-bold text-slate-900">Contact Us</h2>
+            <p className="text-slate-500 mt-2">We'd love to hear from you! (Form coming soon)</p>
+          </div>
+        ) : mode === 'policy' ? (
+          <div className="text-center py-20">
+            <h2 className="text-3xl font-bold text-slate-900">Privacy Policy</h2>
+            <p className="text-slate-500 mt-2">Your data is safe with us. (Policy details coming soon)</p>
+          </div>
         ) : mode === 'split' ? (
-           <SplitTool />
+          <SplitTool />
         ) : mode === 'convert' ? (
-           <ConverterTool />
+          <ConverterTool />
         ) : mode === 'compress' ? (
-           <CompressTool />
+          <CompressTool />
         ) : mode === 'resize' ? (
-           <ResizeTool />
+          <ResizeTool />
         ) : (
-          /* MERGE TOOL VIEW */
+          /* MERGE TOOL VIEW (Default when mode is 'merge') */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
             
             {/* Left: Uploader & List */}
             <div className="lg:col-span-2 space-y-6">
               <div className="mb-2">
-                 <h2 className="text-2xl font-bold text-slate-900">Merge PDF Files</h2>
-                 <p className="text-slate-500">Combine multiple documents into a single PDF file.</p>
+                <h2 className="text-2xl font-bold text-slate-900">Merge PDF Files</h2>
+                <p className="text-slate-500">Combine multiple documents into a single PDF file.</p>
               </div>
 
               <FileUploader onFilesSelected={handleFilesSelected} label="Click or Drag PDF files here" />
@@ -342,13 +358,14 @@ function App() {
                       </div>
                   </div>
                 )}
-
               </div>
             </div>
-
           </div>
         )}
       </main>
+
+      {/* Footer - All pages ke niche dikhega */}
+      <Footer setMode={setMode} />
 
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
