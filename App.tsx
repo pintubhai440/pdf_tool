@@ -11,7 +11,8 @@ import {
   Scissors,
   Files,
   ArrowRightLeft,
-  Minimize2
+  Minimize2,
+  Scaling  // Add kiya gaya
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,6 +23,7 @@ import { AiAssistant } from './components/AiAssistant';
 import { SplitTool } from './components/SplitTool';
 import { ConverterTool } from './components/ConverterTool';
 import { CompressTool } from './components/CompressTool';
+import { ResizeTool } from './components/ResizeTool';  // Import add kiya
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
@@ -158,6 +160,18 @@ function App() {
                 <Minimize2 size={18} />
                 Compress
              </button>
+             <button
+               onClick={() => setMode('resize')}
+               className={clsx(
+                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                 mode === 'resize' 
+                    ? "bg-white text-primary-700 shadow-sm" 
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+               )}
+             >
+                <Scaling size={18} />
+                Resize
+             </button>
           </div>
         </div>
 
@@ -168,6 +182,8 @@ function App() {
            <ConverterTool />
         ) : mode === 'compress' ? (
            <CompressTool />
+        ) : mode === 'resize' ? (
+           <ResizeTool />
         ) : (
           /* MERGE TOOL VIEW */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
