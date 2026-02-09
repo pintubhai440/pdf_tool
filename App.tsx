@@ -10,7 +10,8 @@ import {
   Loader2,
   Scissors,
   Files,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Minimize2
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +21,7 @@ import { FileList } from './components/FileList';
 import { AiAssistant } from './components/AiAssistant';
 import { SplitTool } from './components/SplitTool';
 import { ConverterTool } from './components/ConverterTool';
+import { CompressTool } from './components/CompressTool';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
@@ -144,6 +146,18 @@ function App() {
                 <ArrowRightLeft size={18} />
                 Convert
              </button>
+             <button
+               onClick={() => setMode('compress')}
+               className={clsx(
+                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                 mode === 'compress' 
+                    ? "bg-white text-primary-700 shadow-sm" 
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+               )}
+             >
+                <Minimize2 size={18} />
+                Compress
+             </button>
           </div>
         </div>
 
@@ -152,6 +166,8 @@ function App() {
            <SplitTool />
         ) : mode === 'convert' ? (
            <ConverterTool />
+        ) : mode === 'compress' ? (
+           <CompressTool />
         ) : (
           /* MERGE TOOL VIEW */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
