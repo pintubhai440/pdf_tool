@@ -28,6 +28,7 @@ import { ResizeTool } from './components/ResizeTool';
 import { Home } from './components/Home';
 import { About } from './components/About';
 import { Contact } from './components/Contact';
+import { Policy } from './components/Policy';
 import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
@@ -207,10 +208,7 @@ function App() {
         ) : mode === 'contact' ? (
           <Contact />
         ) : mode === 'policy' ? (
-          <div className="text-center py-20">
-            <h2 className="text-3xl font-bold text-slate-900">Privacy Policy</h2>
-            <p className="text-slate-500 mt-2">Your data is safe with us. (Policy details coming soon)</p>
-          </div>
+          <Policy />
         ) : mode === 'split' ? (
           <SplitTool />
         ) : mode === 'convert' ? (
