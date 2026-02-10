@@ -112,6 +112,14 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   Privacy Policy
                 </button>
               </li>
+              <li>
+                <button 
+                  onClick={() => handleNav('terms')} 
+                  className="hover:text-primary-600 transition-colors text-left"
+                >
+                  Terms & Conditions
+                </button>
+              </li>
             </ul>
           </div>
         </div>
