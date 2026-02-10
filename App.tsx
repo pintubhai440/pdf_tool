@@ -40,6 +40,13 @@ function App() {
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
 
+  // ✅ New function to change mode and scroll to top
+  const changeMode = (newMode: AppMode) => {
+    setMode(newMode);
+    // Scroll to top with smooth behavior
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleFilesSelected = (newFiles: File[]) => {
     const pdfFiles: PdfFile[] = newFiles.map((file) => ({
       id: uuidv4(),
@@ -92,7 +99,7 @@ function App() {
   // Helper function for clickable nav buttons to keep code clean
   const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => (
     <button
-      onClick={() => setMode(targetMode)}
+      onClick={() => changeMode(targetMode)} // ✅ Updated to use changeMode
       className={clsx(
         "flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 min-w-[100px]",
         mode === targetMode
@@ -114,7 +121,7 @@ function App() {
           {/* Logo ko clickable banaya hai - Acts as Home Button */}
           <div 
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setMode('home')} 
+            onClick={() => changeMode('home')} // ✅ Updated to use changeMode
             title="Go to Home"
           >
             <div className="bg-primary-600 p-2 rounded-lg text-white">
@@ -147,7 +154,7 @@ function App() {
             <div className="w-full sm:w-auto flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 sm:bg-slate-100 sm:p-1 sm:rounded-xl sm:shadow-inner">
               {/* Home Button */}
               <button
-                onClick={() => setMode('home')}
+                onClick={() => changeMode('home')} // ✅ Updated to use changeMode
                 className={clsx(
                   "flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 min-w-[100px]",
                   mode === 'home'
@@ -170,7 +177,7 @@ function App() {
 
         {/* Dynamic Content Switching */}
         {mode === 'home' ? (
-          <Home setMode={setMode} />
+          <Home setMode={changeMode} /> {/* ✅ Updated to pass changeMode */}
         ) : mode === 'about' ? (
           <About />
         ) : mode === 'contact' ? (
@@ -329,7 +336,7 @@ function App() {
       </main>
 
       {/* Footer - All pages ke niche dikhega */}
-      <Footer setMode={setMode} />
+      <Footer setMode={changeMode} /> {/* ✅ Updated to pass changeMode */}
 
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
