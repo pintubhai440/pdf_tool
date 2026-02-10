@@ -28,7 +28,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                 <FileStack size={20} />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
-                PDF Fusion AI
+                Genz PDF
               </span>
             </button>
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
@@ -127,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-400 text-sm">
-            © {new Date().getFullYear()} PDF Fusion AI. All rights reserved.
+            © {new Date().getFullYear()} Genz PDF. All rights reserved.
           </p>
           
           {/* Social Placeholders (Dummy Links) */}
