@@ -128,11 +128,11 @@ function App() {
               <FileStack size={24} />
             </div>
             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600 hidden xs:block">
-              PDF Fusion AI
+              Genz PDF
             </h1>
             {/* Mobile Title (Short) */}
             <h1 className="text-xl font-bold text-primary-600 xs:hidden">
-              PDF AI
+              Genz PDF
             </h1>
           </div>
 
