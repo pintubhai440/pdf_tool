@@ -7,7 +7,7 @@ export const About: React.FC = () => {
       {/* Hero Section */}
       <div className="text-center mb-16 space-y-4">
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-          About <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">PDF Fusion</span>
+          About <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">Genz PDF</span>
         </h1>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
           Making digital document management simple, secure, and free for everyone.
@@ -21,7 +21,7 @@ export const About: React.FC = () => {
           {/* Introduction */}
           <div className="prose prose-lg text-slate-600 max-w-none">
             <p className="text-lg leading-relaxed">
-              <strong className="text-slate-900">PDF Fusion</strong> is here to make your digital life easier. 
+              <strong className="text-slate-900">Genz PDF</strong> is here to make your digital life easier. 
               We have eliminated the stress of document management by combining essential tools—
               <span className="text-indigo-600 font-medium"> Merge, Split, Convert, Compress, and Resize</span>
               —into one seamless platform.
@@ -61,7 +61,7 @@ export const About: React.FC = () => {
             </p>
             <p>
               That’s why we created a solution that brings everything together in one place. 
-              <strong> PDF Fusion is your one-stop destination for all things PDF and Image.</strong> 
+              <strong> Genz PDF is your one-stop destination for all things PDF and Image.</strong> 
               Whether you need to Merge reports, Split pages, Convert formats, Compress heavy files, 
               or Resize Images, we give you the power to do it instantly and securely.
             </p>
