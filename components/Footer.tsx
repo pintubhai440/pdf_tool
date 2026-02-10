@@ -72,6 +72,15 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   Compress PDF
                 </button>
               </li>
+              {/* ✅ ADDED RESIZE BUTTON HERE */}
+              <li>
+                <button 
+                  onClick={() => handleNav('resize')} 
+                  className="hover:text-primary-600 transition-colors text-left"
+                >
+                  Resize PDF
+                </button>
+              </li>
             </ul>
           </div>
 
