@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// ✅ 1. 'useEffect' ko import kiya gaya hai
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowDownAZ, 
   ArrowUpAZ, 
@@ -39,6 +40,11 @@ function App() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
+
+  // ✅ 2. Jab bhi mode change ho, page top par scroll kare
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [mode]);
 
   const handleFilesSelected = (newFiles: File[]) => {
     const pdfFiles: PdfFile[] = newFiles.map((file) => ({
