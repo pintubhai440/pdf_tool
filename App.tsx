@@ -30,6 +30,7 @@ import { Home } from './components/Home';
 import { About } from './components/About';
 import { Contact } from './components/Contact';
 import { Policy } from './components/Policy';
+import { Terms } from './components/Terms'; // ✅ Import Terms component
 import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
@@ -147,8 +148,8 @@ function App() {
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Navigation Tabs - Hide on About, Contact, Policy pages */}
-        {!['about', 'contact', 'policy'].includes(mode) && (
+        {/* Navigation Tabs - Hide on About, Contact, Policy, Terms pages */}
+        {!['about', 'contact', 'policy', 'terms'].includes(mode) && (
           <div className="flex justify-center mb-8">
             <div className="w-full sm:w-auto flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 sm:bg-slate-100 sm:p-1 sm:rounded-xl sm:shadow-inner">
               {/* Home Button */}
@@ -183,6 +184,8 @@ function App() {
           <Contact />
         ) : mode === 'policy' ? (
           <Policy />
+        ) : mode === 'terms' ? (     // ✅ ADDED Terms BLOCK
+          <Terms />
         ) : mode === 'split' ? (
           <SplitTool />
         ) : mode === 'convert' ? (
