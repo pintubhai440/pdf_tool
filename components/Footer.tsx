@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode } from '../types';
-import { FileStack, Github, Twitter, Linkedin } from 'lucide-react';
+import { FileStack, Linkedin } from 'lucide-react';
 
 interface FooterProps {
   setMode: (mode: AppMode) => void;
@@ -72,7 +72,6 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   Compress PDF
                 </button>
               </li>
-              {/* ✅ ADDED RESIZE BUTTON HERE */}
               <li>
                 <button 
                   onClick={() => handleNav('resize')} 
@@ -124,22 +123,40 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-400 text-sm">
+        {/* Bottom Bar with Developers */}
+        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-slate-400 text-sm order-2 md:order-1">
             © {new Date().getFullYear()} Genz PDF. All rights reserved.
           </p>
           
-          {/* Social Placeholders (Dummy Links) */}
-          <div className="flex items-center gap-4 text-slate-400">
-            <a href="#" className="hover:text-slate-600 transition-colors" aria-label="Github">
-              <Github size={20} />
+          {/* Developer Credits - Beautiful Pill Design */}
+          <div className="flex flex-wrap items-center justify-center gap-4 order-1 md:order-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:block">
+              Developers
+            </span>
+            
+            {/* Pintu's Link */}
+            <a 
+              href="https://www.linkedin.com/in/pintu-chauhan-ctuap/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
+              title="Connect with Pintu Chauhan on LinkedIn"
+            >
+              <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">Pintu Chauhan</span>
             </a>
-            <a href="#" className="hover:text-blue-400 transition-colors" aria-label="Twitter">
-              <Twitter size={20} />
-            </a>
-            <a href="#" className="hover:text-blue-700 transition-colors" aria-label="LinkedIn">
-              <Linkedin size={20} />
+
+            {/* Raushan's Link */}
+            <a 
+              href="https://www.linkedin.com/in/raushan-kumar-0b5340373/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
+              title="Connect with Raushan Kumar on LinkedIn"
+            >
+              <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">Raushan Kumar</span>
             </a>
           </div>
         </div>
