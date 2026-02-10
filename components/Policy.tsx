@@ -14,7 +14,7 @@ export const Policy: React.FC = () => {
           Our Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Promise</span>
         </h1>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          At PDF Fusion, your safety is our top priority. We have built our website to be 100% private and secure.
+          At Genz PDF, your safety is our top priority. We have built our website to be 100% private and secure.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export const Policy: React.FC = () => {
 
       {/* Trust Badge / Footer Note */}
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-8 text-center max-w-3xl mx-auto">
-        <h3 className="text-2xl font-bold text-green-900 mb-2">Use PDF Fusion with complete confidence.</h3>
+        <h3 className="text-2xl font-bold text-green-900 mb-2">Use Genz PDF with complete confidence.</h3>
         <p className="text-green-700 text-lg">Your data stays yours. Simple, Secure, and 100% Free.</p>
       </div>
     </div>
