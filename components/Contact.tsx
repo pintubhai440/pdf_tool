@@ -24,7 +24,7 @@ export const Contact: React.FC = () => {
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-4">How can we help you?</h2>
         <p className="text-slate-600 max-w-3xl mx-auto text-lg">
-          Do you have a question about PDF Fusion? Did you spot a bug? Our team is here to ensure your experience is smooth and hassle-free. Don't hesitate to contact us regarding any technical issues or general inquiries.
+          Do you have a question about Genz PDF? Did you spot a bug? Our team is here to ensure your experience is smooth and hassle-free. Don't hesitate to contact us regarding any technical issues or general inquiries.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export const Contact: React.FC = () => {
           <p className="text-slate-500 mb-6 text-sm">Dedicated to providing you with the best free PDF tools.</p>
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
             <p className="text-slate-700 font-medium text-center">
-              PDF Fusion is proudly developed and maintained by <br/>
+              Genz PDF is proudly developed and maintained by <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-lg">
                 Pintu & Raushan
               </span>
