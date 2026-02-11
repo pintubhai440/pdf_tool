@@ -24,13 +24,11 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
   const [file, setFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
-  // ✅ Added 'docx-to-pdf' mode
   const [mode, setMode] = useState<'pdf-to-x' | 'img-to-x' | 'docx-to-pdf' | null>(null);
   const [targetFormat, setTargetFormat] = useState<ConversionFormat>('jpg');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Result
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
@@ -58,14 +56,15 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setMode('img-to-x');
       setImageFiles(files);
       setTargetFormat('pdf');
-    }
-    // ✅ New branch for DOCX files
-    else if (firstFile.name.endsWith('.docx') || firstFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    } else if (
+      firstFile.name.endsWith('.docx') ||
+      firstFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
       setMode('docx-to-pdf');
       setFile(firstFile);
       setTargetFormat('pdf');
     } else {
-      setError("Unsupported file type.");
+      setError('Unsupported file type.');
     }
   };
 
@@ -98,13 +97,13 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         const base64Data = dataUrl.split(',')[1];
         folder?.file(`page_${i}.${format}`, base64Data, { base64: true });
       }
-      const content = await zip.generateAsync({ type: "blob" });
+      const content = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(content);
       setDownloadUrl(url);
       setDownloadName(`${folderName}-converted.zip`);
     } catch (err) {
       console.error(err);
-      setError("Failed to convert PDF to images.");
+      setError('Failed to convert PDF to images.');
     }
   };
 
@@ -131,7 +130,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setDownloadName(`${file.name.replace('.pdf', '')}.txt`);
     } catch (err) {
       console.error(err);
-      setError("Failed to extract text.");
+      setError('Failed to extract text.');
     }
   };
 
@@ -151,34 +150,38 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         const textContent = await page.getTextContent();
         const items = textContent.items;
         const paragraphs = [];
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: "888888" })],
-          spacing: { after: 200 }
-        }));
-        let currentLine = "";
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: '888888' })],
+            spacing: { after: 200 },
+          })
+        );
+        let currentLine = '';
         let lastY = -1;
         for (const item of items as any[]) {
           if (lastY !== -1 && Math.abs(item.transform[5] - lastY) > 10) {
             paragraphs.push(new Paragraph({ children: [new TextRun(currentLine)] }));
-            currentLine = "";
+            currentLine = '';
           }
-          currentLine += item.str + " ";
+          currentLine += item.str + ' ';
           lastY = item.transform[5];
         }
         if (currentLine) {
           paragraphs.push(new Paragraph({ children: [new TextRun(currentLine)] }));
         }
         if (i < pdf.numPages) {
-          paragraphs.push(new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }));
+          paragraphs.push(new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }));
         }
         docSections.push({ children: paragraphs });
       }
-      const allChildren = docSections.flatMap(s => s.children);
+      const allChildren = docSections.flatMap((s) => s.children);
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: allChildren
-        }]
+        sections: [
+          {
+            properties: {},
+            children: allChildren,
+          },
+        ],
       });
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
@@ -186,7 +189,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setDownloadName(`${file.name.replace('.pdf', '')}.docx`);
     } catch (err) {
       console.error(err);
-      setError("Failed to convert to Word document.");
+      setError('Failed to convert to Word document.');
     }
   };
 
@@ -200,7 +203,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setDownloadName(`converted-images.pdf`);
     } catch (err) {
       console.error(err);
-      setError("Failed to convert images to PDF.");
+      setError('Failed to convert images to PDF.');
     }
   };
 
@@ -210,26 +213,32 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       const paragraphs = [];
       for (const imgFile of imageFiles) {
         const buffer = await imgFile.arrayBuffer();
-        paragraphs.push(new Paragraph({
-          children: [
-            new ImageRun({
-              data: buffer,
-              transformation: { width: 500, height: 500 },
-              type: imgFile.type === 'image/png' ? "png" : "jpg"
-            })
-          ],
-          spacing: { after: 400 }
-        }));
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ text: imgFile.name, size: 20, color: "666666" })],
-          spacing: { after: 800 }
-        }));
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: buffer,
+                transformation: { width: 500, height: 500 },
+                type: imgFile.type === 'image/png' ? 'png' : 'jpg',
+              }),
+            ],
+            spacing: { after: 400 },
+          })
+        );
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: imgFile.name, size: 20, color: '666666' })],
+            spacing: { after: 800 },
+          })
+        );
       }
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: paragraphs
-        }]
+        sections: [
+          {
+            properties: {},
+            children: paragraphs,
+          },
+        ],
       });
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
@@ -237,7 +246,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setDownloadName(`converted-images.docx`);
     } catch (err) {
       console.error(err);
-      setError("Failed to convert images to Word.");
+      setError('Failed to convert images to Word.');
     }
   };
 
@@ -246,12 +255,14 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       if (imageFiles.length > 1) {
         const zip = new JSZip();
-        const folder = zip.folder("converted_images");
+        const folder = zip.folder('converted_images');
         for (const imgFile of imageFiles) {
           const img = new Image();
           const objectUrl = URL.createObjectURL(imgFile);
           img.src = objectUrl;
-          await new Promise((resolve) => { img.onload = resolve; });
+          await new Promise((resolve) => {
+            img.onload = resolve;
+          });
           const canvas = document.createElement('canvas');
           canvas.width = img.width;
           canvas.height = img.height;
@@ -265,7 +276,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           }
           URL.revokeObjectURL(objectUrl);
         }
-        const content = await zip.generateAsync({ type: "blob" });
+        const content = await zip.generateAsync({ type: 'blob' });
         setDownloadUrl(URL.createObjectURL(content));
         setDownloadName(`converted-images.zip`);
       } else {
@@ -273,7 +284,9 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         const img = new Image();
         const objectUrl = URL.createObjectURL(imgFile);
         img.src = objectUrl;
-        await new Promise((resolve) => { img.onload = resolve; });
+        await new Promise((resolve) => {
+          img.onload = resolve;
+        });
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -289,28 +302,76 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       }
     } catch (err) {
       console.error(err);
-      setError("Image conversion failed.");
+      setError('Image conversion failed.');
     }
   };
 
-  // ✅ NEW: DOCX to PDF conversion using mammoth + jsPDF
+  // ✅ UPDATED: DOCX to PDF (Preserves Images & Formatting)
   const convertDocxToPdf = async () => {
     if (!file) return;
     try {
       const arrayBuffer = await file.arrayBuffer();
+
+      // Step A: Convert DOCX to HTML (Mammoth automatically handles images as base64)
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const htmlContent = result.value;
-      const doc = new jsPDF();
-      // Strip HTML tags and split into lines that fit the PDF width
-      const textLines = doc.splitTextToSize(htmlContent.replace(/<[^>]+>/g, '\n'), 180);
-      doc.text(textLines, 10, 10);
+
+      // Step B: Create a temporary hidden container for the HTML
+      // (jsPDF needs a real DOM element to render images correctly)
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = result.value;
+
+      // Basic styling to mimic a generic A4 page
+      Object.assign(tempContainer.style, {
+        width: '595px', // A4 width at 72 DPI
+        padding: '40px',
+        fontSize: '12pt',
+        fontFamily: 'Arial, sans-serif',
+        lineHeight: '1.5',
+        backgroundColor: 'white',
+        color: 'black',
+        position: 'absolute',
+        left: '-9999px', // Hide it off-screen
+        top: '0',
+      });
+
+      // Make images responsive so they don't overflow the page
+      const images = tempContainer.getElementsByTagName('img');
+      for (let img of images) {
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.margin = '10px 0';
+      }
+
+      document.body.appendChild(tempContainer);
+
+      // Step C: Render HTML to PDF using jsPDF .html() method
+      const doc = new jsPDF({
+        unit: 'pt',
+        format: 'a4',
+      });
+
+      await doc.html(tempContainer, {
+        x: 0,
+        y: 0,
+        width: 595, // Target width in PDF
+        windowWidth: 595, // Window width for CSS resolution
+        margin: [20, 0, 20, 0], // Top/Bottom margins
+        autoPaging: 'text',
+      });
+
+      // Generate blob and create download URL
       const blob = doc.output('blob');
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
       setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
+
+      // Cleanup: Remove temporary element
+      document.body.removeChild(tempContainer);
     } catch (err) {
       console.error(err);
-      setError("Failed to convert DOCX to PDF.");
+      setError(
+        'Failed to convert DOCX to PDF. Ensure html2canvas is installed in package.json.'
+      );
     }
   };
 
@@ -335,9 +396,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         } else if (targetFormat === 'jpg' || targetFormat === 'png') {
           await convertImageFormat(targetFormat);
         }
-      }
-      // ✅ New branch for DOCX to PDF
-      else if (mode === 'docx-to-pdf') {
+      } else if (mode === 'docx-to-pdf') {
         await convertDocxToPdf();
       }
     } finally {
@@ -359,17 +418,18 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       <div className="w-full">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-slate-900">Universal Converter</h3>
-          <p className="text-slate-500">Upload any file to see available conversion options (PDF, JPG, PNG, DOCX).</p>
+          <p className="text-slate-500">
+            Upload any file to see available conversion options (PDF, JPG, PNG, DOCX).
+          </p>
         </div>
         <FileUploader
           onFilesSelected={handleFilesSelected}
           allowMultiple={true}
-          // ✅ Added DOCX MIME type
           acceptedFileTypes={[
             'application/pdf',
             'image/jpeg',
             'image/png',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           ]}
           label="Click or Drag PDF, Images or DOCX here"
           subLabel="Support for: PDF, JPG, PNG, DOCX"
@@ -402,9 +462,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
           <div>
             <h3 className="font-semibold text-slate-900">{imageFiles.length} Image(s)</h3>
-            <p className="text-sm text-slate-500">
-              Ready to convert
-            </p>
+            <p className="text-sm text-slate-500">Ready to convert</p>
           </div>
         </>
       );
@@ -428,12 +486,9 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-
       {/* File Info Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {renderFileInfo()}
-        </div>
+        <div className="flex items-center gap-4">{renderFileInfo()}</div>
         <button onClick={handleReset} className="text-slate-400 hover:text-red-500 p-2">
           <AlertCircle size={20} className="rotate-45" />
         </button>
@@ -456,7 +511,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </h4>
 
           <div className="flex items-center gap-4">
-            {/* For DOCX to PDF we show a simple static message (no dropdown) */}
             {mode === 'docx-to-pdf' ? (
               <div className="flex-1">
                 <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
@@ -534,7 +588,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
