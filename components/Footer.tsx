@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode } from '../types';
-import { FileStack, Linkedin } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
 
 interface FooterProps {
   setMode: (mode: AppMode) => void;
@@ -24,9 +24,12 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
               onClick={() => handleNav('home')} 
               className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity text-left"
             >
-              <div className="bg-primary-600 p-1.5 rounded-lg text-white">
-                <FileStack size={20} />
-              </div>
+              {/* Custom Footer Logo */}
+              <img 
+                src="/logo.png" 
+                alt="Genz PDF Logo" 
+                className="w-8 h-8 object-contain rounded-lg" 
+              />
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
                 Genz PDF
               </span>
