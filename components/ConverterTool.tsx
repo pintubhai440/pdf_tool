@@ -377,7 +377,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: White Page Issue Solved (Using z-index instead of off-screen)
+  // ✅ FIXED: Full Page Capture (Solved 'Half Page' & Cutoff Issue)
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -386,16 +386,16 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup - Z-INDEX trick use karein (Off-screen nahi)
+      // 1. Container setup - FIXED ki jagah ABSOLUTE use karein
       const wrapper = document.createElement('div');
-      wrapper.style.position = 'fixed';
-      wrapper.style.top = '0';
+      wrapper.style.position = 'absolute'; // ✨ Change: Fixed -> Absolute
+      wrapper.style.top = '-9999px'; // ✨ Change: Screen ke upar bheja (hidden but renderable)
       wrapper.style.left = '0';
-      wrapper.style.zIndex = '-9999'; // User ko nahi dikhega, par html2canvas ko dikhega
+      wrapper.style.zIndex = '-9999';
       wrapper.style.width = '794px'; // A4 width
-      wrapper.style.minHeight = '1123px'; // A4 height
       wrapper.style.backgroundColor = 'white';
-      wrapper.style.color = 'black'; // Force black text
+      wrapper.style.color = 'black';
+      // Note: Height auto rehne dein taaki pura content aaye
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
@@ -405,8 +405,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         experimental: true
       });
 
-      // Thoda wait karein taaki rendering puri ho jaye (Critical for accurate capture)
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for rendering (Images & Fonts)
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Time thoda badhaya (1 sec) safe side ke liye
 
       // 3. jsPDF se PDF banayein
       const doc = new jsPDF({
@@ -428,8 +428,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595, 
-        windowWidth: 794,
+        width: 595, // Target width (A4 point)
+        windowWidth: 794, // Source width (A4 pixel)
         autoPaging: 'text',
         html2canvas: {
           scale: 2, 
@@ -437,9 +437,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          // Explicitly tell html2canvas to look at 0,0
-          x: 0,
-          y: 0
+          scrollY: 0, // ✨ Force top scroll capture
+          windowHeight: wrapper.scrollHeight + 100 // ✨ Force full height capture
         }
       };
 
