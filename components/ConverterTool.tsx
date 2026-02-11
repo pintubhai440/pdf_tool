@@ -378,7 +378,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: DOCX → PDF conversion with reliable rendering and cleanup
+  // ========== IMPROVED DOCX → PDF (CRASH‑FREE, RELIABLE RENDERING) ==========
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -389,15 +389,14 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
       // 1. Container setup – hidden but fully rendered
       const wrapper = document.createElement('div');
-      // 🔴 FIX: 'left: -9999px' hataya. Browser off-screen content paint nahi karta.
-      // ✅ FIX: 'fixed' aur 'z-index: -9999' use kiya taaki wo screen pe ho par piche chupa rahe.
+      // ✅ FIX 1: Screen par dikhana zaroori hai (hidden behind)
       wrapper.style.position = 'fixed'; 
       wrapper.style.top = '0';
       wrapper.style.left = '0';
       wrapper.style.zIndex = '-9999'; 
       wrapper.style.width = '794px';      // A4 Width
-      wrapper.style.backgroundColor = 'white'; // White background zaroori hai
-      wrapper.style.color = 'black';      // Readable text
+      wrapper.style.backgroundColor = 'white'; 
+      wrapper.style.color = 'black';
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
@@ -407,8 +406,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         experimental: true
       });
 
-      // Rendering ke liye wait karein (extra safety)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // ✅ FIX 2: Badi file ke liye timeout badhaya (1.5s -> 3s)
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // 3. jsPDF se PDF banayein
       const doc = new jsPDF({
@@ -430,18 +429,18 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595, // A4 width in pt
-        windowWidth: 794, // Wrapper width in px
+        width: 595,        // A4 width in pt
+        windowWidth: 794,  // Wrapper width in px
         autoPaging: 'text',
         margin: [20, 20, 20, 20],
         html2canvas: {
-          scale: 2,       // Quality badhane ke liye
+          // ✅ FIX 3: Scale = 1 (29 pages scale:2 par browser crash)
+          scale: 1,       
           useCORS: true, 
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          // ✅ FIX: Height calculation ensure karega ki pura content capture ho
-          windowHeight: wrapper.scrollHeight + 50,
+          windowHeight: wrapper.scrollHeight + 100,
           scrollY: 0 
         }
       };
@@ -458,6 +457,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       if (existingWrapper) document.body.removeChild(existingWrapper);
     }
   };
+  // =========================================================================
 
   const handleConvert = async () => {
     setIsProcessing(true);
