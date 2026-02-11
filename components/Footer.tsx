@@ -8,19 +8,19 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ setMode }) => {
   
-  // Helper function for navigation
+  // Helper function for navigation (Changes mode & scrolls up)
   const handleNav = (mode: AppMode) => {
     setMode(mode); 
   };
 
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto relative overflow-hidden">
-      {/* Decorative top gradient line */}
+      {/* Decorative Top Gradient Line */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* TOP SECTION: Logo & Links */}
+        {/* ==================== TOP SECTION: Links & Brand ==================== */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
           
           {/* Brand Column */}
@@ -84,10 +84,10 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
         {/* Separator */}
         <div className="border-t border-slate-100 my-10"></div>
 
-        {/* BOTTOM BAR: The Pro Layout */}
+        {/* ==================== BOTTOM BAR: PRO LAYOUT ==================== */}
         <div className="flex flex-col xl:flex-row justify-between items-center gap-8 text-center xl:text-left">
           
-          {/* 1. COPYRIGHT SECTION (Dark Pill Design) */}
+          {/* 1. COPYRIGHT SECTION (Dark Pill Design with Green Dot) */}
           <div className="order-3 xl:order-1 min-w-[240px] flex justify-center xl:justify-start">
              <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-[#1e293b] border border-slate-700 shadow-lg hover:shadow-xl hover:border-slate-600 transition-all duration-300 cursor-default group">
                 {/* Glowing Green Dot */}
@@ -102,7 +102,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
              </div>
           </div>
 
-          {/* 2. MADE IN INDIA BADGE (Center - Premium Dark) */}
+          {/* 2. MADE IN INDIA BADGE (Center - Premium Dark & Tricolor) */}
           <div className="order-1 xl:order-2 animate-in fade-in zoom-in duration-700">
             <div className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#0f172a] border border-slate-800 shadow-2xl shadow-slate-200 hover:shadow-orange-500/10 hover:border-orange-500/30 transition-all duration-300 cursor-default select-none hover:-translate-y-1">
               
@@ -110,7 +110,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                 Developed with
               </span>
               
-              {/* Beating Heart with Glow */}
+              {/* Beating Heart with Red Glow */}
               <Heart 
                 size={20} 
                 className="text-red-500 fill-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]" 
@@ -127,37 +127,37 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
             </div>
           </div>
 
-          {/* 3. DEVELOPERS SECTION (Right) */}
+          {/* 3. DEVELOPERS SECTION (Right - Dark Buttons turning Blue) */}
           <div className="flex flex-col sm:flex-row items-center gap-4 order-2 xl:order-3 min-w-[240px] justify-end">
              
-             {/* Highlighted 'Developed by' Label */}
-             <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
-                <span className="text-[10px] uppercase font-extrabold text-indigo-700 tracking-widest">
+             {/* 'Developed by' Label */}
+             <div className="px-4 py-2 bg-[#1e293b] border border-slate-700 rounded-full shadow-sm">
+                <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-widest">
                   Developed by
                 </span>
              </div>
              
-             <div className="flex items-center gap-2">
-                {/* Pintu's Link */}
+             <div className="flex items-center gap-3">
+                {/* Pintu's Link - Black to Blue on Hover */}
                 <a 
                   href="https://www.linkedin.com/in/pintu-chauhan-ctuap/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#1e293b] text-slate-300 border border-slate-700 hover:bg-[#0077b5] hover:border-[#0077b5] hover:text-white transition-all duration-300 group shadow-md hover:shadow-lg hover:-translate-y-1"
                 >
                   <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">Pintu</span>
+                  <span className="text-xs font-bold tracking-wide">Pintu</span>
                 </a>
 
-                {/* Raushan's Link */}
+                {/* Raushan's Link - Black to Blue on Hover */}
                 <a 
                   href="https://www.linkedin.com/in/raushan-kumar-0b5340373/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#1e293b] text-slate-300 border border-slate-700 hover:bg-[#0077b5] hover:border-[#0077b5] hover:text-white transition-all duration-300 group shadow-md hover:shadow-lg hover:-translate-y-1"
                 >
                   <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">Raushan</span>
+                  <span className="text-xs font-bold tracking-wide">Raushan</span>
                 </a>
              </div>
           </div>
