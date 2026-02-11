@@ -1,6 +1,6 @@
 import React from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
-import { FileText, GripVertical, Trash2, Eye } from 'lucide-react';
+import { FileText, GripVertical, Trash2 } from 'lucide-react';
 import { PdfFile } from '../types';
 
 interface FileListProps {
@@ -21,19 +21,22 @@ const FileItem: React.FC<{ file: PdfFile; onRemove: (id: string) => void }> = ({
       id={file.id}
       dragListener={false}
       dragControls={controls}
-      className="bg-white border border-slate-200 rounded-lg p-3 mb-2 flex items-center shadow-sm select-none"
+      className="bg-white border border-slate-200 rounded-lg p-3 flex items-center shadow-sm select-none"
     >
+      {/* Drag handle */}
       <div
         className="cursor-grab active:cursor-grabbing p-2 mr-2 text-slate-400 hover:text-slate-600"
         onPointerDown={(e) => controls.start(e)}
       >
         <GripVertical size={20} />
       </div>
-      
+
+      {/* File icon */}
       <div className="bg-red-50 p-2 rounded-lg mr-3">
         <FileText className="text-red-500 w-5 h-5" />
       </div>
 
+      {/* File info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-slate-900 truncate">
           {file.name}
@@ -43,6 +46,7 @@ const FileItem: React.FC<{ file: PdfFile; onRemove: (id: string) => void }> = ({
         </p>
       </div>
 
+      {/* Remove button */}
       <button
         onClick={() => onRemove(file.id)}
         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
@@ -56,8 +60,14 @@ const FileItem: React.FC<{ file: PdfFile; onRemove: (id: string) => void }> = ({
 
 export const FileList: React.FC<FileListProps> = ({ files, setFiles, onRemove }) => {
   return (
-    <div className="w-full">
-      <Reorder.Group axis="y" values={files} onReorder={setFiles}>
+    // Scrollable container with max height and custom scrollbar
+    <div className="w-full max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+      <Reorder.Group
+        axis="y"
+        values={files}
+        onReorder={setFiles}
+        className="space-y-3"
+      >
         {files.map((file) => (
           <FileItem key={file.id} file={file} onRemove={onRemove} />
         ))}
