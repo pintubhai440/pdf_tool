@@ -203,7 +203,8 @@ function App() {
         ) : (
           /* ---------- MERGE TOOL (Responsive Version) ---------- */
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-            {/* Hidden file input for "Add More Files" button */}
+            
+            {/* Hidden Input (Isko rehne dein) */}
             <input
               type="file"
               ref={fileInputRef}
@@ -217,128 +218,122 @@ function App() {
               className="hidden"
             />
 
-            {/* Header row with title and action buttons */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">Merge PDF Documents</h3>
-                <p className="text-slate-500">Combine multiple PDFs into one. Drag to reorder.</p>
-              </div>
-
-              {/* Buttons – full width on mobile, inline on desktop */}
-              <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <Files size={18} />
-                  Add More Files
-                </button>
-                <button
-                  onClick={handleMerge}
-                  disabled={files.length < 2 || isMerging}
-                  className="px-8 py-2.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2"
-                >
-                  {isMerging ? (
-                    <Loader2 className="animate-spin" size={20} />
-                  ) : (
-                    <FileStack size={20} />
-                  )}
-                  Merge Files
-                </button>
-              </div>
-            </div>
-
-            {/* File list container – responsive padding, includes sort/clear controls */}
-            {files.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-6 overflow-hidden">
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                  <h3 className="font-semibold text-slate-700 flex items-center gap-2">
-                    <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">
-                      {files.length}
-                    </span>
-                    Files to Merge
-                  </h3>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleSort(SortOrder.ASC)}
-                      className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
-                      title="Sort A-Z"
-                    >
-                      <ArrowDownAZ size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleSort(SortOrder.DESC)}
-                      className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
-                      title="Sort Z-A"
-                    >
-                      <ArrowUpAZ size={18} />
-                    </button>
-                    <div className="w-px h-4 bg-slate-300 mx-1"></div>
-                    <button
-                      onClick={handleClearAll}
-                      className="p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
-                      title="Clear All"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+            {/* ✅ NEW: Agar koi file nahi hai, toh FileUploader dikhao */}
+            {files.length === 0 ? (
+              <div className="w-full">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-slate-900">Merge PDF Documents</h3>
+                  <p className="text-slate-500">Combine multiple PDFs into one. Drag to reorder.</p>
                 </div>
-                <FileList
-                  files={files}
-                  setFiles={setFiles}
-                  onRemove={handleRemoveFile}
+                <FileUploader 
+                  onFilesSelected={handleFilesSelected} 
+                  allowMultiple={true}
+                  acceptedFileTypes={['application/pdf']}
+                  label="Drop PDFs here to Merge"
                 />
               </div>
-            )}
+            ) : (
+              /* ✅ EXISTING CODE: Agar files hain, toh List aur Buttons dikhao */
+              <>
+                {/* Header row with title and action buttons */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900">Merge PDF Documents</h3>
+                    <p className="text-slate-500">Combine multiple PDFs into one. Drag to reorder.</p>
+                  </div>
 
-            {/* Download card & AI promo – stack below file list */}
-            <div className="space-y-4">
-              {/* Success / Download Card */}
-              {mergedPdfUrl && (
-                <div className="bg-green-50 rounded-xl border border-green-200 p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-green-100 p-2 rounded-full text-green-600">
-                      <FileStack size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-green-900">Merge Complete!</h4>
-                      <p className="text-sm text-green-700 mt-1 mb-4">
-                        Your consolidated document is ready.
-                      </p>
-                      <a
-                        href={mergedPdfUrl}
-                        download={`merged-document-${new Date().toISOString().slice(0, 10)}.pdf`}
-                        className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-                      >
-                        <Download size={16} />
-                        Download PDF
-                      </a>
-                    </div>
+                  <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <Files size={18} />
+                      Add More Files
+                    </button>
+                    <button
+                      onClick={handleMerge}
+                      disabled={files.length < 2 || isMerging}
+                      className="px-8 py-2.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2"
+                    >
+                      {isMerging ? (
+                        <Loader2 className="animate-spin" size={20} />
+                      ) : (
+                        <FileStack size={20} />
+                      )}
+                      Merge Files
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* AI Promo Card – shown when no files are present */}
-              {files.length === 0 && (
-                <div className="bg-gradient-to-br from-slate-50 to-indigo-50/50 rounded-xl border border-indigo-100 p-5">
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="text-indigo-500 w-5 h-5 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-slate-900 text-sm">Need help organizing?</h4>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Ask our AI assistant to help you structure documents or analyze images of your files.
-                      </p>
+                {/* File list container */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-6 overflow-hidden">
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                    <h3 className="font-semibold text-slate-700 flex items-center gap-2">
+                      <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">
+                        {files.length}
+                      </span>
+                      Files to Merge
+                    </h3>
+                    <div className="flex items-center gap-1">
                       <button
-                        onClick={() => setIsAiOpen(true)}
-                        className="text-xs text-indigo-600 font-medium mt-2 hover:underline"
+                        onClick={() => handleSort(SortOrder.ASC)}
+                        className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
+                        title="Sort A-Z"
                       >
-                        Open Assistant
+                        <ArrowDownAZ size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleSort(SortOrder.DESC)}
+                        className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
+                        title="Sort Z-A"
+                      >
+                        <ArrowUpAZ size={18} />
+                      </button>
+                      <div className="w-px h-4 bg-slate-300 mx-1"></div>
+                      <button
+                        onClick={handleClearAll}
+                        className="p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
+                        title="Clear All"
+                      >
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
+                  <FileList
+                    files={files}
+                    setFiles={setFiles}
+                    onRemove={handleRemoveFile}
+                  />
                 </div>
-              )}
-            </div>
+
+                {/* Download card */}
+                <div className="space-y-4">
+                  {mergedPdfUrl && (
+                    <div className="bg-green-50 rounded-xl border border-green-200 p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-100 p-2 rounded-full text-green-600">
+                          <FileStack size={20} />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-green-900">Merge Complete!</h4>
+                          <p className="text-sm text-green-700 mt-1 mb-4">
+                            Your consolidated document is ready.
+                          </p>
+                          <a
+                            href={mergedPdfUrl}
+                            download={`merged-document-${new Date().toISOString().slice(0, 10)}.pdf`}
+                            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                          >
+                            <Download size={16} />
+                            Download PDF
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>
