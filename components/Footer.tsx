@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode } from '../types';
-import { Linkedin } from 'lucide-react';
+import { Linkedin, Heart } from 'lucide-react';
 
 interface FooterProps {
   setMode: (mode: AppMode) => void;
@@ -8,27 +8,29 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ setMode }) => {
   
-  // Helper function to keep code clean
   const handleNav = (mode: AppMode) => {
-    setMode(mode); // Yeh App.js wala changeMode call karega jo scroll up karta hai
+    setMode(mode); 
   };
 
   return (
-    <footer className="bg-white border-t border-slate-200 mt-auto">
+    <footer className="bg-white border-t border-slate-200 mt-auto relative overflow-hidden">
+      {/* Optional: Top decorative gradient line */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           
-          {/* Brand Column (Clickable Logo -> Home) */}
+          {/* Brand Column */}
           <div className="col-span-1 md:col-span-2">
             <button 
               onClick={() => handleNav('home')} 
-              className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity text-left"
+              className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity text-left group"
             >
-              {/* Custom Footer Logo */}
+              {/* Custom Logo Image */}
               <img 
                 src="/logo.png" 
                 alt="Genz PDF Logo" 
-                className="w-8 h-8 object-contain rounded-lg" 
+                className="w-10 h-10 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-300" 
               />
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
                 Genz PDF
@@ -39,129 +41,95 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
             </p>
           </div>
 
-          {/* Quick Links (Product) */}
+          {/* Product Links */}
           <div>
-            <h4 className="font-semibold text-slate-900 mb-4">Product</h4>
+            <h4 className="font-semibold text-slate-900 mb-4 text-xs uppercase tracking-wider">Product</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li>
-                <button 
-                  onClick={() => handleNav('merge')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Merge PDF
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('split')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Split PDF
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('convert')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Convert PDF
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('compress')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Compress PDF
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('resize')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Resize PDF
-                </button>
-              </li>
+              {['merge', 'split', 'convert', 'compress', 'resize'].map((item) => (
+                <li key={item}>
+                  <button 
+                    onClick={() => handleNav(item as AppMode)} 
+                    className="hover:text-primary-600 transition-colors text-left capitalize flex items-center gap-2"
+                  >
+                    {item} PDF
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Company Links (About, Contact, Privacy) */}
+          {/* Company Links */}
           <div>
-            <h4 className="font-semibold text-slate-900 mb-4">Company</h4>
+            <h4 className="font-semibold text-slate-900 mb-4 text-xs uppercase tracking-wider">Company</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li>
-                <button 
-                  onClick={() => handleNav('about')} 
-                  className="hover:text-primary-600 transition-colors font-medium text-left"
-                >
-                  About Us
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('contact')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Contact Us
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('policy')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Privacy Policy
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleNav('terms')} 
-                  className="hover:text-primary-600 transition-colors text-left"
-                >
-                  Terms & Conditions
-                </button>
-              </li>
+              <li><button onClick={() => handleNav('about')} className="hover:text-primary-600">About Us</button></li>
+              <li><button onClick={() => handleNav('contact')} className="hover:text-primary-600">Contact Us</button></li>
+              <li><button onClick={() => handleNav('policy')} className="hover:text-primary-600">Privacy Policy</button></li>
+              <li><button onClick={() => handleNav('terms')} className="hover:text-primary-600">Terms & Conditions</button></li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar with Developers */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 text-sm order-2 md:order-1">
+        {/* Separator */}
+        <div className="border-t border-slate-100 my-8"></div>
+
+        {/* Bottom Bar: Layout adjusted for Pro Look */}
+        <div className="flex flex-col xl:flex-row justify-between items-center gap-6 text-center xl:text-left">
+          
+          {/* 1. Copyright (Left) */}
+          <p className="text-slate-400 text-sm font-medium order-3 xl:order-1">
             © {new Date().getFullYear()} Genz PDF. All rights reserved.
           </p>
-          
-          {/* Developer Credits - Beautiful Pill Design */}
-          <div className="flex flex-wrap items-center justify-center gap-4 order-1 md:order-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:block">
-              Developers
-            </span>
-            
-            {/* Pintu's Link */}
-            <a 
-              href="https://www.linkedin.com/in/pintu-chauhan-ctuap/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
-              title="Connect with Pintu Chauhan on LinkedIn"
-            >
-              <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium">Pintu Chauhan</span>
-            </a>
 
-            {/* Raushan's Link */}
-            <a 
-              href="https://www.linkedin.com/in/raushan-kumar-0b5340373/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
-              title="Connect with Raushan Kumar on LinkedIn"
-            >
-              <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium">Raushan Kumar</span>
-            </a>
+          {/* 2. PRO "Made in India" Badge (Center) */}
+          <div className="order-1 xl:order-2 animate-in fade-in zoom-in duration-700">
+            <div className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 cursor-default select-none">
+              <span className="text-slate-500 text-[11px] font-bold uppercase tracking-widest">Developed with</span>
+              
+              {/* Beating Heart */}
+              <Heart 
+                size={14} 
+                className="text-red-500 fill-red-500 animate-pulse drop-shadow-sm" 
+              />
+              
+              <span className="text-slate-500 text-[11px] font-bold uppercase tracking-widest">in</span>
+              
+              {/* Tricolor Gradient Text for INDIA */}
+              <span className="text-sm font-black bg-clip-text text-transparent bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808] drop-shadow-sm">
+                INDIA
+              </span>
+            </div>
           </div>
+
+          {/* 3. Developers (Right) */}
+          <div className="flex flex-wrap items-center justify-center gap-3 order-2 xl:order-3">
+             <span className="text-[10px] uppercase font-bold text-slate-300 tracking-widest hidden sm:block">
+               Created By
+             </span>
+             
+             {/* Pintu's Link */}
+             <a 
+               href="https://www.linkedin.com/in/pintu-chauhan-ctuap/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
+             >
+               <Linkedin size={14} className="group-hover:scale-110 transition-transform" />
+               <span className="text-xs font-semibold">Pintu Chauhan</span>
+             </a>
+
+             {/* Raushan's Link */}
+             <a 
+               href="https://www.linkedin.com/in/raushan-kumar-0b5340373/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm"
+             >
+               <Linkedin size={14} className="group-hover:scale-110 transition-transform" />
+               <span className="text-xs font-semibold">Raushan Kumar</span>
+             </a>
+          </div>
+
         </div>
       </div>
     </footer>
