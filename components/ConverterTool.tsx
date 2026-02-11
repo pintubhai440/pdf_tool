@@ -68,7 +68,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // --- PDF to X conversions (unchanged) ---
+  // --- PDF to X conversions ---
   const convertPdfToImages = async (format: 'jpg' | 'png') => {
     if (!file) return;
     try {
@@ -134,6 +134,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
+  // ✅ UPDATED: Smart PDF to DOCX (Handles Scanned/Image PDFs)
   const convertPdfToDocx = async () => {
     if (!file) return;
     try {
@@ -142,38 +143,105 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       if (!lib.GlobalWorkerOptions.workerSrc) {
         lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
+
       const loadingTask = lib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       const docSections = [];
+
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const items = textContent.items;
-        const paragraphs = [];
-        paragraphs.push(
-          new Paragraph({
-            children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: '888888' })],
-            spacing: { after: 200 },
-          })
-        );
-        let currentLine = '';
-        let lastY = -1;
-        for (const item of items as any[]) {
-          if (lastY !== -1 && Math.abs(item.transform[5] - lastY) > 10) {
-            paragraphs.push(new Paragraph({ children: [new TextRun(currentLine)] }));
-            currentLine = '';
+
+        // Check if page has text – if very few items, treat as scanned/image page
+        const hasText = textContent.items.length > 5;
+
+        if (!hasText) {
+          // --- CASE A: IMAGE / SCANNED PDF ---
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          if (context) {
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport }).promise;
+
+            // Convert canvas to JPEG buffer
+            const imgDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            const response = await fetch(imgDataUrl);
+            const buffer = await response.arrayBuffer();
+
+            docSections.push({
+              children: [
+                new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: buffer,
+                      transformation: {
+                        width: 500,
+                        height: (500 / viewport.width) * viewport.height,
+                      },
+                      type: 'jpg',
+                    }),
+                  ],
+                  spacing: { after: 200 },
+                }),
+                new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }), // Page break
+              ],
+            });
           }
-          currentLine += item.str + ' ';
-          lastY = item.transform[5];
+        } else {
+          // --- CASE B: TEXT PDF ---
+          const items = textContent.items.map((item: any) => ({
+            text: item.str,
+            x: item.transform[4],
+            y: item.transform[5],
+          }));
+
+          // Sort: top-to-bottom, left-to-right
+          items.sort((a, b) => {
+            const lineThreshold = 5;
+            if (Math.abs(a.y - b.y) < lineThreshold) return a.x - b.x;
+            return b.y - a.y; // PDF Y is inverted
+          });
+
+          const paragraphs = [];
+
+          // Page header
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: '888888' })],
+              spacing: { after: 200 },
+            })
+          );
+
+          let currentLineText = '';
+          let lastY = -99999;
+
+          for (const item of items) {
+            if (lastY !== -99999 && Math.abs(item.y - lastY) > 10) {
+              if (currentLineText.trim()) {
+                paragraphs.push(new Paragraph({ children: [new TextRun(currentLineText.trim())] }));
+              }
+              currentLineText = '';
+            }
+            currentLineText += item.text + ' ';
+            lastY = item.y;
+          }
+
+          if (currentLineText.trim()) {
+            paragraphs.push(new Paragraph({ children: [new TextRun(currentLineText.trim())] }));
+          }
+
+          if (i < pdf.numPages) {
+            paragraphs.push(new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }));
+          }
+
+          docSections.push({ children: paragraphs });
         }
-        if (currentLine) {
-          paragraphs.push(new Paragraph({ children: [new TextRun(currentLine)] }));
-        }
-        if (i < pdf.numPages) {
-          paragraphs.push(new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }));
-        }
-        docSections.push({ children: paragraphs });
       }
+
       const allChildren = docSections.flatMap((s) => s.children);
       const doc = new Document({
         sections: [
@@ -183,6 +251,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           },
         ],
       });
+
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
@@ -193,7 +262,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // --- Image to X conversions (unchanged) ---
+  // --- Image to X conversions ---
   const convertImagesToPdf = async () => {
     if (imageFiles.length === 0) return;
     try {
@@ -306,21 +375,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ UPDATED: Fixed Blank PDF Issue (DOCX to PDF with images & formatting)
+  // ✅ FIXED: DOCX to PDF with images & formatting
   const convertDocxToPdf = async () => {
     if (!file) return;
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // Step A: Convert DOCX to HTML
       const result = await mammoth.convertToHtml({ arrayBuffer });
 
-      // Step B: Create Temp Container
       const tempContainer = document.createElement('div');
       tempContainer.innerHTML = result.value;
 
-      // Styling Fix: 'left: -9999px' ki jagah z-index use karein. 
-      // html2canvas kabhi-kabhi off-screen elements ko render nahi karta.
       Object.assign(tempContainer.style, {
         width: '595px',
         padding: '40px',
@@ -329,13 +394,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         lineHeight: '1.5',
         backgroundColor: 'white',
         color: 'black',
-        position: 'fixed',   // Absolute ki jagah Fixed
-        left: '0',           // Screen ke andar
+        position: 'fixed',
+        left: '0',
         top: '0',
-        zIndex: '-9999',     // User se chupane ke liye peeche bhejein
+        zIndex: '-9999',
       });
 
-      // Images ko responsive banayein
       const images = tempContainer.getElementsByTagName('img');
       for (let img of images) {
         img.style.maxWidth = '100%';
@@ -350,17 +414,13 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         format: 'a4',
       });
 
-      // Step C: Render HTML to PDF using Callback
-      // 'await' hata kar callback pattern use karein jo 100% reliable hai
       doc.html(tempContainer, {
         callback: function (doc) {
-          // Ye code tab chalega jab PDF puri tarah ban jayegi
           const blob = doc.output('blob');
           const url = URL.createObjectURL(blob);
           setDownloadUrl(url);
           setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
-          
-          // Cleanup
+
           document.body.removeChild(tempContainer);
         },
         x: 0,
@@ -370,7 +430,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         margin: [20, 0, 20, 0],
         autoPaging: 'text',
       });
-
     } catch (err) {
       console.error(err);
       setError('Failed to convert DOCX to PDF. Ensure html2canvas is installed in package.json.');
@@ -440,7 +499,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     );
   }
 
-  // --- File info display (updated for docx-to-pdf) ---
   const renderFileInfo = () => {
     if (mode === 'pdf-to-x' && file) {
       return (
