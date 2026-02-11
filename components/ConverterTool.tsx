@@ -1,3 +1,4 @@
+// components/ConverterTool.tsx
 import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
@@ -377,7 +378,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: Final Stable Version (Correct Positioning)
+  // ✅ FIXED: DOCX → PDF conversion with reliable rendering and cleanup
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -386,15 +387,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup
+      // 1. Container setup – hidden but fully rendered
       const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute';
-      wrapper.style.top = '0';            // ✨ Top 0 hi rakhein (Safe)
-      wrapper.style.left = '-9999px';     // ✨ Left side mein chupayein (Screen se bahar)
-      wrapper.style.zIndex = '-9999';
-      wrapper.style.width = '794px';      // A4 width
-      wrapper.style.backgroundColor = 'white';
-      wrapper.style.color = 'black';
+      // 🔴 FIX: 'left: -9999px' hataya. Browser off-screen content paint nahi karta.
+      // ✅ FIX: 'fixed' aur 'z-index: -9999' use kiya taaki wo screen pe ho par piche chupa rahe.
+      wrapper.style.position = 'fixed'; 
+      wrapper.style.top = '0';
+      wrapper.style.left = '0';
+      wrapper.style.zIndex = '-9999'; 
+      wrapper.style.width = '794px';      // A4 Width
+      wrapper.style.backgroundColor = 'white'; // White background zaroori hai
+      wrapper.style.color = 'black';      // Readable text
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
@@ -404,8 +407,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         experimental: true
       });
 
-      // Rendering ke liye wait karein
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Rendering ke liye wait karein (extra safety)
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // 3. jsPDF se PDF banayein
       const doc = new jsPDF({
@@ -427,17 +430,19 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595, 
-        windowWidth: 794, 
+        width: 595, // A4 width in pt
+        windowWidth: 794, // Wrapper width in px
         autoPaging: 'text',
-        margin: [20, 20, 20, 20], // ✨ Thoda margin add kiya taaki text na kate
+        margin: [20, 20, 20, 20],
         html2canvas: {
-          scale: 2, 
+          scale: 2,       // Quality badhane ke liye
           useCORS: true, 
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          windowHeight: wrapper.scrollHeight + 100 // Full height capture karega
+          // ✅ FIX: Height calculation ensure karega ki pura content capture ho
+          windowHeight: wrapper.scrollHeight + 50,
+          scrollY: 0 
         }
       };
 
@@ -447,6 +452,10 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       console.error(err);
       setError('Conversion failed. Please try again.');
       setIsProcessing(false);
+      
+      // Cleanup in case of error
+      const existingWrapper = document.querySelector('div[style*="z-index: -9999"]');
+      if (existingWrapper) document.body.removeChild(existingWrapper);
     }
   };
 
