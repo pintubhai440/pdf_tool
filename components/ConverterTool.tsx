@@ -4,8 +4,6 @@ import JSZip from 'jszip';
 import { Document, Packer, Paragraph, TextRun, ImageRun } from 'docx';
 import mammoth from 'mammoth';
 import { jsPDF } from 'jspdf';
-// @ts-ignore
-import { renderAsync } from 'docx-preview';
 import {
   FileText,
   Image as ImageIcon,
@@ -136,7 +134,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // Smart PDF to DOCX (Handles Scanned/Image PDFs)
+  // ✅ UPDATED: Smart PDF to DOCX (Handles Scanned/Image PDFs)
   const convertPdfToDocx = async () => {
     if (!file) return;
     try {
@@ -377,70 +375,64 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ UPDATED: Best Quality DOCX to PDF (Handles Images & Text perfectly)
+  // ✅ FIXED: DOCX to PDF with images & formatting
   const convertDocxToPdf = async () => {
     if (!file) return;
-    setIsProcessing(true);
-    setError(null);
-
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Temporary container banayein jo screen par na dikhe par render kare
-      const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute';
-      wrapper.style.left = '-9999px';
-      wrapper.style.top = '0';
-      wrapper.style.width = '794px'; // A4 width in pixels (approx)
-      wrapper.style.backgroundColor = 'white';
-      wrapper.style.padding = '20px';
-      document.body.appendChild(wrapper);
+      const result = await mammoth.convertToHtml({ arrayBuffer });
 
-      // 2. docx-preview se document ko render karein (Visuals preserve rahenge)
-      await renderAsync(arrayBuffer, wrapper, null, {
-        inWrapper: false, 
-        ignoreWidth: false,
-        experimental: true // Tables aur images ke liye better support
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = result.value;
+
+      Object.assign(tempContainer.style, {
+        width: '595px',
+        padding: '40px',
+        fontSize: '12pt',
+        fontFamily: 'Arial, sans-serif',
+        lineHeight: '1.5',
+        backgroundColor: 'white',
+        color: 'black',
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        zIndex: '-9999',
       });
 
-      // 3. jsPDF se High Quality PDF banayein
+      const images = tempContainer.getElementsByTagName('img');
+      for (let img of images) {
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.margin = '10px 0';
+      }
+
+      document.body.appendChild(tempContainer);
+
       const doc = new jsPDF({
         unit: 'pt',
         format: 'a4',
-        orientation: 'portrait'
       });
 
-      const pdfOptions = {
-        callback: function (doc: any) {
+      doc.html(tempContainer, {
+        callback: function (doc) {
           const blob = doc.output('blob');
           const url = URL.createObjectURL(blob);
           setDownloadUrl(url);
           setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
-          
-          // Cleanup
-          document.body.removeChild(wrapper);
-          setIsProcessing(false);
+
+          document.body.removeChild(tempContainer);
         },
         x: 0,
         y: 0,
-        width: 595, // A4 width in points
-        windowWidth: 794, // Matches the wrapper width
-        autoPaging: 'text', // Smart page breaking
-        html2canvas: {
-          scale: 2, // ✨ MAGIC: Quality 2x kar dega (Blurry nahi hoga)
-          useCORS: true, // Images load karne ke liye
-          logging: false,
-          letterRendering: true,
-          allowTaint: true
-        }
-      };
-
-      doc.html(wrapper, pdfOptions);
-
+        width: 595,
+        windowWidth: 595,
+        margin: [20, 0, 20, 0],
+        autoPaging: 'text',
+      });
     } catch (err) {
       console.error(err);
-      setError('Conversion failed. Please try again.');
-      setIsProcessing(false);
+      setError('Failed to convert DOCX to PDF. Ensure html2canvas is installed in package.json.');
     }
   };
 
