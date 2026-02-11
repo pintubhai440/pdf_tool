@@ -378,7 +378,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ========== IMPROVED DOCX → PDF (CRASH‑FREE, RELIABLE RENDERING) ==========
+  // ✅ FIXED: Smart DOCX to PDF (Full Content, No Cutoff)
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -387,29 +387,31 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup – hidden but fully rendered
+      // 1. Container setup - "Absolute" positioning is smarter for scrolling content
       const wrapper = document.createElement('div');
-      // ✅ FIX 1: Screen par dikhana zaroori hai (hidden behind)
-      wrapper.style.position = 'fixed'; 
+      wrapper.style.position = 'absolute';  // ✅ FIX: 'fixed' se 'absolute' kiya
       wrapper.style.top = '0';
-      wrapper.style.left = '0';
-      wrapper.style.zIndex = '-9999'; 
-      wrapper.style.width = '794px';      // A4 Width
+      wrapper.style.left = '0';             // Screen par hi rakho
+      wrapper.style.zIndex = '-9999';       // User ke piche chupao
+      wrapper.style.width = '794px';        // A4 Width (approx)
       wrapper.style.backgroundColor = 'white'; 
       wrapper.style.color = 'black';
+      // ✅ FIX: Height auto rakho taaki content pura expand ho
+      wrapper.style.height = 'auto';        
+      wrapper.style.overflow = 'visible';   
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
       await renderAsync(arrayBuffer, wrapper, null, {
         inWrapper: false, 
         ignoreWidth: false,
-        experimental: true
+        experimental: true // Better layout handling
       });
 
-      // ✅ FIX 2: Badi file ke liye timeout badhaya (1.5s -> 3s)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // ✅ Smart Wait: Images load hone ka wait
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 3. jsPDF se PDF banayein
+      // 3. jsPDF Configuration
       const doc = new jsPDF({
         unit: 'pt',
         format: 'a4',
@@ -429,19 +431,19 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595,        // A4 width in pt
-        windowWidth: 794,  // Wrapper width in px
-        autoPaging: 'text',
-        margin: [20, 20, 20, 20],
+        width: 595, // A4 width in pt
+        windowWidth: 794, // HTML wrapper width
+        autoPaging: 'text', // ✅ Smart Text Paging (Text ko beech se nahi katega)
+        margin: [20, 20, 20, 20], 
         html2canvas: {
-          // ✅ FIX 3: Scale = 1 (29 pages scale:2 par browser crash)
-          scale: 1,       
+          scale: 1.5, // ✅ Quality slightly better than 1, but stable
           useCORS: true, 
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          windowHeight: wrapper.scrollHeight + 100,
-          scrollY: 0 
+          // ✅ CRITICAL FIX: Pura scroll height capture karo + thoda buffer
+          windowHeight: wrapper.scrollHeight + 200, 
+          scrollY: 0
         }
       };
 
@@ -452,12 +454,10 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setError('Conversion failed. Please try again.');
       setIsProcessing(false);
       
-      // Cleanup in case of error
       const existingWrapper = document.querySelector('div[style*="z-index: -9999"]');
       if (existingWrapper) document.body.removeChild(existingWrapper);
     }
   };
-  // =========================================================================
 
   const handleConvert = async () => {
     setIsProcessing(true);
@@ -645,7 +645,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </div>
       ) : (
-        /* Success State */
+        {/* Success State */}
         <div className="bg-green-50 rounded-xl p-8 border border-green-200 text-center animate-in fade-in zoom-in-95 duration-300">
           <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
             <FileCheck size={32} />
