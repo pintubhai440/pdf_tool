@@ -377,7 +377,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ UPDATED: Best Quality DOCX to PDF (Handles Images & Text perfectly)
+  // ✅ FIXED: White Page Issue Solved (Using z-index instead of off-screen)
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -386,24 +386,29 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Temporary container banayein jo screen par na dikhe par render kare
+      // 1. Container setup - Z-INDEX trick use karein (Off-screen nahi)
       const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute';
-      wrapper.style.left = '-9999px';
+      wrapper.style.position = 'fixed';
       wrapper.style.top = '0';
-      wrapper.style.width = '794px'; // A4 width in pixels (approx)
+      wrapper.style.left = '0';
+      wrapper.style.zIndex = '-9999'; // User ko nahi dikhega, par html2canvas ko dikhega
+      wrapper.style.width = '794px'; // A4 width
+      wrapper.style.minHeight = '1123px'; // A4 height
       wrapper.style.backgroundColor = 'white';
-      wrapper.style.padding = '20px';
+      wrapper.style.color = 'black'; // Force black text
       document.body.appendChild(wrapper);
 
-      // 2. docx-preview se document ko render karein (Visuals preserve rahenge)
+      // 2. docx-preview se render karein
       await renderAsync(arrayBuffer, wrapper, null, {
         inWrapper: false, 
         ignoreWidth: false,
-        experimental: true // Tables aur images ke liye better support
+        experimental: true
       });
 
-      // 3. jsPDF se High Quality PDF banayein
+      // Thoda wait karein taaki rendering puri ho jaye (Critical for accurate capture)
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 3. jsPDF se PDF banayein
       const doc = new jsPDF({
         unit: 'pt',
         format: 'a4',
@@ -423,15 +428,18 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595, // A4 width in points
-        windowWidth: 794, // Matches the wrapper width
-        autoPaging: 'text', // Smart page breaking
+        width: 595, 
+        windowWidth: 794,
+        autoPaging: 'text',
         html2canvas: {
-          scale: 2, // ✨ MAGIC: Quality 2x kar dega (Blurry nahi hoga)
-          useCORS: true, // Images load karne ke liye
+          scale: 2, 
+          useCORS: true, 
           logging: false,
           letterRendering: true,
-          allowTaint: true
+          allowTaint: true,
+          // Explicitly tell html2canvas to look at 0,0
+          x: 0,
+          y: 0
         }
       };
 
