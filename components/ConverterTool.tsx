@@ -378,83 +378,97 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: Safer DOCX to PDF (Under 32k pixel limit)
+  // ✅ FINAL TOP QUALITY: Uses Browser's Native Engine for HD Text & Perfect Layout
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
     setError(null);
 
+    // Store timeout ID for cleanup
+    let cleanupTimeout: NodeJS.Timeout;
+    let iframe: HTMLIFrameElement | null = null;
+
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup
-      const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute';
-      wrapper.style.top = '0';
-      wrapper.style.left = '0';
-      wrapper.style.zIndex = '-9999';
-      wrapper.style.width = '794px';
-      wrapper.style.backgroundColor = 'white';
-      wrapper.style.color = 'black';
-      wrapper.style.height = 'auto'; // Auto height for full content
-      document.body.appendChild(wrapper);
+      // 1. Create an invisible Iframe (so main page is not disturbed)
+      iframe = document.createElement('iframe');
+      Object.assign(iframe.style, {
+        position: 'fixed',
+        right: '0',
+        bottom: '0',
+        width: '0',
+        height: '0',
+        border: '0',
+        visibility: 'hidden'
+      });
+      document.body.appendChild(iframe);
 
-      // 2. docx-preview se render karein
-      await renderAsync(arrayBuffer, wrapper, null, {
+      const iframeDoc = iframe.contentWindow?.document;
+      if (!iframeDoc) throw new Error('Browser limitation: Cannot create print frame.');
+
+      // 2. Add Print Styles (A4 Page formatting)
+      const style = iframeDoc.createElement('style');
+      style.textContent = `
+        @page { size: A4; margin: 20mm; }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 0; 
+          padding: 20px; 
+          color: #000;
+          background: #fff;
+          -webkit-print-color-adjust: exact; 
+        }
+        .docx-wrapper { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+        section { margin-bottom: 0 !important; box-shadow: none !important; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; width: 100%; }
+      `;
+      iframeDoc.head.appendChild(style);
+
+      // 3. Render DOCX inside the Iframe
+      const container = iframeDoc.createElement('div');
+      iframeDoc.body.appendChild(container);
+
+      await renderAsync(arrayBuffer, container, null, {
         inWrapper: false,
-        ignoreWidth: false,
-        experimental: true
+        ignoreWidth: false, // Respect page width
+        experimental: true // Better formatting
       });
 
-      // Wait for rendering
+      // 4. Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 3. jsPDF Configuration
-      const doc = new jsPDF({
-        unit: 'pt',
-        format: 'a4',
-        orientation: 'portrait'
-      });
+      // 5. Trigger Print Dialog (Chrome's PDF Engine)
+      setIsProcessing(false);
+      
+      alert("Conversion Ready! Please select 'Save as PDF' in the destination.");
 
-      const pdfOptions = {
-        callback: function (doc: any) {
-          const blob = doc.output('blob');
-          const url = URL.createObjectURL(blob);
-          setDownloadUrl(url);
-          setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
-          
-          document.body.removeChild(wrapper);
-          setIsProcessing(false);
-        },
-        x: 0,
-        y: 0,
-        width: 595,
-        windowWidth: 794,
-        autoPaging: 'text',
-        margin: [20, 20, 20, 20],
-        html2canvas: {
-          // 🔴 IMPORTANT CHANGE:
-          // 29 pages ke liye scale 1.5 bahut bada ho jata hai (Browser Crash risk).
-          // 0.9 safe hai (Under 32,767px limit).
-          scale: 0.9, 
-          useCORS: true,
-          logging: false,
-          letterRendering: true,
-          allowTaint: true,
-          windowHeight: wrapper.scrollHeight + 100,
-          scrollY: 0
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (e) {
+        console.error('Print blocked', e);
+        setError('Pop-up blocked. Please allow pop-ups.');
+      }
+
+      // 6. Cleanup after printing (delay to keep dialog open)
+      cleanupTimeout = setTimeout(() => {
+        if (iframe && document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
         }
-      };
-
-      doc.html(wrapper, pdfOptions);
+      }, 5000);
 
     } catch (err) {
       console.error(err);
-      setError('Conversion failed. Try a smaller file or split it.');
+      setError('Conversion failed. Please try again.');
       setIsProcessing(false);
       
-      const existingWrapper = document.querySelector('div[style*="z-index: -9999"]');
-      if (existingWrapper) document.body.removeChild(existingWrapper);
+      // Cleanup iframe if it exists and hasn't been removed
+      if (iframe && document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+      if (cleanupTimeout) clearTimeout(cleanupTimeout);
     }
   };
 
@@ -596,7 +610,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
             {mode === 'docx-to-pdf' ? (
               <div className="flex-1">
                 <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
-                  <span className="font-medium">Convert to PDF</span>
+                  <span className="font-medium">Convert to PDF (Browser Print Engine)</span>
                 </div>
               </div>
             ) : (
@@ -644,7 +658,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </div>
       ) : (
-        /* Success State */
+        /* Success State – only shown for conversions that produce a downloadable file */
         <div className="bg-green-50 rounded-xl p-8 border border-green-200 text-center animate-in fade-in zoom-in-95 duration-300">
           <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
             <FileCheck size={32} />
