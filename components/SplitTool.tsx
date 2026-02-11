@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Loader2, Download, Scissors, FileCheck, AlertCircle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -96,8 +96,8 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     }
   };
 
-  // Toggle page selection (1‑based page numbers)
-  const togglePageSelection = (pageNumber: number) => {
+  // Stable toggle function – uses callback form to avoid stale closures
+  const togglePageSelection = useCallback((pageNumber: number) => {
     setSelectedPages((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(pageNumber)) {
@@ -107,7 +107,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
       }
       return newSet;
     });
-  };
+  }, []);
 
   // Extract selected pages → remove all others
   const handleSplit = async () => {
@@ -155,7 +155,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
   // Main UI – file loaded
   return (
     <div className="w-full space-y-6">
-      {/* ----- NEW UI: Header & Grid ----- */}
       <div className="space-y-6">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -220,8 +219,12 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                 const isSelected = selectedPages.has(pageNumber);
                 return (
                   <div
-                    key={index}
-                    onClick={() => !resultUrl && togglePageSelection(pageNumber)}
+                    key={`page-${index}`} // unique and stable key
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!resultUrl) togglePageSelection(pageNumber);
+                    }}
                     className={clsx(
                       'relative cursor-pointer group transition-all duration-300',
                       isSelected ? 'scale-95' : 'hover:scale-105',
