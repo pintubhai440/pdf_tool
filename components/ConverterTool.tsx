@@ -284,6 +284,46 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   }
 
+  // [ADDED] Convert images to JPG or PNG and bundle them in a ZIP file
+  const convertImageFormat = async (target: 'jpg' | 'png') => {
+    if (imageFiles.length === 0) return;
+    
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder("converted_images");
+
+      for (const imgFile of imageFiles) {
+        const img = new Image();
+        img.src = URL.createObjectURL(imgFile);
+        await new Promise((resolve) => { img.onload = resolve; });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const mimeType = target === 'jpg' ? 'image/jpeg' : 'image/png';
+          // Base64 data nikalne ke liye
+          const dataUrl = canvas.toDataURL(mimeType, 0.9);
+          const base64Data = dataUrl.split(',')[1];
+          
+          const newFileName = imgFile.name.split('.')[0] + `.${target}`;
+          folder?.file(newFileName, base64Data, { base64: true });
+        }
+      }
+
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
+      setDownloadUrl(url);
+      setDownloadName(`converted-images.zip`);
+    } catch (err) {
+      console.error(err);
+      setError("Image conversion failed.");
+    }
+  };
+
   const handleConvert = async () => {
     setIsProcessing(true);
     setError(null);
@@ -302,6 +342,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
              await convertImagesToPdf();
         } else if (targetFormat === 'docx') {
              await convertImagesToDocx();
+        } else if (targetFormat === 'jpg' || targetFormat === 'png') { // [ADDED] New image format conversion
+          await convertImageFormat(targetFormat);
         }
       }
     } finally {
@@ -393,9 +435,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                            <option value="txt">Text (TXT)</option>
                         </>
                      ) : (
+                        // [ADDED] JPG and PNG options for image conversion
                         <>
                            <option value="pdf">PDF Document</option>
                            <option value="docx">Word Document (DOCX)</option>
+                           <option value="jpg">Convert to JPG</option>
+                           <option value="png">Convert to PNG</option>
                         </>
                      )}
                   </select>
