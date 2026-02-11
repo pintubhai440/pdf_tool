@@ -8,6 +8,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ setMode }) => {
   
+  // Helper function for navigation
   const handleNav = (mode: AppMode) => {
     setMode(mode); 
   };
@@ -17,7 +18,9 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
       {/* Decorative top gradient line */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        {/* TOP SECTION: Logo & Links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
           
           {/* Brand Column */}
@@ -81,15 +84,25 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
         {/* Separator */}
         <div className="border-t border-slate-100 my-10"></div>
 
-        {/* Bottom Bar: Layout adjusted for Pro Look */}
+        {/* BOTTOM BAR: The Pro Layout */}
         <div className="flex flex-col xl:flex-row justify-between items-center gap-8 text-center xl:text-left">
           
-          {/* 1. Copyright (Left) */}
-          <p className="text-slate-400 text-sm font-medium order-3 xl:order-1 min-w-[200px]">
-            © {new Date().getFullYear()} Genz PDF. All rights reserved.
-          </p>
+          {/* 1. COPYRIGHT SECTION (Dark Pill Design) */}
+          <div className="order-3 xl:order-1 min-w-[240px] flex justify-center xl:justify-start">
+             <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-[#1e293b] border border-slate-700 shadow-lg hover:shadow-xl hover:border-slate-600 transition-all duration-300 cursor-default group">
+                {/* Glowing Green Dot */}
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                {/* Text */}
+                <p className="text-slate-300 text-[11px] font-bold tracking-widest uppercase group-hover:text-white transition-colors">
+                  © {new Date().getFullYear()} Genz PDF. All rights reserved.
+                </p>
+             </div>
+          </div>
 
-          {/* 2. PRO "Made in India" Badge (Center - Dark & Big) */}
+          {/* 2. MADE IN INDIA BADGE (Center - Premium Dark) */}
           <div className="order-1 xl:order-2 animate-in fade-in zoom-in duration-700">
             <div className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#0f172a] border border-slate-800 shadow-2xl shadow-slate-200 hover:shadow-orange-500/10 hover:border-orange-500/30 transition-all duration-300 cursor-default select-none hover:-translate-y-1">
               
@@ -100,29 +113,25 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
               {/* Beating Heart with Glow */}
               <Heart 
                 size={20} 
-                className="text-red-500 fill-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                className="text-red-500 fill-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]" 
               />
               
               <span className="text-slate-400 text-xs font-bold uppercase tracking-widest group-hover:text-slate-200 transition-colors">
                 in
               </span>
               
-              {/* Tricolor Gradient Text for INDIA with White for contrast */}
+              {/* Tricolor Gradient Text for INDIA */}
               <span className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-[#FF9933] via-[#ffffff] to-[#138808] drop-shadow-sm">
                 INDIA
               </span>
             </div>
           </div>
 
-          {/* 3. Developers (Right - Highlighted) */}
-          <div className="flex flex-wrap items-center justify-center gap-4 order-2 xl:order-3 min-w-[200px]">
+          {/* 3. DEVELOPERS SECTION (Right) */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 order-2 xl:order-3 min-w-[240px] justify-end">
              
-             {/* Highlighted "Developed By" Badge */}
-             <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                </span>
+             {/* Highlighted 'Developed by' Label */}
+             <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
                 <span className="text-[10px] uppercase font-extrabold text-indigo-700 tracking-widest">
                   Developed by
                 </span>
@@ -134,10 +143,10 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   href="https://www.linkedin.com/in/pintu-chauhan-ctuap/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
                 >
                   <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">Pintu Chauhan</span>
+                  <span className="text-xs font-bold">Pintu</span>
                 </a>
 
                 {/* Raushan's Link */}
@@ -145,10 +154,10 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   href="https://www.linkedin.com/in/raushan-kumar-0b5340373/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5] transition-all duration-300 group shadow-sm hover:shadow-md"
                 >
                   <Linkedin size={16} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">Raushan Kumar</span>
+                  <span className="text-xs font-bold">Raushan</span>
                 </a>
              </div>
           </div>
