@@ -99,14 +99,22 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     });
   }, []);
 
+  // Updated handleSplit: sort pages to remove in descending order to prevent index shift
   const handleSplit = async () => {
     if (!file || selectedPages.size === 0) return;
 
     setIsProcessing(true);
     try {
+      // 1. Saare pages ki list banayein (1-based index)
       const allPages = Array.from({ length: pageImages.length }, (_, i) => i + 1);
-      const pagesToRemove = allPages.filter((p) => !selectedPages.has(p));
+      
+      // 2. Sirf wo pages nikaalein jo select NAHI kiye gaye hain
+      // Inhe descending order mein sort karein (bade se chota) taaki index shift na ho
+      const pagesToRemove = allPages
+        .filter((p) => !selectedPages.has(p))
+        .sort((a, b) => b - a);
 
+      // 3. pdfService ko call karein
       const newPdfBytes = await removePagesFromPdf(file, pagesToRemove);
       const url = createPdfUrl(newPdfBytes);
       setResultUrl(url);
