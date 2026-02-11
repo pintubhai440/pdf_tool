@@ -377,7 +377,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: Full Page Capture (Solved 'Half Page' & Cutoff Issue)
+  // ✅ FIXED: Final Stable Version (Correct Positioning)
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -386,16 +386,15 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup - FIXED ki jagah ABSOLUTE use karein
+      // 1. Container setup
       const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute'; // ✨ Change: Fixed -> Absolute
-      wrapper.style.top = '-9999px'; // ✨ Change: Screen ke upar bheja (hidden but renderable)
-      wrapper.style.left = '0';
+      wrapper.style.position = 'absolute';
+      wrapper.style.top = '0';            // ✨ Top 0 hi rakhein (Safe)
+      wrapper.style.left = '-9999px';     // ✨ Left side mein chupayein (Screen se bahar)
       wrapper.style.zIndex = '-9999';
-      wrapper.style.width = '794px'; // A4 width
+      wrapper.style.width = '794px';      // A4 width
       wrapper.style.backgroundColor = 'white';
       wrapper.style.color = 'black';
-      // Note: Height auto rehne dein taaki pura content aaye
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
@@ -405,8 +404,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         experimental: true
       });
 
-      // Wait for rendering (Images & Fonts)
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Time thoda badhaya (1 sec) safe side ke liye
+      // Rendering ke liye wait karein
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 3. jsPDF se PDF banayein
       const doc = new jsPDF({
@@ -428,17 +427,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         },
         x: 0,
         y: 0,
-        width: 595, // Target width (A4 point)
-        windowWidth: 794, // Source width (A4 pixel)
+        width: 595, 
+        windowWidth: 794, 
         autoPaging: 'text',
+        margin: [20, 20, 20, 20], // ✨ Thoda margin add kiya taaki text na kate
         html2canvas: {
           scale: 2, 
           useCORS: true, 
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          scrollY: 0, // ✨ Force top scroll capture
-          windowHeight: wrapper.scrollHeight + 100 // ✨ Force full height capture
+          windowHeight: wrapper.scrollHeight + 100 // Full height capture karega
         }
       };
 
