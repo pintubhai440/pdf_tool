@@ -378,108 +378,86 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ------------------------------------------------------------------------
-  // ✅ ADVANCED DOCX to PDF with smart scaling and canvas height safety
-  // ------------------------------------------------------------------------
+  // ✅ FIXED: Safer DOCX to PDF (Under 32k pixel limit)
   const convertDocxToPdf = async () => {
     if (!file) return;
-
-    let wrapper: HTMLDivElement | null = null;
+    setIsProcessing(true);
+    setError(null);
 
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Create off‑screen container
-      wrapper = document.createElement('div');
+      // 1. Container setup
+      const wrapper = document.createElement('div');
       wrapper.style.position = 'absolute';
       wrapper.style.top = '0';
-      wrapper.style.left = '-9999px'; // hide from view
+      wrapper.style.left = '0';
       wrapper.style.zIndex = '-9999';
-      wrapper.style.width = '800px';     // A4 approx width
+      wrapper.style.width = '794px';
       wrapper.style.backgroundColor = 'white';
       wrapper.style.color = 'black';
-      wrapper.style.height = 'auto';
+      wrapper.style.height = 'auto'; // Auto height for full content
       document.body.appendChild(wrapper);
 
-      // 2. Render DOCX to HTML using docx-preview
+      // 2. docx-preview se render karein
       await renderAsync(arrayBuffer, wrapper, null, {
         inWrapper: false,
         ignoreWidth: false,
-        experimental: true,
+        experimental: true
       });
 
-      // 3. Allow extra time for fonts / rendering to settle
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 4. Smart scaling – avoid browser canvas height limit (~32,000px)
-      const totalHeight = wrapper.scrollHeight;
-      const MAX_CANVAS_HEIGHT = 32000;
-      let safeScale = 0.9; // default quality
-
-      if (totalHeight * safeScale > MAX_CANVAS_HEIGHT) {
-        safeScale = MAX_CANVAS_HEIGHT / totalHeight;
-        if (safeScale < 0.1) safeScale = 0.1; // never go below 10%
-      }
-
-      console.log(`📄 DOCX height: ${totalHeight}px, scale: ${safeScale}`);
-
-      // 5. Prepare jsPDF instance
+      // 3. jsPDF Configuration
       const doc = new jsPDF({
         unit: 'pt',
         format: 'a4',
-        orientation: 'portrait',
+        orientation: 'portrait'
       });
 
-      // 6. Promisify doc.html so we can await it
-      const pdfBlob = await new Promise<Blob>((resolve, reject) => {
-        const options = {
-          callback: (docInstance: any) => {
-            try {
-              const blob = docInstance.output('blob');
-              resolve(blob);
-            } catch (e) {
-              reject(e);
-            }
-          },
-          x: 0,
-          y: 0,
-          width: 595,                 // A4 width in pt
-          windowWidth: 800,           // matches wrapper width
-          autoPaging: 'text',
-          margin: [20, 20, 20, 20],  // small margins
-          html2canvas: {
-            scale: safeScale,
-            useCORS: true,
-            logging: false,
-            letterRendering: true,
-            allowTaint: true,
-            windowHeight: totalHeight + 200, // capture full height
-            scrollY: 0,
-          },
-        };
+      const pdfOptions = {
+        callback: function (doc: any) {
+          const blob = doc.output('blob');
+          const url = URL.createObjectURL(blob);
+          setDownloadUrl(url);
+          setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
+          
+          document.body.removeChild(wrapper);
+          setIsProcessing(false);
+        },
+        x: 0,
+        y: 0,
+        width: 595,
+        windowWidth: 794,
+        autoPaging: 'text',
+        margin: [20, 20, 20, 20],
+        html2canvas: {
+          // 🔴 IMPORTANT CHANGE:
+          // 29 pages ke liye scale 1.5 bahut bada ho jata hai (Browser Crash risk).
+          // 0.9 safe hai (Under 32,767px limit).
+          scale: 0.9, 
+          useCORS: true,
+          logging: false,
+          letterRendering: true,
+          allowTaint: true,
+          windowHeight: wrapper.scrollHeight + 100,
+          scrollY: 0
+        }
+      };
 
-        doc.html(wrapper!, options);
-      });
+      doc.html(wrapper, pdfOptions);
 
-      // 7. Create download URL
-      const url = URL.createObjectURL(pdfBlob);
-      setDownloadUrl(url);
-      setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
     } catch (err) {
-      console.error('❌ DOCX to PDF conversion failed:', err);
+      console.error(err);
       setError('Conversion failed. Try a smaller file or split it.');
-      throw err; // re-throw so handleConvert can catch it
-    } finally {
-      // 8. Cleanup: remove hidden wrapper
-      if (wrapper && wrapper.parentNode) {
-        wrapper.parentNode.removeChild(wrapper);
-      }
+      setIsProcessing(false);
+      
+      const existingWrapper = document.querySelector('div[style*="z-index: -9999"]');
+      if (existingWrapper) document.body.removeChild(existingWrapper);
     }
   };
 
-  // ------------------------------------------------------------------------
-  // Main conversion handler
-  // ------------------------------------------------------------------------
   const handleConvert = async () => {
     setIsProcessing(true);
     setError(null);
@@ -502,11 +480,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           await convertImageFormat(targetFormat);
         }
       } else if (mode === 'docx-to-pdf') {
-        await convertDocxToPdf(); // now returns a Promise, fully awaited
+        await convertDocxToPdf();
       }
-    } catch (err) {
-      // Error is already set inside each converter, but we keep the flag
-      console.error(err);
     } finally {
       setIsProcessing(false);
     }
