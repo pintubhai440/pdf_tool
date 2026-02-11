@@ -378,7 +378,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: Smart DOCX to PDF (Full Content, No Cutoff)
+  // ✅ FIXED: Safer DOCX to PDF (Under 32k pixel limit)
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -387,28 +387,26 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Container setup - "Absolute" positioning is smarter for scrolling content
+      // 1. Container setup
       const wrapper = document.createElement('div');
-      wrapper.style.position = 'absolute';  // ✅ FIX: 'fixed' se 'absolute' kiya
+      wrapper.style.position = 'absolute';
       wrapper.style.top = '0';
-      wrapper.style.left = '0';             // Screen par hi rakho
-      wrapper.style.zIndex = '-9999';       // User ke piche chupao
-      wrapper.style.width = '794px';        // A4 Width (approx)
-      wrapper.style.backgroundColor = 'white'; 
+      wrapper.style.left = '0';
+      wrapper.style.zIndex = '-9999';
+      wrapper.style.width = '794px';
+      wrapper.style.backgroundColor = 'white';
       wrapper.style.color = 'black';
-      // ✅ FIX: Height auto rakho taaki content pura expand ho
-      wrapper.style.height = 'auto';        
-      wrapper.style.overflow = 'visible';   
+      wrapper.style.height = 'auto'; // Auto height for full content
       document.body.appendChild(wrapper);
 
       // 2. docx-preview se render karein
       await renderAsync(arrayBuffer, wrapper, null, {
-        inWrapper: false, 
+        inWrapper: false,
         ignoreWidth: false,
-        experimental: true // Better layout handling
+        experimental: true
       });
 
-      // ✅ Smart Wait: Images load hone ka wait
+      // Wait for rendering
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // 3. jsPDF Configuration
@@ -425,24 +423,25 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           setDownloadUrl(url);
           setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
           
-          // Cleanup
           document.body.removeChild(wrapper);
           setIsProcessing(false);
         },
         x: 0,
         y: 0,
-        width: 595, // A4 width in pt
-        windowWidth: 794, // HTML wrapper width
-        autoPaging: 'text', // ✅ Smart Text Paging (Text ko beech se nahi katega)
-        margin: [20, 20, 20, 20], 
+        width: 595,
+        windowWidth: 794,
+        autoPaging: 'text',
+        margin: [20, 20, 20, 20],
         html2canvas: {
-          scale: 1.5, // ✅ Quality slightly better than 1, but stable
-          useCORS: true, 
+          // 🔴 IMPORTANT CHANGE:
+          // 29 pages ke liye scale 1.5 bahut bada ho jata hai (Browser Crash risk).
+          // 0.9 safe hai (Under 32,767px limit).
+          scale: 0.9, 
+          useCORS: true,
           logging: false,
           letterRendering: true,
           allowTaint: true,
-          // ✅ CRITICAL FIX: Pura scroll height capture karo + thoda buffer
-          windowHeight: wrapper.scrollHeight + 200, 
+          windowHeight: wrapper.scrollHeight + 100,
           scrollY: 0
         }
       };
@@ -451,7 +450,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
     } catch (err) {
       console.error(err);
-      setError('Conversion failed. Please try again.');
+      setError('Conversion failed. Try a smaller file or split it.');
       setIsProcessing(false);
       
       const existingWrapper = document.querySelector('div[style*="z-index: -9999"]');
@@ -645,7 +644,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </div>
       ) : (
-        {/* Success State */}
+        /* Success State */
         <div className="bg-green-50 rounded-xl p-8 border border-green-200 text-center animate-in fade-in zoom-in-95 duration-300">
           <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
             <FileCheck size={32} />
