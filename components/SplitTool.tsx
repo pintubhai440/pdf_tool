@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Loader2, Download, Scissors, FileCheck, AlertCircle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -20,7 +20,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
   useEffect(() => {
     const initPdfWorker = () => {
       const lib = (pdfjsLib as any).default || pdfjsLib;
-      if (lib && lib.GlobalWorkerOptions) {
+      if (lib && lib.GlobalWorkerOptions && !lib.GlobalWorkerOptions.workerSrc) {
         lib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
@@ -40,11 +40,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
       try {
         const arrayBuffer = await file.arrayBuffer();
         const lib = (pdfjsLib as any).default || pdfjsLib;
-
-        if (!lib.GlobalWorkerOptions.workerSrc) {
-          lib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
 
         const loadingTask = lib.getDocument({ data: arrayBuffer });
         const pdf = await loadingTask.promise;
@@ -73,11 +68,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
         setPageImages(images);
       } catch (err: any) {
         console.error('PDF Load Error:', err);
-        let errorMessage = 'Failed to load PDF pages. The file might be corrupted or password protected.';
-        if (err.name === 'MissingPDFException') errorMessage = 'Missing or invalid PDF file.';
-        if (err.name === 'InvalidPDFException') errorMessage = 'Invalid PDF structure.';
-        if (err.name === 'PasswordException') errorMessage = 'Password protected PDF.';
-        setError(errorMessage);
+        setError('Failed to load PDF pages. The file might be corrupted.');
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +77,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     loadPdfPages();
   }, [file]);
 
-  // Handle file upload
   const handleFileSelected = (files: File[]) => {
     if (files.length > 0) {
       setFile(files[0]);
@@ -96,7 +86,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     }
   };
 
-  // Stable toggle function – uses callback form to avoid stale closures
+  // Stable toggle logic using useCallback
   const togglePageSelection = useCallback((pageNumber: number) => {
     setSelectedPages((prev) => {
       const newSet = new Set(prev);
@@ -109,13 +99,11 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     });
   }, []);
 
-  // Extract selected pages → remove all others
   const handleSplit = async () => {
     if (!file || selectedPages.size === 0) return;
 
     setIsProcessing(true);
     try {
-      // Pages to remove = all pages NOT selected
       const allPages = Array.from({ length: pageImages.length }, (_, i) => i + 1);
       const pagesToRemove = allPages.filter((p) => !selectedPages.has(p));
 
@@ -130,7 +118,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     }
   };
 
-  // Reset everything (back to file upload)
   const handleReset = () => {
     setFile(null);
     setPageImages([]);
@@ -139,7 +126,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     setError(null);
   };
 
-  // Initial state – no file uploaded
   if (!file) {
     return (
       <div className="w-full">
@@ -152,26 +138,25 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     );
   }
 
-  // Main UI – file loaded
   return (
     <div className="w-full space-y-6">
       <div className="space-y-6">
-        {/* Header Section */}
+        {/* Responsive Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
+          <div className="w-full md:w-auto">
             <h3 className="text-2xl font-bold text-slate-900">Split PDF</h3>
-            <p className="text-slate-500 flex flex-wrap items-center gap-x-2">
-              <span>{file.name} • {pageImages.length} Pages</span>
+            <div className="text-slate-500 flex flex-wrap items-center gap-x-2">
+              <span className="truncate max-w-[200px] md:max-w-md font-medium">{file.name}</span>
+              <span>• {pageImages.length} Pages</span>
               <button
                 onClick={handleReset}
-                className="text-sm text-rose-600 hover:text-rose-700 font-medium transition-colors"
+                className="text-sm text-rose-600 hover:text-rose-700 font-semibold transition-colors ml-1"
               >
-                Change file
+                Change
               </button>
-            </p>
+            </div>
           </div>
 
-          {/* Action Button – Extract or Download */}
           {resultUrl ? (
             <a
               href={resultUrl}
@@ -187,17 +172,12 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
               disabled={selectedPages.size === 0 || isProcessing}
               className="w-full md:w-auto px-8 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-200"
             >
-              {isProcessing ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                <Scissors size={20} />
-              )}
+              {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Scissors size={20} />}
               Extract {selectedPages.size} Page{selectedPages.size !== 1 ? 's' : ''}
             </button>
           )}
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2">
             <AlertCircle size={18} />
@@ -205,8 +185,8 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
           </div>
         )}
 
-        {/* Pages Grid – Scrollable */}
-        <div className="bg-slate-100 rounded-2xl p-4 md:p-8 min-h-[400px] max-h-[70vh] overflow-y-auto custom-scrollbar">
+        {/* Scrollable Grid Container */}
+        <div className="bg-slate-100 rounded-2xl p-4 md:p-8 min-h-[400px] max-h-[75vh] overflow-y-auto custom-scrollbar">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-slate-400">
               <Loader2 className="w-10 h-10 animate-spin mb-4 text-rose-500" />
@@ -219,7 +199,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                 const isSelected = selectedPages.has(pageNumber);
                 return (
                   <div
-                    key={`page-${index}`} // unique and stable key
+                    key={`split-page-${index}`}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -242,25 +222,21 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                       <img
                         src={image}
                         alt={`Page ${pageNumber}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover select-none pointer-events-none"
                       />
 
-                      {/* Page Number Badge */}
                       <div
                         className={clsx(
                           'absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md transition-colors',
-                          isSelected
-                            ? 'bg-rose-500 text-white'
-                            : 'bg-white text-slate-900'
+                          isSelected ? 'bg-rose-500 text-white' : 'bg-white text-slate-900'
                         )}
                       >
                         {pageNumber}
                       </div>
 
-                      {/* Selection Overlay (only when not already processed) */}
                       {isSelected && !resultUrl && (
                         <div className="absolute inset-0 bg-rose-500/10 flex items-center justify-center">
-                          <div className="bg-rose-500 text-white p-1 rounded-full">
+                          <div className="bg-rose-500 text-white p-1 rounded-full animate-in zoom-in-50 duration-200">
                             <FileCheck size={20} />
                           </div>
                         </div>
