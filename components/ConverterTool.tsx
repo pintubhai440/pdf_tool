@@ -306,35 +306,36 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ UPDATED: DOCX to PDF (Preserves Images & Formatting)
+  // ✅ UPDATED: Fixed Blank PDF Issue (DOCX to PDF with images & formatting)
   const convertDocxToPdf = async () => {
     if (!file) return;
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // Step A: Convert DOCX to HTML (Mammoth automatically handles images as base64)
+      // Step A: Convert DOCX to HTML
       const result = await mammoth.convertToHtml({ arrayBuffer });
 
-      // Step B: Create a temporary hidden container for the HTML
-      // (jsPDF needs a real DOM element to render images correctly)
+      // Step B: Create Temp Container
       const tempContainer = document.createElement('div');
       tempContainer.innerHTML = result.value;
 
-      // Basic styling to mimic a generic A4 page
+      // Styling Fix: 'left: -9999px' ki jagah z-index use karein. 
+      // html2canvas kabhi-kabhi off-screen elements ko render nahi karta.
       Object.assign(tempContainer.style, {
-        width: '595px', // A4 width at 72 DPI
+        width: '595px',
         padding: '40px',
         fontSize: '12pt',
         fontFamily: 'Arial, sans-serif',
         lineHeight: '1.5',
         backgroundColor: 'white',
         color: 'black',
-        position: 'absolute',
-        left: '-9999px', // Hide it off-screen
+        position: 'fixed',   // Absolute ki jagah Fixed
+        left: '0',           // Screen ke andar
         top: '0',
+        zIndex: '-9999',     // User se chupane ke liye peeche bhejein
       });
 
-      // Make images responsive so they don't overflow the page
+      // Images ko responsive banayein
       const images = tempContainer.getElementsByTagName('img');
       for (let img of images) {
         img.style.maxWidth = '100%';
@@ -344,34 +345,35 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
       document.body.appendChild(tempContainer);
 
-      // Step C: Render HTML to PDF using jsPDF .html() method
       const doc = new jsPDF({
         unit: 'pt',
         format: 'a4',
       });
 
-      await doc.html(tempContainer, {
+      // Step C: Render HTML to PDF using Callback
+      // 'await' hata kar callback pattern use karein jo 100% reliable hai
+      doc.html(tempContainer, {
+        callback: function (doc) {
+          // Ye code tab chalega jab PDF puri tarah ban jayegi
+          const blob = doc.output('blob');
+          const url = URL.createObjectURL(blob);
+          setDownloadUrl(url);
+          setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
+          
+          // Cleanup
+          document.body.removeChild(tempContainer);
+        },
         x: 0,
         y: 0,
-        width: 595, // Target width in PDF
-        windowWidth: 595, // Window width for CSS resolution
-        margin: [20, 0, 20, 0], // Top/Bottom margins
+        width: 595,
+        windowWidth: 595,
+        margin: [20, 0, 20, 0],
         autoPaging: 'text',
       });
 
-      // Generate blob and create download URL
-      const blob = doc.output('blob');
-      const url = URL.createObjectURL(blob);
-      setDownloadUrl(url);
-      setDownloadName(`${file.name.replace('.docx', '')}.pdf`);
-
-      // Cleanup: Remove temporary element
-      document.body.removeChild(tempContainer);
     } catch (err) {
       console.error(err);
-      setError(
-        'Failed to convert DOCX to PDF. Ensure html2canvas is installed in package.json.'
-      );
+      setError('Failed to convert DOCX to PDF. Ensure html2canvas is installed in package.json.');
     }
   };
 
