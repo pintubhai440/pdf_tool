@@ -124,9 +124,12 @@ function App() {
             onClick={() => setMode('home')} 
             title="Go to Home"
           >
-            <div className="bg-primary-600 p-2 rounded-lg text-white">
-              <FileStack size={24} />
-            </div>
+            {/* Custom Logo Image */}
+            <img 
+              src="/logo.png" 
+              alt="Genz PDF Logo" 
+              className="w-10 h-10 object-contain rounded-lg" 
+            />
             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600 hidden xs:block">
               Genz PDF
             </h1>
