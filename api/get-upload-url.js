@@ -1,14 +1,16 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  // ---------------------------------------------------------
-  // 1. CORS Headers (Browser ko permission dene ke liye)
-  // ---------------------------------------------------------
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Production mein '*' ki jagah apna domain likh sakte hain
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  // --------------------------------------------------------------------------
+  // ✅ FIX 1: Browser ko permission do (CORS Headers)
+  // --------------------------------------------------------------------------
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Sabko allow karein
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); // OPTIONS method zaroori hai
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Preflight request (Browser checking options) handle karo
+  // --------------------------------------------------------------------------
+  // ✅ FIX 2: Preflight (OPTIONS) request ko pass hone do
+  // --------------------------------------------------------------------------
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -21,7 +23,6 @@ export default async function handler(req, res) {
   try {
     const { name, mimeType, size } = req.body;
 
-    // Google Auth (Robot Login)
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -32,15 +33,12 @@ export default async function handler(req, res) {
 
     const drive = google.drive({ version: 'v3', auth });
 
-    // 2. Google ko batao ki ek file aane wali hai (Metadata)
     const fileMetadata = {
       name: name,
-      // Agar PPTX chahiye to ye mimeType rakhein, nahi to original rehne dein
       mimeType: 'application/vnd.google-apps.presentation', 
-      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID], 
+      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
     };
 
-    // 3. Resumable Upload Link maango (Session Create)
     const response = await drive.files.create({
       requestBody: fileMetadata,
       media: {
@@ -48,23 +46,22 @@ export default async function handler(req, res) {
       },
       fields: 'id',
     }, {
-      // Ye URL sirf session create karne ke liye hai
       url: 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
       method: 'POST',
       headers: {
         'X-Upload-Content-Type': mimeType,
         'X-Upload-Content-Length': size,
-        // ✅ Ye sabse zaroori fix tha:
-        'Origin': req.headers.origin || '*', 
+        'Origin': req.headers.origin || '*', // Ye aapne sahi lagaya tha
       }
     });
 
-    // 4. Link wapas frontend ko bhej do
-    // Note: Google session URL 'location' header mein bhejta hai
+    // --------------------------------------------------------------------------
+    // ✅ FIX 3: Safety Check - Kabhi kabhi Location header lowercase hota hai
+    // --------------------------------------------------------------------------
     const uploadUrl = response.headers.location || response.headers.Location;
     
     if (!uploadUrl) {
-      throw new Error("Google didn't return an upload URL.");
+        throw new Error("Google ne Upload URL return nahi kiya.");
     }
 
     res.status(200).json({ uploadUrl });
