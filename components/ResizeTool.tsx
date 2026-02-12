@@ -1,34 +1,16 @@
-// components/ResizeTool.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Scaling, 
   Download, 
   Loader2, 
   RefreshCcw, 
-  Image as ImageIcon, 
-  AlertCircle,
-  CheckCircle2,
-  Zap,
-  ShieldCheck,
-  Move,
-  Lock,
-  Unlock,
-  AspectRatio,
-  ArrowRight
+  Image as ImageIcon,
+  AlertCircle
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { clsx } from 'clsx';
 
-/**
- * 🎨 PROFESSIONAL IMAGE RESIZER (Final Polish)
- * 100% Error Free, SEO Optimized, Premium UI
- */
 export const ResizeTool: React.FC = () => {
-  // ---------- SEO CONFIGURATION ----------
-  const TOOL_NAME = 'Free Image Resizer – Change Dimensions Online';
-  const TOOL_DESCRIPTION = 'Resize JPG, PNG, and WebP images by pixel or percentage. Maintain aspect ratio, preserve quality, and process files securely in your browser.';
-  
-  // ---------- STATE ----------
   const [file, setFile] = useState<File | null>(null);
   const [originalDimensions, setOriginalDimensions] = useState<{ w: number, h: number } | null>(null);
   const [width, setWidth] = useState<number>(0);
@@ -36,81 +18,37 @@ export const ResizeTool: React.FC = () => {
   const [maintainRatio, setMaintainRatio] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  // ---------- ✅ FIX 1: ROBUST SEO & SCHEMA ----------
-  useEffect(() => {
-    // 1. Dynamic Title
-    document.title = file ? `Resize ${file.name} - ${TOOL_NAME}` : TOOL_NAME;
-
-    // 2. Dynamic Meta Description
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute('content', TOOL_DESCRIPTION);
-
-    // 3. JSON-LD Schema (Safe Injection)
-    const scriptId = 'json-ld-resizer';
-    let scriptTag = document.getElementById(scriptId);
-    
-    if (!scriptTag) {
-      scriptTag = document.createElement('script');
-      scriptTag.id = scriptId;
-      scriptTag.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptTag);
-    }
-
-    const schema = {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Advanced Image Resizer',
-      applicationCategory: 'MultimediaApplication',
-      operatingSystem: 'Any',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      description: TOOL_DESCRIPTION,
-      featureList: 'Resize by Pixel, Maintain Aspect Ratio, Client-side Privacy'
-    };
-
-    scriptTag.textContent = JSON.stringify(schema);
-  }, [file]);
-
-  // ---------- LOGIC ----------
-  const handleFileSelected = useCallback((files: File[]) => {
+  const handleFileSelected = (files: File[]) => {
     if (files.length > 0) {
       const selectedFile = files[0];
       setFile(selectedFile);
       setDownloadUrl(null);
-      setError(null);
       
+      // Image load karke original dimensions nikalo
       const img = new Image();
       img.onload = () => {
         setOriginalDimensions({ w: img.width, h: img.height });
         setWidth(img.width);
         setHeight(img.height);
       };
-      img.onerror = () => setError("Failed to load image. Please try another file.");
       img.src = URL.createObjectURL(selectedFile);
     }
-  }, []);
+  };
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const newWidth = val === '' ? 0 : parseInt(val);
+    const newWidth = parseInt(e.target.value) || 0;
     setWidth(newWidth);
-    if (maintainRatio && originalDimensions && newWidth > 0) {
+    if (maintainRatio && originalDimensions) {
       const ratio = originalDimensions.h / originalDimensions.w;
       setHeight(Math.round(newWidth * ratio));
     }
   };
 
   const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const newHeight = val === '' ? 0 : parseInt(val);
+    const newHeight = parseInt(e.target.value) || 0;
     setHeight(newHeight);
-    if (maintainRatio && originalDimensions && newHeight > 0) {
+    if (maintainRatio && originalDimensions) {
       const ratio = originalDimensions.w / originalDimensions.h;
       setWidth(Math.round(newHeight * ratio));
     }
@@ -119,16 +57,11 @@ export const ResizeTool: React.FC = () => {
   const handleResize = async () => {
     if (!file || width <= 0 || height <= 0) return;
     setIsProcessing(true);
-    // Smooth UI transition
-    await new Promise(r => setTimeout(r, 500));
 
     try {
       const img = new Image();
       img.src = URL.createObjectURL(file);
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
+      await new Promise((resolve) => { img.onload = resolve; });
 
       const canvas = document.createElement('canvas');
       canvas.width = width;
@@ -136,300 +69,150 @@ export const ResizeTool: React.FC = () => {
       const ctx = canvas.getContext('2d');
 
       if (ctx) {
+        // High Quality Settings
         ctx.imageSmoothingEnabled = true;
-        // ✅ FIX 2: Type assertion for older TS versions
-        (ctx as any).imageSmoothingQuality = 'high';
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob((blob) => {
           if (blob) {
             const url = URL.createObjectURL(blob);
             setDownloadUrl(url);
-          } else {
-            setError("Resizing process failed.");
           }
           setIsProcessing(false);
-        }, file.type, 0.95); // High quality
+        }, file.type, 1.0); // 1.0 matlab max quality
       }
     } catch (error) {
       console.error("Resize failed", error);
-      setError("An error occurred while resizing.");
       setIsProcessing(false);
     }
   };
 
   const handleReset = () => {
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-    setFile(null); setDownloadUrl(null); setOriginalDimensions(null); setError(null);
+    setFile(null);
+    setDownloadUrl(null);
+    setOriginalDimensions(null);
   };
 
-  // ---------- UI RENDER ----------
-  return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      
-      {/* 1. HERO HEADER */}
-      <header className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wide mb-6 shadow-sm">
-           <Scaling size={14} className="fill-emerald-700" />
-           v2.0 • Intelligent Resizing
+  if (!file) {
+    return (
+      <div className="w-full">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-slate-900">Resize Image</h3>
+          <p className="text-slate-500">Change image dimensions while maintaining quality.</p>
         </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
-           Resize Images <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Pixel Perfect</span>
-        </h1>
-        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
-           Change image dimensions by pixel or percentage. 
-           <span className="text-emerald-600 font-bold"> 100% Client-Side & Secure.</span>
-        </p>
-      </header>
+        <FileUploader 
+          onFilesSelected={handleFileSelected} 
+          allowMultiple={false}
+          acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
+          label="Drop Image to Resize"
+        />
+      </div>
+    );
+  }
 
-      {/* 2. MAIN TOOL CARD */}
-      <section className="relative z-10 max-w-3xl mx-auto mb-20">
-         {/* Background Glow */}
-         <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 transform -rotate-1 rounded-3xl opacity-20 blur-2xl"></div>
-         
-         <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
-            {!file ? (
-               // UPLOAD STATE
-               <div className="p-8 md:p-12">
-                  <FileUploader 
-                     onFilesSelected={handleFileSelected} 
-                     allowMultiple={false}
-                     acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
-                     label="Drop Image to Resize"
-                     subLabel="Supports JPG, PNG, WebP"
-                  />
-                  <div className="mt-8 flex flex-wrap justify-center gap-4 md:gap-8 opacity-70">
-                     <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wide">
-                        <ShieldCheck size={16} className="text-emerald-500"/> Private
-                     </div>
-                     <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wide">
-                        <Move size={16} className="text-teal-500"/> Scalable
-                     </div>
-                     <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wide">
-                        <ImageIcon size={16} className="text-blue-500"/> HD Quality
-                     </div>
-                  </div>
-               </div>
-            ) : (
-               // RESIZE CONTROLS
-               <div className="p-0">
-                  {/* Card Header */}
-                  <div className="bg-slate-50/80 px-8 py-6 border-b border-slate-200 flex items-center justify-between">
-                     <div className="flex items-center gap-4">
-                        <div className="bg-emerald-100 p-3 rounded-xl text-emerald-600 shadow-sm">
-                           <ImageIcon size={24} />
-                        </div>
-                        <div className="min-w-0">
-                           <h3 className="font-bold text-slate-800 text-lg truncate max-w-[200px]">{file.name}</h3>
-                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                              Original: {originalDimensions?.w} x {originalDimensions?.h} px
-                           </p>
-                        </div>
-                     </div>
-                     <button onClick={handleReset} className="p-2 hover:bg-white rounded-full transition-colors text-slate-400 hover:text-red-500 shadow-sm border border-transparent hover:border-slate-200">
-                        <RefreshCcw size={20} />
-                     </button>
-                  </div>
-
-                  <div className="p-8 space-y-8">
-                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-in slide-in-from-top-2">
-                           <AlertCircle size={20} /> <span className="font-medium">{error}</span>
-                        </div>
-                     )}
-
-                     {!downloadUrl ? (
-                        /* INPUTS */
-                        <div className="animate-in fade-in duration-500">
-                           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/60 mb-8">
-                              <div className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide mb-5">
-                                 <Scaling size={16} className="text-emerald-500"/> New Dimensions
-                              </div>
-
-                              <div className="flex items-end gap-4">
-                                 {/* Width Input */}
-                                 <div className="flex-1 relative group">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Width (px)</label>
-                                    <div className="relative">
-                                       <input 
-                                          type="number" value={width || ''} onChange={handleWidthChange}
-                                          className="w-full bg-white border border-slate-200 text-slate-900 text-xl font-bold rounded-xl pl-4 pr-3 py-3.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all shadow-sm group-hover:border-emerald-200"
-                                          placeholder="0"
-                                       />
-                                    </div>
-                                 </div>
-
-                                 {/* Link Icon */}
-                                 <div className="pb-5 text-slate-300">
-                                    {maintainRatio ? <Lock size={20} className="text-emerald-500" strokeWidth={2.5} /> : <Unlock size={20} />}
-                                 </div>
-
-                                 {/* Height Input */}
-                                 <div className="flex-1 relative group">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Height (px)</label>
-                                    <div className="relative">
-                                       <input 
-                                          type="number" value={height || ''} onChange={handleHeightChange}
-                                          className="w-full bg-white border border-slate-200 text-slate-900 text-xl font-bold rounded-xl pl-4 pr-3 py-3.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all shadow-sm group-hover:border-emerald-200"
-                                          placeholder="0"
-                                       />
-                                    </div>
-                                 </div>
-                              </div>
-
-                              {/* Ratio Toggle & Presets */}
-                              <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => setMaintainRatio(!maintainRatio)}>
-                                    <div className={clsx(
-                                       "w-10 h-6 rounded-full transition-colors flex items-center px-1",
-                                       maintainRatio ? "bg-emerald-500" : "bg-slate-300"
-                                    )}>
-                                       <div className={clsx(
-                                          "w-4 h-4 bg-white rounded-full shadow-md transform transition-transform",
-                                          maintainRatio ? "translate-x-4" : "translate-x-0"
-                                       )} />
-                                    </div>
-                                    <span className="text-sm font-semibold text-slate-600">
-                                       Aspect Ratio
-                                    </span>
-                                 </div>
-                                 
-                                 <div className="flex gap-2">
-                                    {[0.25, 0.50, 0.75].map(ratio => (
-                                       <button 
-                                          key={ratio}
-                                          onClick={() => {
-                                             if(originalDimensions) {
-                                                setWidth(Math.round(originalDimensions.w * ratio));
-                                                setHeight(Math.round(originalDimensions.h * ratio));
-                                             }
-                                          }}
-                                          className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors"
-                                       >
-                                          {ratio * 100}%
-                                       </button>
-                                    ))}
-                                 </div>
-                              </div>
-                           </div>
-
-                           <button
-                             onClick={handleResize}
-                             disabled={isProcessing || width <= 0 || height <= 0}
-                             className="group w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-lg font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 transform transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-3"
-                           >
-                              {isProcessing ? (
-                                 <><Loader2 className="animate-spin" /> Resizing...</>
-                              ) : (
-                                 <>Resize Image <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/></>
-                              )}
-                           </button>
-                        </div>
-                     ) : (
-                        /* SUCCESS STATE */
-                        <div className="text-center animate-in zoom-in-95 duration-300">
-                           <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-emerald-50/50">
-                              <CheckCircle2 size={48} className="drop-shadow-sm" />
-                           </div>
-                           <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Resized!</h2>
-                           <p className="text-slate-500 mb-8 font-medium">Your image is ready for download.</p>
-                           
-                           {/* Stats Bar */}
-                           <div className="flex justify-center items-center gap-3 md:gap-8 text-sm mb-10 bg-slate-50 p-5 rounded-2xl border border-slate-200 inline-flex mx-auto min-w-[300px]">
-                              <div className="text-center">
-                                 <div className="text-xs font-bold text-slate-400 uppercase mb-1">Original</div>
-                                 <div className="font-mono font-medium text-slate-600 line-through">
-                                    {originalDimensions?.w} x {originalDimensions?.h}
-                                 </div>
-                              </div>
-                              <ArrowRight size={20} className="text-emerald-400" />
-                              <div className="text-center">
-                                 <div className="text-xs font-bold text-emerald-600 uppercase mb-1">New Size</div>
-                                 <div className="font-mono font-bold text-emerald-700 text-lg">
-                                    {width} x {height}
-                                 </div>
-                              </div>
-                           </div>
-
-                           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                              <a 
-                                href={downloadUrl} 
-                                // ✅ FIX: Null check for file.name
-                                download={`resized-${file?.name || 'image'}`}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-2 transition-transform hover:-translate-y-0.5"
-                              >
-                                 <Download size={20} /> Download
-                              </a>
-                              <button 
-                                onClick={handleReset}
-                                className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 px-8 rounded-xl transition-colors"
-                              >
-                                 Resize Another
-                              </button>
-                           </div>
-                        </div>
-                     )}
-                  </div>
-               </div>
-            )}
-         </div>
-      </section>
-
-      {/* 3. FEATURES GRID */}
-      <section className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24">
-         {[
-            {
-               icon: <ShieldCheck size={32}/>, title: "100% Secure", desc: "Your photos process directly in your browser. We never upload them.",
-               color: "text-emerald-600", bg: "bg-emerald-50"
-            },
-            {
-               icon: <Zap size={32}/>, title: "Instant Result", desc: "No queue, no loading bars. Resize happens in milliseconds.",
-               color: "text-teal-600", bg: "bg-teal-50"
-            },
-            {
-               icon: <AspectRatio size={32}/>, title: "Best Quality", desc: "We use high-quality resampling to keep your images sharp.",
-               color: "text-blue-600", bg: "bg-blue-50"
-            }
-         ].map((f, i) => (
-            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
-               <div className={`w-14 h-14 ${f.bg} ${f.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  {f.icon}
-               </div>
-               <h3 className="text-xl font-bold text-slate-900 mb-3">{f.title}</h3>
-               <p className="text-slate-600 leading-relaxed">{f.desc}</p>
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+       {/* File Info */}
+       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-blue-50 p-3 rounded-full text-blue-600">
+               <ImageIcon size={24} />
             </div>
-         ))}
-      </section>
+            <div>
+               <h3 className="font-semibold text-slate-900">{file.name}</h3>
+               <p className="text-sm text-slate-500">
+                 Original: {originalDimensions?.w} x {originalDimensions?.h} px
+               </p>
+            </div>
+          </div>
+          <button onClick={handleReset} className="text-slate-400 hover:text-red-500 p-2">
+             <RefreshCcw size={20} />
+          </button>
+       </div>
 
-      {/* 4. FAQ SECTION */}
-      <section className="max-w-3xl mx-auto border-t border-slate-200 pt-16">
-         <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Common Questions</h2>
-            <p className="text-slate-500">Learn more about our resizing technology.</p>
-         </div>
-         
-         <div className="space-y-4">
-            {[
-               { q: "Does resizing reduce image quality?", a: "Scaling down (making smaller) maintains high quality. Scaling up (making bigger) may cause pixelation, but our tool uses smoothing to minimize this." },
-               { q: "Can I change dimensions separately?", a: "Yes! Simply uncheck the 'Maintain Aspect Ratio' toggle to define Width and Height independently." },
-               { q: "What formats are supported?", a: "We support the most popular web formats: JPEG, PNG, and WebP." }
-            ].map((item, i) => (
-               <details key={i} className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer transition-all hover:border-emerald-200">
-                  <summary className="flex justify-between items-center p-6 font-semibold text-slate-800 list-none">
-                     {item.q}
-                     <span className="transform group-open:rotate-180 transition-transform text-emerald-500">▼</span>
-                  </summary>
-                  <div className="px-6 pb-6 text-slate-600 bg-slate-50/30 pt-2 leading-relaxed">
-                     {item.a}
-                  </div>
-               </details>
-            ))}
-         </div>
-      </section>
+       {/* Controls */}
+       {!downloadUrl ? (
+         <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+            <h4 className="font-medium text-slate-700 mb-4 flex items-center gap-2">
+               <Scaling size={18} />
+               New Dimensions
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Width (px)</label>
+                <input 
+                  type="number" 
+                  value={width} 
+                  onChange={handleWidthChange}
+                  className="w-full p-2 border border-slate-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Height (px)</label>
+                <input 
+                  type="number" 
+                  value={height} 
+                  onChange={handleHeightChange}
+                  className="w-full p-2 border border-slate-300 rounded-lg"
+                />
+              </div>
+            </div>
 
-      <footer className="text-center text-xs text-slate-400 mt-20 pb-8">
-         <p>© {new Date().getFullYear()} {TOOL_NAME}. All rights reserved.</p>
-      </footer>
+            <div className="flex items-center gap-2 mb-6">
+              <input 
+                type="checkbox" 
+                id="ratio" 
+                checked={maintainRatio} 
+                onChange={(e) => setMaintainRatio(e.target.checked)}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="ratio" className="text-sm text-slate-600 cursor-pointer">Maintain Aspect Ratio</label>
+            </div>
+               
+            <button
+               onClick={handleResize}
+               disabled={isProcessing || width <= 0 || height <= 0}
+               className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200"
+            >
+               {isProcessing ? (
+                  <>
+                     <Loader2 className="animate-spin w-5 h-5" />
+                     Resizing...
+                  </>
+               ) : (
+                  'Resize Image'
+               )}
+            </button>
+         </div>
+       ) : (
+         /* Success State */
+         <div className="bg-green-50 rounded-xl p-8 border border-green-200 text-center animate-in fade-in zoom-in-95 duration-300">
+            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+               <Scaling size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-green-900 mb-2">Resized Successfully!</h3>
+            <p className="text-green-700 mb-6">New size: {width} x {height} px</p>
+            
+            <div className="flex items-center justify-center gap-4">
+               <a 
+                  href={downloadUrl} 
+                  download={`resized-${file.name}`}
+                  className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-200 flex items-center gap-2 transition-all hover:scale-105"
+               >
+                  <Download size={20} />
+                  Download
+               </a>
+               <button 
+                  onClick={handleReset}
+                  className="px-6 py-3 bg-white text-slate-600 border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+               >
+                  Resize Another
+               </button>
+            </div>
+         </div>
+       )}
     </div>
   );
 };
