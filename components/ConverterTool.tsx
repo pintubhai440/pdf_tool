@@ -378,7 +378,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ UPDATED: Top Quality + Bigger Text (Smart Zoom)
+  // ✅ FINAL TOP QUALITY: Uses Browser's Native Engine for HD Text & Perfect Layout
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -391,7 +391,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Create an invisible Iframe
+      // 1. Create an invisible Iframe (so main page is not disturbed)
       iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
         position: 'fixed',
@@ -407,24 +407,22 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       const iframeDoc = iframe.contentWindow?.document;
       if (!iframeDoc) throw new Error('Browser limitation: Cannot create print frame.');
 
-      // 2. Add Print Styles (Zoom Added 🔍)
+      // 2. Add Print Styles (A4 Page formatting)
       const style = iframeDoc.createElement('style');
       style.textContent = `
-        @page { size: A4; margin: 15mm; } /* Margins thode kam kiye taaki bada text fit ho */
+        @page { size: A4; margin: 20mm; }
         body { 
           font-family: Arial, sans-serif; 
           margin: 0; 
           padding: 20px; 
           color: #000;
           background: #fff;
-          -webkit-print-color-adjust: exact;
-          zoom: 1.15; /* ✅ Text size 15% increase kar diya */
+          -webkit-print-color-adjust: exact; 
         }
         .docx-wrapper { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
         section { margin-bottom: 0 !important; box-shadow: none !important; }
         img { max-width: 100%; height: auto; }
         table { border-collapse: collapse; width: 100%; }
-        p { margin-bottom: 8px; } /* Thoda gap badhaya readability ke liye */
       `;
       iframeDoc.head.appendChild(style);
 
@@ -434,17 +432,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
       await renderAsync(arrayBuffer, container, null, {
         inWrapper: false,
-        ignoreWidth: true, // ✅ IMPORTANT: Ye text ko page ke hisab se reflow karega
-        experimental: true
+        ignoreWidth: false, // Respect page width
+        experimental: true // Better formatting
       });
 
-      // 4. Wait for images/fonts
+      // 4. Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 5. Trigger Print Dialog
+      // 5. Trigger Print Dialog (Chrome's PDF Engine)
       setIsProcessing(false);
       
-      alert("Conversion Ready! Please select 'Save as PDF'.");
+      alert("Conversion Ready! Please select 'Save as PDF' in the destination.");
 
       try {
         iframe.contentWindow?.focus();
@@ -454,7 +452,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         setError('Pop-up blocked. Please allow pop-ups.');
       }
 
-      // 6. Cleanup
+      // 6. Cleanup after printing (delay to keep dialog open)
       cleanupTimeout = setTimeout(() => {
         if (iframe && document.body.contains(iframe)) {
           document.body.removeChild(iframe);
@@ -466,6 +464,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setError('Conversion failed. Please try again.');
       setIsProcessing(false);
       
+      // Cleanup iframe if it exists and hasn't been removed
       if (iframe && document.body.contains(iframe)) {
         document.body.removeChild(iframe);
       }
