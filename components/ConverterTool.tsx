@@ -10,7 +10,9 @@ import {
   FileCheck,
   CheckCircle2,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCw,
+  FileType
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
@@ -37,7 +39,7 @@ export const ConverterTool: React.FC = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
-  // ----- ✅ FIX 1: DYNAMIC SEO HANDLING (Replaces next/head) -----
+  // ----- ✅ FIX 1: DYNAMIC SEO & SCHEMA (Replaces next/head) -----
   useEffect(() => {
     // 1. Set Document Title
     document.title = pageTitle;
@@ -51,8 +53,8 @@ export const ConverterTool: React.FC = () => {
     }
     metaDescription.setAttribute('content', pageDesc);
 
-    // 3. Set JSON-LD Schema
-    const scriptId = 'json-ld-schema';
+    // 3. Set JSON‑LD Schema (SoftwareApplication)
+    const scriptId = 'json-ld-converter';
     let scriptTag = document.getElementById(scriptId);
     if (!scriptTag) {
       scriptTag = document.createElement('script');
@@ -61,19 +63,18 @@ export const ConverterTool: React.FC = () => {
       document.head.appendChild(scriptTag);
     }
 
-    const jsonLd = {
+    const schema = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'Universal File Converter',
+      name: 'Universal PDF & Image Converter',
       applicationCategory: 'ProductivityApplication',
-      operatingSystem: 'Web',
+      operatingSystem: 'Any',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
       description: pageDesc,
-      featureList: 'PDF to DOCX, PDF to JPG, PDF to PNG, PDF to TXT, JPG to PDF, PNG to PDF, Images to DOCX, DOCX to PDF, Private & Secure'
+      featureList: 'PDF to DOCX, JPG to PDF, DOCX to PDF, Client-side privacy'
     };
 
-    scriptTag.textContent = JSON.stringify(jsonLd);
-
+    scriptTag.textContent = JSON.stringify(schema);
   }, [pageTitle, pageDesc]);
 
   // ----- ✅ FIX 2: PDF WORKER INITIALIZATION (Safe Versioning) -----
@@ -81,8 +82,7 @@ export const ConverterTool: React.FC = () => {
     const initPdfWorker = async () => {
       try {
         const pdfjs = await import('pdfjs-dist');
-        // Use loaded version or fallback to avoid crashes
-        const version = pdfjs.version || '3.11.174'; 
+        const version = pdfjs.version || '3.11.174';
         if (pdfjs.GlobalWorkerOptions && !pdfjs.GlobalWorkerOptions.workerSrc) {
           pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
         }
@@ -98,7 +98,7 @@ export const ConverterTool: React.FC = () => {
   const loadDocx = async () => await import('docx');
   const loadDocxPreview = async () => await import('docx-preview');
 
-  // ----- FILE SELECTION HANDLER -----
+  // ----- FILE SELECTION HANDLER (with SEO update) -----
   const handleFilesSelected = useCallback((files: File[]) => {
     setError(null);
     setDownloadUrl(null);
@@ -148,7 +148,7 @@ export const ConverterTool: React.FC = () => {
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2.0 }); // high quality
+        const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         if (!context) continue;
@@ -162,7 +162,6 @@ export const ConverterTool: React.FC = () => {
         const base64Data = dataUrl.split(',')[1];
         folder?.file(`page_${i}.${format}`, base64Data, { base64: true });
 
-        // free memory
         canvas.width = 0;
         canvas.height = 0;
       }
@@ -218,7 +217,6 @@ export const ConverterTool: React.FC = () => {
         const hasText = textContent.items.length > 5;
 
         if (!hasText) {
-          // fallback: render page as image
           const viewport = page.getViewport({ scale: 1.5 });
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
@@ -249,7 +247,6 @@ export const ConverterTool: React.FC = () => {
             });
           }
         } else {
-          // extract text with basic layout preservation
           const paragraphs = [];
           const items = textContent.items.map((item: any) => ({
             text: item.str,
@@ -435,7 +432,6 @@ export const ConverterTool: React.FC = () => {
       const iframeDoc = iframe.contentWindow?.document;
       if (!iframeDoc) throw new Error('Could not create print frame.');
 
-      // print styles for clean PDF
       const style = iframeDoc.createElement('style');
       style.textContent = `
         @page { size: A4; margin: 20mm; }
@@ -475,7 +471,7 @@ export const ConverterTool: React.FC = () => {
     setIsProcessing(true);
     setError(null);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 50)); // UI feedback
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Smooth UI feedback
 
       if (mode === 'pdf-to-x') {
         if (targetFormat === 'docx') await convertPdfToDocx();
@@ -488,6 +484,9 @@ export const ConverterTool: React.FC = () => {
       } else if (mode === 'docx-to-pdf') {
         await convertDocxToPdf();
       }
+    } catch (err) {
+      console.error(err);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -500,248 +499,220 @@ export const ConverterTool: React.FC = () => {
     setDownloadUrl(null);
     setError(null);
     setPageTitle('Universal File Converter – PDF, Word, Images');
-    setPageDesc('Free online file converter. Convert PDF to Word, Image to PDF, DOCX to PDF and more – securely in your browser.');
+    setPageDesc('Free online file converter. Convert PDF to Word, Image to PDF, DOCX to PDF and more – securely in your browser, no upload.');
   };
 
-  // ----- RENDER -----
+  // ----- UI RENDER (Premium, SEO‑Rich) -----
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      {/* No <Head> tag here - managed via useEffect */}
-
-      <section aria-label="File Converter Interface" className="mb-16">
-        {!mode ? (
-          // ----- HOMEPAGE / UPLOAD STATE -----
-          <div className="animate-in fade-in duration-500">
-            <div className="text-center mb-10">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                Universal <span className="text-primary-600">File Converter</span>
-              </h1>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                The ultimate free tool to convert PDFs, Images, and Word documents.
-                <br />
-                <span className="font-semibold text-primary-600">100% Client‑Side & Secure – No Upload</span>
-              </p>
-            </div>
-
-            <FileUploader
-              onFilesSelected={handleFilesSelected}
-              allowMultiple={true}
-              acceptedFileTypes={[
-                'application/pdf',
-                'image/jpeg',
-                'image/png',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-              ]}
-              label="Drop files here to start converting"
-              subLabel="Supports PDF, DOCX, JPG, PNG"
-            />
-          </div>
-        ) : (
-          // ----- CONVERSION WORKFLOW -----
-          <div className="max-w-2xl mx-auto space-y-6">
-            {/* File info card */}
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-primary-50 p-4 rounded-full text-primary-600">
-                  {mode.includes('img') ? <ImageIcon size={28} /> : <FileText size={28} />}
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-lg">
-                    {mode === 'img-to-x'
-                      ? `${imageFiles.length} Image${imageFiles.length > 1 ? 's' : ''} Selected`
-                      : file?.name}
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    {mode === 'img-to-x'
-                      ? 'Ready to merge or convert'
-                      : `${((file?.size || 0) / 1024 / 1024).toFixed(2)} MB • Secure`}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleReset}
-                className="text-slate-400 hover:text-red-500 transition-colors p-2"
-                aria-label="Cancel and start over"
-              >
-                <AlertCircle size={24} className="rotate-45" />
-              </button>
-            </div>
-
-            {/* Error display */}
-            {error && (
-              <div
-                role="alert"
-                className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r shadow-sm flex items-center gap-3"
-              >
-                <AlertCircle size={20} />
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
-
-            {/* Conversion UI (before download) */}
-            {!downloadUrl ? (
-              <div className="bg-white rounded-xl p-8 border border-slate-200 shadow-sm">
-                <h4 className="font-bold text-slate-800 mb-6 flex items-center gap-2 text-lg">
-                  <ArrowRightLeft className="text-primary-600" /> Choose Output Format
-                </h4>
-
-                <div className="grid gap-6">
-                  {mode === 'docx-to-pdf' ? (
-                    <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex items-start gap-3">
-                      <Zap className="mt-1 shrink-0" size={18} />
-                      <p className="text-sm font-medium">
-                        We use your browser’s native print engine to ensure the highest quality PDF conversion.
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <label htmlFor="target-format" className="block text-sm font-semibold text-slate-700 mb-2">
-                        Convert To:
-                      </label>
-                      <select
-                        id="target-format"
-                        value={targetFormat}
-                        onChange={(e) => setTargetFormat(e.target.value as ConversionFormat)}
-                        className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
-                      >
-                        {mode === 'pdf-to-x' ? (
-                          <>
-                            <option value="docx">Word Document (.docx)</option>
-                            <option value="jpg">JPG Images</option>
-                            <option value="png">PNG Images</option>
-                            <option value="txt">Plain Text (.txt)</option>
-                          </>
-                        ) : (
-                          // mode === 'img-to-x'
-                          <>
-                            <option value="pdf">PDF Document (.pdf)</option>
-                            <option value="docx">Word Document (.docx)</option>
-                            <option value="jpg">Convert to JPG</option>
-                            <option value="png">Convert to PNG</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleConvert}
-                    disabled={isProcessing}
-                    className="w-full py-4 bg-primary-600 text-white rounded-xl font-bold text-lg hover:bg-primary-700 disabled:opacity-70 disabled:cursor-wait shadow-lg shadow-primary-200 transition-all flex justify-center items-center gap-3"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="animate-spin" size={22} /> Processing...
-                      </>
-                    ) : (
-                      'Convert Now'
-                    )}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // ----- SUCCESS / DOWNLOAD STATE -----
-              <div className="bg-green-50 rounded-xl p-10 border border-green-200 text-center animate-in zoom-in-95 duration-300 shadow-sm">
-                <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 shadow-sm">
-                  <FileCheck size={40} />
-                </div>
-                <h3 className="text-2xl font-bold text-green-900 mb-2">Conversion Complete!</h3>
-                <p className="text-green-700 mb-8">Your file has been optimized and is ready to download.</p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href={downloadUrl}
-                    download={downloadName}
-                    className="px-8 py-3.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 shadow-lg shadow-green-200 flex items-center justify-center gap-2 hover:-translate-y-1 transition-all"
-                  >
-                    <Download size={20} /> Download File
-                  </a>
-                  <button
-                    onClick={handleReset}
-                    className="px-8 py-3.5 bg-white text-slate-700 border border-slate-300 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
-                  >
-                    Convert Another
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+    <div className="w-full max-w-5xl mx-auto px-4 py-8">
+      {/* HERO SECTION */}
+      <section className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wide mb-6">
+          <Zap size={14} className="fill-indigo-700" />
+          v2.0 • 100% Client-Side
+        </div>
+        <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+          Convert <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Anything</span> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Everything</span>
+        </h1>
+        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          The most secure file converter on the web. Transform PDFs, Images, and Documents instantly without your data ever leaving this browser tab.
+        </p>
       </section>
 
-      {/* ----- SEO‑RICH CONTENT ----- */}
-      <article className="prose prose-slate max-w-none mt-20 border-t border-slate-200 pt-16">
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <ShieldCheck className="w-10 h-10 text-primary-600 mb-4" />
-            <h3 className="font-bold text-xl mb-2 text-slate-900">100% Secure & Private</h3>
-            <p className="text-slate-600">
-              Files never leave your device. All conversions happen locally in your browser – no servers, no uploads.
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <Zap className="w-10 h-10 text-primary-600 mb-4" />
-            <h3 className="font-bold text-xl mb-2 text-slate-900">Lightning Fast</h3>
-            <p className="text-slate-600">
-              No waiting for uploads or downloads. Our WebAssembly‑powered engine processes files instantly.
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <CheckCircle2 className="w-10 h-10 text-primary-600 mb-4" />
-            <h3 className="font-bold text-xl mb-2 text-slate-900">High Quality Output</h3>
-            <p className="text-slate-600">
-              Preserve fonts, images, and layout when converting PDF to Word or merging images into PDF.
-            </p>
-          </div>
-        </div>
+      {/* MAIN TOOL CARD */}
+      <section className="relative z-10 max-w-3xl mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-500 transform rotate-1 rounded-3xl opacity-20 blur-xl"></div>
+        <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+          
+          {!mode ? (
+            // ----- UPLOAD STATE -----
+            <div className="p-8 md:p-12 bg-slate-50/50">
+              <FileUploader
+                onFilesSelected={handleFilesSelected}
+                allowMultiple={true}
+                acceptedFileTypes={[
+                  'application/pdf',
+                  'image/jpeg',
+                  'image/png',
+                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ]}
+                label="Click or Drag files to Convert"
+                subLabel="Supported: PDF, DOCX, JPG, PNG"
+              />
+              <div className="mt-6 flex justify-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> PDF</div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> DOCX</div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><ImageIcon size={16}/> PNG/JPG</div>
+              </div>
+            </div>
+          ) : (
+            // ----- CONVERSION WORKFLOW -----
+            <div className="p-0">
+              {/* File info header */}
+              <div className="bg-slate-50 px-8 py-6 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl shadow-sm ${mode.includes('img') ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                    {mode === 'img-to-x' ? <ImageIcon size={24} /> : <FileText size={24} />}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-lg truncate max-w-[200px] md:max-w-xs">
+                      {mode === 'img-to-x' ? `${imageFiles.length} Image${imageFiles.length > 1 ? 's' : ''}` : file?.name}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      {mode === 'img-to-x' ? 'Batch Processing' : 'Single File'}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={handleReset} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-red-500">
+                  <RefreshCw size={20} />
+                </button>
+              </div>
 
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
-          <div className="text-left space-y-6">
-            <details className="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-              <summary className="font-semibold text-slate-800 list-none flex justify-between items-center">
-                How do I convert PDF to Word for free?
-                <span className="text-primary-600 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-3 text-slate-600">
-                Simply upload your PDF, select <strong>Word Document (.docx)</strong> and click Convert. Our tool
-                extracts text and images, preserving layout as much as possible – all without uploading your file.
-              </p>
-            </details>
-            <details className="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-              <summary className="font-semibold text-slate-800 list-none flex justify-between items-center">
-                Is it safe to convert confidential documents?
-                <span className="text-primary-600 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-3 text-slate-600">
-                Absolutely. Unlike online converters that send your files to a remote server, this tool runs entirely
-                in your browser. Your documents never leave your computer – 100% private and secure.
-              </p>
-            </details>
-            <details className="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-              <summary className="font-semibold text-slate-800 list-none flex justify-between items-center">
-                Can I combine multiple JPGs into one PDF?
-                <span className="text-primary-600 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-3 text-slate-600">
-                Yes! Select multiple images at once (JPG or PNG) and choose <strong>PDF Document</strong>. They will be
-                merged into a single, high‑quality PDF file in the order you selected.
-              </p>
-            </details>
-            <details className="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-              <summary className="font-semibold text-slate-800 list-none flex justify-between items-center">
-                What formats are supported?
-                <span className="text-primary-600 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-3 text-slate-600">
-                <strong>Input:</strong> PDF, DOCX, JPG, PNG.<br />
-                <strong>Output:</strong> PDF, DOCX, JPG, PNG, TXT (from PDF).<br />
-                You can also convert images between JPG ↔ PNG and merge images into PDF or Word.
-              </p>
-            </details>
-          </div>
+              {/* Body */}
+              <div className="p-8 space-y-8">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-in slide-in-from-top-2">
+                    <AlertCircle size={20} /> <span className="font-medium">{error}</span>
+                  </div>
+                )}
+
+                {!downloadUrl ? (
+                  <div className="space-y-6">
+                    {mode !== 'docx-to-pdf' ? (
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Target Format</label>
+                        <div className="relative">
+                          <select 
+                            value={targetFormat} 
+                            onChange={(e) => setTargetFormat(e.target.value as ConversionFormat)}
+                            className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-800 text-lg font-medium rounded-xl px-5 py-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all cursor-pointer"
+                          >
+                            {mode === 'pdf-to-x' && (
+                              <>
+                                <option value="docx">Word Document (.docx)</option>
+                                <option value="jpg">Images (.jpg)</option>
+                                <option value="png">Images (.png)</option>
+                                <option value="txt">Text (.txt)</option>
+                              </>
+                            )}
+                            {mode === 'img-to-x' && (
+                              <>
+                                <option value="pdf">PDF Document (.pdf)</option>
+                                <option value="docx">Word Document (.docx)</option>
+                                <option value="jpg">Convert to JPG</option>
+                                <option value="png">Convert to PNG</option>
+                              </>
+                            )}
+                          </select>
+                          <ArrowRightLeft className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 text-blue-800">
+                        <Zap className="shrink-0 mt-0.5" size={18} />
+                        <p className="text-sm">We use the native browser print engine for DOCX to PDF. It ensures 100% layout accuracy.</p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleConvert}
+                      disabled={isProcessing}
+                      className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transform transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-3"
+                    >
+                      {isProcessing ? (
+                        <><Loader2 className="animate-spin" /> Converting...</>
+                      ) : (
+                        <>Start Conversion <ArrowRightLeft size={20} /></>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  // ----- SUCCESS / DOWNLOAD STATE -----
+                  <div className="text-center animate-in zoom-in-95 duration-300">
+                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                      <CheckCircle2 size={40} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">It's Ready!</h2>
+                    <p className="text-slate-500 mb-8">Your file has been successfully converted.</p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <a 
+                        href={downloadUrl} 
+                        download={downloadName}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-green-200 flex justify-center items-center gap-2 transition-transform hover:-translate-y-0.5"
+                      >
+                        <Download size={20} /> Download File
+                      </a>
+                      <button 
+                        onClick={handleReset}
+                        className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-colors"
+                      >
+                        Convert Another
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </article>
+      </section>
+
+      {/* FEATURES GRID (SEO Content) */}
+      <section className="mt-24 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {[
+          {
+            icon: <ShieldCheck size={32} />,
+            title: "Private & Secure",
+            desc: "We process files locally. No data is ever uploaded to a server.",
+            color: "text-emerald-600", bg: "bg-emerald-50"
+          },
+          {
+            icon: <Zap size={32} />,
+            title: "Lightning Fast",
+            desc: "Powered by WebAssembly for instant conversions without lag.",
+            color: "text-amber-600", bg: "bg-amber-50"
+          },
+          {
+            icon: <FileCheck size={32} />,
+            title: "High Precision",
+            desc: "Preserves layout, fonts, and images during conversion.",
+            color: "text-blue-600", bg: "bg-blue-50"
+          }
+        ].map((feature, idx) => (
+          <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className={`w-14 h-14 ${feature.bg} ${feature.color} rounded-2xl flex items-center justify-center mb-6`}>
+              {feature.icon}
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
+            <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* FAQ SECTION (Rich Snippets target) */}
+      <section className="mt-20 max-w-3xl mx-auto">
+        <h2 className="text-3xl font-bold text-center text-slate-900 mb-10">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          {[
+            { q: "How do I convert PDF to Word for free?", a: "Upload your PDF, select DOCX as the format, and click Convert. It runs instantly in your browser." },
+            { q: "Is it safe to use this converter?", a: "Yes. Unlike other sites, we do NOT upload your files. Everything happens on your computer." },
+            { q: "Does it support scanned PDFs?", a: "It extracts images and text layers. For OCR (scanned text), results may vary." },
+            { q: "Can I merge multiple images into one PDF?", a: "Yes! Select multiple images at once (JPG or PNG) and choose PDF Document. They will be merged into a single PDF." },
+            { q: "What if I have a password-protected PDF?", a: "The tool does not support password-protected PDFs. Please remove password protection first." }
+          ].map((item, i) => (
+            <details key={i} className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer transition-all hover:border-indigo-200">
+              <summary className="flex justify-between items-center p-6 font-semibold text-slate-800 list-none">
+                {item.q}
+                <span className="transform group-open:rotate-180 transition-transform text-indigo-500">▼</span>
+              </summary>
+              <div className="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-50 pt-4">
+                {item.a}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
