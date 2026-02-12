@@ -15,12 +15,14 @@ import {
   Loader2,
   AlertCircle,
   FileCheck,
-  Presentation // ✅ PPTX icon
+  Presentation,
+  ShieldCheck // ✅ added for Google Drive
 } from 'lucide-react';
-import { FileUploader } from './FileUploader';
+import { FileUploader } from './FileUploader'; // named import – consistent with big component
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
 import { clsx } from 'clsx';
+import { initGoogleDrive, convertPPTXtoPDF } from '../services/googleDriveService'; // ✅ added
 
 interface ConverterToolProps {}
 
@@ -34,7 +36,11 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
-  // Initialize PDF.js worker
+  // ✅ Google Drive state
+  const [isDriveReady, setIsDriveReady] = useState(false);
+  const [pptxConversionMethod, setPptxConversionMethod] = useState<'standard' | 'drive'>('standard');
+
+  // ✅ Initialize PDF.js worker
   useEffect(() => {
     const initPdfWorker = () => {
       const lib = (pdfjsLib as any).default || pdfjsLib;
@@ -43,6 +49,13 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       }
     };
     initPdfWorker();
+  }, []);
+
+  // ✅ Initialize Google Drive API
+  useEffect(() => {
+    initGoogleDrive()
+      .then(() => setIsDriveReady(true))
+      .catch((err) => console.error('Drive Init Failed:', err));
   }, []);
 
   // ✅ File detection includes PPTX
@@ -73,6 +86,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setMode('pptx-to-pdf');
       setFile(firstFile);
       setTargetFormat('pdf');
+      // default to standard method, but user can switch
+      setPptxConversionMethod('standard');
     } else {
       setError('Unsupported file type. Please upload PDF, DOCX, PPTX, or Images.');
     }
@@ -463,7 +478,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ FIXED: Perfect PPTX to PDF (Visible Iframe for Correct Layout)
+  // --- STANDARD PPTX to PDF (PPTXjs / iframe) ---
   const convertPptxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -474,14 +489,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     let fileUrl: string | null = null;
 
     try {
-      // 1. Create Iframe (Visible but Off-Screen)
-      // ⚠️ IMPORTANT: Width '0' se layout tut jata hai. Hum width 100% denge par screen se bahar rakhenge.
       iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
         position: 'fixed',
-        left: '-10000px', // Screen se bahar
+        left: '-10000px',
         top: '0',
-        width: '100vw',   // Full Width taaki layout calculate ho sake
+        width: '100vw',
         height: '100vh',
         border: '0',
         zIndex: '-100'
@@ -491,10 +504,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       const iframeDoc = iframe.contentWindow?.document;
       if (!iframeDoc) throw new Error('Browser error: Cannot create print frame.');
 
-      // 2. Prepare File URL
       fileUrl = URL.createObjectURL(file);
 
-      // 3. Write HTML with PPTXjs & Print Styles
       iframeDoc.open();
       iframeDoc.write(`
         <!DOCTYPE html>
@@ -503,9 +514,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           <title>Print PPTX</title>
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/css/pptxjs.css">
           <style>
-            /* ✅ Force Landscape for PDF */
             @page { size: landscape; margin: 0; }
-            
             body { 
               margin: 0; 
               padding: 0; 
@@ -513,15 +522,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
               -webkit-print-color-adjust: exact;
               overflow: visible;
             }
-
             #result { 
               width: 100%; 
               display: flex; 
               flex-direction: column; 
               align-items: center; 
             }
-            
-            /* ✅ Slide Styling - Fit to Page */
             .slide { 
               margin: 0 !important;
               margin-bottom: 20px !important; 
@@ -532,22 +538,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
               border: 1px solid #eee;
               box-shadow: none !important;
               transform-origin: top center;
-              /* Agar slide badi ho toh page me fit karein */
               max-width: 100% !important; 
               height: auto !important;
             }
-
-            /* Hide Loading/Errors in print */
             .loading, .error { display: none !important; }
           </style>
         </head>
         <body>
           <div id="result"></div>
-
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
           <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/js/pptxjs.js"></script>
-
           <script>
             window.onload = function() {
               $("#result").pptxToHtml({
@@ -565,10 +566,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       `);
       iframeDoc.close();
 
-      // 4. Wait for Rendering (Thoda zyada time dein taaki layout set ho jaye)
       await new Promise(resolve => setTimeout(resolve, 5000));
 
-      // 5. Print
       setIsProcessing(false);
       alert("Conversion Ready! Please select 'Save as PDF'.\n\n💡 Tip: Layout me 'Landscape' select karein.");
       
@@ -580,7 +579,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         setError('Print blocked. Please allow pop-ups.');
       }
 
-      // Cleanup
       cleanupTimeout = setTimeout(() => {
         if (iframe && document.body.contains(iframe)) {
           document.body.removeChild(iframe);
@@ -596,6 +594,28 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         document.body.removeChild(iframe);
       }
       if (fileUrl) URL.revokeObjectURL(fileUrl);
+    }
+  };
+
+  // ✅ HIGH QUALITY PPTX to PDF (Google Drive)
+  const convertPptxToPdfDrive = async () => {
+    if (!file) return;
+    if (!isDriveReady) {
+      setError('Google Drive API ready nahi hai. Page refresh karein.');
+      return;
+    }
+    setIsProcessing(true);
+    setError(null);
+    try {
+      const pdfBlob = await convertPPTXtoPDF(file);
+      const url = URL.createObjectURL(pdfBlob);
+      setDownloadUrl(url);
+      setDownloadName(file.name.replace(/\.pptx$/i, '.pdf'));
+    } catch (err: any) {
+      console.error(err);
+      setError('Google Drive conversion failed. Please check popup blocker or login again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -623,7 +643,11 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       } else if (mode === 'docx-to-pdf') {
         await convertDocxToPdf();
       } else if (mode === 'pptx-to-pdf') {
-        await convertPptxToPdf();
+        if (pptxConversionMethod === 'standard') {
+          await convertPptxToPdf();
+        } else {
+          await convertPptxToPdfDrive();
+        }
       }
     } finally {
       setIsProcessing(false);
@@ -750,7 +774,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
             Conversion Options
           </h4>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             {mode === 'docx-to-pdf' ? (
               <div className="flex-1">
                 <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
@@ -758,10 +782,41 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                 </div>
               </div>
             ) : mode === 'pptx-to-pdf' ? (
-              <div className="flex-1">
-                <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
-                  <span className="font-medium">Convert to PDF (PPTX to PDF)</span>
+              <div className="flex-1 space-y-2">
+                <label className="block text-sm text-slate-500 mb-1">Conversion Method:</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="pptxMethod"
+                      value="standard"
+                      checked={pptxConversionMethod === 'standard'}
+                      onChange={() => setPptxConversionMethod('standard')}
+                      className="text-primary-600"
+                    />
+                    <span className="text-sm">Standard (PPTXjs)</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="pptxMethod"
+                      value="drive"
+                      checked={pptxConversionMethod === 'drive'}
+                      onChange={() => setPptxConversionMethod('drive')}
+                      className="text-primary-600"
+                      disabled={!isDriveReady}
+                    />
+                    <span className="text-sm flex items-center gap-1">
+                      <ShieldCheck size={16} className={isDriveReady ? 'text-green-600' : 'text-gray-400'} />
+                      High Quality (Google Drive)
+                    </span>
+                  </label>
                 </div>
+                {!isDriveReady && pptxConversionMethod === 'drive' && (
+                  <p className="text-xs text-amber-600">
+                    Google Drive API is loading. Please wait or use standard conversion.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="flex-1">
@@ -837,3 +892,5 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     </div>
   );
 };
+
+export default ConverterTool;
