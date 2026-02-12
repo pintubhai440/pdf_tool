@@ -40,6 +40,7 @@ export default async function handler(req, res) {
       headers: {
         'X-Upload-Content-Type': mimeType,
         'X-Upload-Content-Length': size,
+        'Origin': req.headers.origin || '*',
       }
     });
 
