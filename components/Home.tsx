@@ -9,7 +9,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  Globe
+  Globe,
+  Star
 } from 'lucide-react';
 import { AppMode } from '../types';
 
@@ -46,7 +47,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       { property: 'og:description', content: 'Merge, split, compress, convert & resize – all in your browser. Zero uploads, maximum privacy.' },
       { property: 'og:type', content: 'website' },
       { property: 'og:url', content: 'https://genzpdf.com/' },
-      { property: 'og:image', content: 'https://genzpdf.com/og-image.png' }, // Replace with real image URL
+      { property: 'og:image', content: 'https://genzpdf.com/og-image.png' },
       { property: 'og:site_name', content: 'Genz PDF' }
     ];
     ogTags.forEach(({ property, content }) => {
@@ -65,7 +66,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       { name: 'twitter:title', content: 'Genz PDF – Free Online PDF Tools' },
       { name: 'twitter:description', content: 'Merge, split, compress, convert PDFs. 100% free, secure & local.' },
       { name: 'twitter:image', content: 'https://genzpdf.com/twitter-image.png' },
-      { name: 'twitter:site', content: '@genzpdf' } // Optional
+      { name: 'twitter:site', content: '@genzpdf' }
     ];
     twitterTags.forEach(({ name, content }) => {
       let tag = document.querySelector(`meta[name="${name}"]`);
@@ -96,7 +97,6 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
     robots.setAttribute('content', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
 
     // ----- 7. JSON-LD STRUCTURED DATA (ItemList + Organization) -----
-    //      Tells Google these are distinct tools – helps with "Software Application" rich results
     const scriptId = 'json-ld-home';
     let scriptTag = document.getElementById(scriptId) as HTMLScriptElement;
     if (!scriptTag) {
@@ -162,18 +162,10 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       ]
     };
     scriptTag.textContent = JSON.stringify(schema);
-
-    // ----- CLEANUP FUNCTION (optional – for strict SPA mode) -----
-    return () => {
-      // If you use a head management library like React Helmet, cleanup is automatic.
-      // Here we do nothing because we want meta tags to persist when navigating away.
-      // Overwriting them in next mount is sufficient.
-    };
   }, []); // Empty deps = runs once on mount
 
   // ------------------------------------------------------------------
   //  SPA NAVIGATION – SEO friendly <a> tags with preventDefault
-  //  Search bots see real hrefs, users get SPA speed
   // ------------------------------------------------------------------
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, mode: AppMode) => {
     e.preventDefault();
@@ -182,148 +174,156 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
   };
 
   // ------------------------------------------------------------------
-  //  TOOLS CONFIG – Fully typed, easy to extend / i18n
+  //  MODERN GLASS‑MORPHISM UI (taken verbatim from the second code)
   // ------------------------------------------------------------------
   const tools = [
     {
       id: 'merge',
       title: 'Merge PDF',
-      desc: 'Combine multiple PDF files into one single document instantly. Arrange pages in your preferred order.',
+      desc: 'Combine multiple files into one document. Drag & drop reordering.',
       icon: Files,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-      hover: 'group-hover:bg-blue-600 group-hover:text-white',
-      border: 'hover:border-blue-300 hover:shadow-blue-200/50'
+      iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+      shadow: 'hover:shadow-blue-500/20',
+      border: 'hover:border-blue-500/50'
     },
     {
       id: 'split',
       title: 'Split PDF',
-      desc: 'Extract specific pages from your PDF or split a large file into multiple smaller independent files.',
+      desc: 'Separate pages or extract specific ranges into independent files.',
       icon: Scissors,
-      color: 'text-rose-600',
-      bg: 'bg-rose-50',
-      hover: 'group-hover:bg-rose-600 group-hover:text-white',
-      border: 'hover:border-rose-300 hover:shadow-rose-200/50'
+      iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
+      shadow: 'hover:shadow-rose-500/20',
+      border: 'hover:border-rose-500/50'
     },
     {
       id: 'convert',
       title: 'Convert PDF',
-      desc: 'Convert your PDF to editable Word (DOCX), JPG, PNG or create PDFs from images instantly.',
+      desc: 'Transform PDFs to Word, JPG, PNG or create PDFs from images.',
       icon: ArrowRightLeft,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
-      hover: 'group-hover:bg-purple-600 group-hover:text-white',
-      border: 'hover:border-purple-300 hover:shadow-purple-200/50'
+      iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      shadow: 'hover:shadow-violet-500/20',
+      border: 'hover:border-violet-500/50'
     },
     {
       id: 'compress',
       title: 'Compress PDF',
-      desc: 'Significantly reduce file size while maintaining the best visual quality for sharing and storage.',
+      desc: 'Shrink file size up to 90% while preserving visual quality.',
       icon: Minimize2,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
-      hover: 'group-hover:bg-orange-600 group-hover:text-white',
-      border: 'hover:border-orange-300 hover:shadow-orange-200/50'
+      iconBg: 'bg-gradient-to-br from-orange-400 to-red-500',
+      shadow: 'hover:shadow-orange-500/20',
+      border: 'hover:border-orange-500/50'
     },
     {
       id: 'resize',
       title: 'Resize Image',
-      desc: 'Resize JPG, PNG, or WebP images by defining pixels or percentage without losing transparency.',
+      desc: 'Resize JPG, PNG, or WebP images by pixel or percentage.',
       icon: Scaling,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-      hover: 'group-hover:bg-emerald-600 group-hover:text-white',
-      border: 'hover:border-emerald-300 hover:shadow-emerald-200/50'
+      iconBg: 'bg-gradient-to-br from-emerald-400 to-green-600',
+      shadow: 'hover:shadow-emerald-500/20',
+      border: 'hover:border-emerald-500/50'
     }
   ];
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-      {/* ----- HERO SECTION – H1 for primary keyword ----- */}
-      <header className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-widest mb-6">
-          <Zap size={14} className="fill-slate-500" />
-          Free • Secure • Fast • Client‑Side
-        </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">
-          Every tool you need to work with <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-            PDFs in one place
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-          Genz PDF is your all-in-one solution to manage documents.
-          100% free, runs locally in your browser, and <strong>no file uploads required</strong>.
-        </p>
-      </header>
+    <div className="relative w-full min-h-screen overflow-hidden bg-slate-50">
+      
+      {/* ✨ DESIGN: Background Decor (Gradients & Grid) */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 blur-[120px]"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        {/* Tech Grid Pattern */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.4 }}></div>
+      </div>
 
-      {/* ----- TOOLS GRID – Semantic links with real hrefs for bots ----- */}
-      <section aria-label="PDF Tools Collection">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tools.map((tool) => (
-            <a
-              key={tool.id}
-              href={`/${tool.id}-pdf`}
-              onClick={(e) => handleNav(e, tool.id as AppMode)}
-              className={`group relative flex flex-col p-8 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${tool.border}`}
-              title={`Open ${tool.title} tool – 100% free`}
-              aria-label={`Use ${tool.title} tool online`}
-            >
-              {/* Icon with dynamic hover colors */}
-              <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300 ${tool.bg} ${tool.color} ${tool.hover}`}
-                aria-hidden="true"
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        
+        {/* 1. HERO SECTION */}
+        <header className="text-center mb-20 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-slate-200 shadow-sm backdrop-blur-md text-slate-600 text-xs font-bold uppercase tracking-widest mb-8 hover:scale-105 transition-transform cursor-default">
+             <Star size={12} className="fill-yellow-400 text-yellow-400" />
+             Trusted by 10,000+ Users
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+            Master your Documents <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 drop-shadow-sm">
+              Without Limits.
+            </span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
+            Genz PDF brings you powerful, server-less PDF tools. 
+            Merge, Split, and Convert files directly in your browser with 
+            <span className="text-indigo-600 font-bold"> 100% privacy</span>.
+          </p>
+        </header>
+
+        {/* 2. TOOLS GRID (Glassmorphism Cards) */}
+        <section aria-label="PDF Tools Collection" className="mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {tools.map((tool, idx) => (
+              <a
+                key={tool.id}
+                href={`/${tool.id}-pdf`}
+                onClick={(e) => handleNav(e, tool.id as AppMode)}
+                className={`
+                  group relative flex flex-col p-8 rounded-3xl 
+                  bg-white/70 backdrop-blur-xl border border-slate-200/60
+                  transition-all duration-300 ease-out
+                  hover:-translate-y-2 hover:bg-white 
+                  ${tool.shadow} ${tool.border}
+                `}
+                style={{ animationDelay: `${idx * 100}ms` }}
               >
-                <tool.icon size={28} />
-              </div>
-
-              <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary-700 transition-colors">
-                {tool.title}
-              </h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-8 flex-grow">
-                {tool.desc}
-              </p>
-
-              <div className="mt-auto flex items-center font-bold text-sm text-slate-900 group-hover:gap-2 transition-all">
-                Start Now <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* ----- TRUST INDICATORS (E‑E‑A‑T signals) ----- */}
-      <section className="mt-24 pt-16 border-t border-slate-100" aria-label="Why choose Genz PDF">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="p-6 rounded-2xl bg-white border border-slate-50 shadow-sm hover:shadow-md transition-shadow">
-            <div className="mx-auto w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-              <ShieldCheck size={24} />
-            </div>
-            <h3 className="font-bold text-slate-900 mb-2 text-lg">100% Secure</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Files are processed locally on your device. We never store, upload, or view your documents.
-            </p>
+                {/* Icon Container with Glow */}
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg text-white ${tool.iconBg} transform group-hover:scale-110 transition-transform duration-300`}>
+                  <tool.icon size={32} strokeWidth={2} />
+                </div>
+                
+                <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">
+                  {tool.title}
+                </h2>
+                
+                <p className="text-slate-500 text-sm leading-relaxed mb-8 flex-grow font-medium">
+                  {tool.desc}
+                </p>
+                
+                {/* Arrow Button */}
+                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100">
+                  <span className="text-sm font-bold text-slate-900">Open Tool</span>
+                  <div className="p-2 rounded-full bg-slate-50 group-hover:bg-indigo-50 transition-colors">
+                    <ArrowRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
-          <div className="p-6 rounded-2xl bg-white border border-slate-50 shadow-sm hover:shadow-md transition-shadow">
-            <div className="mx-auto w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-              <Zap size={24} />
-            </div>
-            <h3 className="font-bold text-slate-900 mb-2 text-lg">Blazing Fast</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Powered by WebAssembly for instant processing – no server upload wait times.
-            </p>
-          </div>
-          <div className="p-6 rounded-2xl bg-white border border-slate-50 shadow-sm hover:shadow-md transition-shadow">
-            <div className="mx-auto w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
-              <Globe size={24} />
-            </div>
-            <h3 className="font-bold text-slate-900 mb-2 text-lg">Universal Support</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Works flawlessly on any device – Mac, Windows, Linux, iOS, Android. Free forever.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
+        </section>
+
+        {/* 3. FEATURES / TRUST SECTION */}
+        <section aria-label="Why Choose Us" className="relative">
+           {/* Decorative Line */}
+           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-indigo-200 to-transparent rounded-full"></div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16">
+              {[
+                { icon: ShieldCheck, color: 'text-emerald-500', title: 'Private & Secure', desc: 'Files process locally. No servers involved.' },
+                { icon: Zap, color: 'text-amber-500', title: 'Lightning Fast', desc: 'Instant results powered by WebAssembly.' },
+                { icon: Globe, color: 'text-blue-500', title: 'Cross Platform', desc: 'Works on Mac, Windows, Linux & Mobile.' },
+              ].map((feat, i) => (
+                <div key={i} className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-white/50 transition-colors duration-300">
+                   <div className={`p-4 rounded-full bg-white shadow-sm mb-4 ${feat.color}`}>
+                      <feat.icon size={32} />
+                   </div>
+                   <h3 className="text-lg font-bold text-slate-900 mb-2">{feat.title}</h3>
+                   <p className="text-sm text-slate-500 max-w-[200px]">{feat.desc}</p>
+                </div>
+              ))}
+           </div>
+        </section>
+
+      </main>
+    </div>
   );
 };
