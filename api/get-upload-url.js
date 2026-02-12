@@ -5,12 +5,11 @@ export default async function handler(req, res) {
   // ✅ STEP 1: CORS Headers Setup (Browser ko permission do)
   // --------------------------------------------------------------------------
   res.setHeader('Access-Control-Allow-Origin', '*'); // Sabko allow karein
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); // OPTIONS method zaroori hai
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Headers allow karein
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // --------------------------------------------------------------------------
   // ✅ STEP 2: Handle Preflight (OPTIONS) Request
-  // Browser pehle ye check karta hai, agar ye fail hua to error aata hai
   // --------------------------------------------------------------------------
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -26,6 +25,9 @@ export default async function handler(req, res) {
   try {
     const { name, mimeType, size } = req.body;
 
+    // ✅ FIX: Origin detect karein – agar browser nahi bhej raha to domain manually do
+    const origin = req.headers.origin || 'https://pdf-tool-wheat.vercel.app';
+
     // Google Auth Setup
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -37,12 +39,11 @@ export default async function handler(req, res) {
 
     const drive = google.drive({ version: 'v3', auth });
 
-    // File Metadata
+    // File Metadata – Google Slides banane ke liye
     const fileMetadata = {
       name: name,
-      // Force convert to Google Slides (PPTX) format
-      mimeType: 'application/vnd.google-apps.presentation', 
-      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID], 
+      mimeType: 'application/vnd.google-apps.presentation',
+      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
     };
 
     // --------------------------------------------------------------------------
@@ -60,19 +61,18 @@ export default async function handler(req, res) {
       headers: {
         'X-Upload-Content-Type': mimeType,
         'X-Upload-Content-Length': size,
-        // Ye sabse zaroori hai Google ke liye:
-        'Origin': req.headers.origin || '*', 
+        // ✅ Google ko exact origin milega – kabhi bhi * nahi bhejenge
+        'Origin': origin,
       }
     });
 
     // --------------------------------------------------------------------------
     // ✅ STEP 5: Safe URL Extraction
-    // Kabhi location header lowercase hota hai, kabhi Uppercase
     // --------------------------------------------------------------------------
     const uploadUrl = response.headers.location || response.headers.Location;
-    
+
     if (!uploadUrl) {
-        throw new Error("Google API ne Upload URL return nahi kiya.");
+      throw new Error('Google API ne Upload URL return nahi kiya.');
     }
 
     // Success response
