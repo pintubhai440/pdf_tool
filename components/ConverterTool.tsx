@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import { Document, Packer, Paragraph, TextRun, ImageRun } from 'docx';
-import mammoth from 'mammoth';
-import { jsPDF } from 'jspdf';
 // @ts-ignore
 import { renderAsync } from 'docx-preview';
 import {
@@ -14,29 +12,24 @@ import {
   Download,
   Loader2,
   AlertCircle,
-  FileCheck,
-  Presentation,
-  ShieldCheck
+  FileCheck
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
-import { clsx } from 'clsx';
 
 interface ConverterToolProps {}
 
 export const ConverterTool: React.FC<ConverterToolProps> = () => {
   const [file, setFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [mode, setMode] = useState<'pdf-to-x' | 'img-to-x' | 'docx-to-pdf' | 'pptx-to-pdf' | null>(null);
+  // ✅ Removed 'pptx-to-pdf' from mode type
+  const [mode, setMode] = useState<'pdf-to-x' | 'img-to-x' | 'docx-to-pdf' | null>(null);
   const [targetFormat, setTargetFormat] = useState<ConversionFormat>('jpg');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
-
-  // ✅ PPTX conversion method state (kept for user preference)
-  const [pptxConversionMethod, setPptxConversionMethod] = useState<'standard' | 'drive'>('standard');
 
   // ✅ Initialize PDF.js worker
   useEffect(() => {
@@ -49,7 +42,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     initPdfWorker();
   }, []);
 
-  // ✅ File detection includes PPTX
+  // ✅ Updated: Removed PPTX check
   const handleFilesSelected = (files: File[]) => {
     setError(null);
     setDownloadUrl(null);
@@ -70,16 +63,9 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setMode('docx-to-pdf');
       setFile(firstFile);
       setTargetFormat('pdf');
-    } else if (
-      firstFile.name.endsWith('.pptx') ||
-      firstFile.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    ) {
-      setMode('pptx-to-pdf');
-      setFile(firstFile);
-      setTargetFormat('pdf');
-      setPptxConversionMethod('standard');
     } else {
-      setError('Unsupported file type. Please upload PDF, DOCX, PPTX, or Images.');
+      // ✅ Updated error message
+      setError('Unsupported file type. Please upload PDF, DOCX, or Images.');
     }
   };
 
@@ -89,9 +75,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const lib = (pdfjsLib as any).default || pdfjsLib;
-      if (!lib.GlobalWorkerOptions.workerSrc) {
-        lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
       const loadingTask = lib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       const numPages = pdf.numPages;
@@ -127,9 +110,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const lib = (pdfjsLib as any).default || pdfjsLib;
-      if (!lib.GlobalWorkerOptions.workerSrc) {
-        lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
       const loadingTask = lib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       let fullText = '';
@@ -154,10 +134,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const lib = (pdfjsLib as any).default || pdfjsLib;
-      if (!lib.GlobalWorkerOptions.workerSrc) {
-        lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
-
       const loadingTask = lib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       const docSections = [];
@@ -175,9 +151,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           if (context) {
             canvas.height = viewport.height;
             canvas.width = viewport.width;
-
             await page.render({ canvasContext: context, viewport }).promise;
-
             const imgDataUrl = canvas.toDataURL('image/jpeg', 0.8);
             const response = await fetch(imgDataUrl);
             const buffer = await response.arrayBuffer();
@@ -215,7 +189,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           });
 
           const paragraphs = [];
-
           paragraphs.push(
             new Paragraph({
               children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: '888888' })],
@@ -225,7 +198,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
           let currentLineText = '';
           let lastY = -99999;
-
           for (const item of items) {
             if (lastY !== -99999 && Math.abs(item.y - lastY) > 10) {
               if (currentLineText.trim()) {
@@ -236,29 +208,17 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
             currentLineText += item.text + ' ';
             lastY = item.y;
           }
-
           if (currentLineText.trim()) {
             paragraphs.push(new Paragraph({ children: [new TextRun(currentLineText.trim())] }));
           }
-
           if (i < pdf.numPages) {
             paragraphs.push(new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }));
           }
-
           docSections.push({ children: paragraphs });
         }
       }
-
       const allChildren = docSections.flatMap((s) => s.children);
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: allChildren,
-          },
-        ],
-      });
-
+      const doc = new Document({ sections: [{ properties: {}, children: allChildren }] });
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
@@ -308,14 +268,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           })
         );
       }
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: paragraphs,
-          },
-        ],
-      });
+      const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
@@ -336,9 +289,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           const img = new Image();
           const objectUrl = URL.createObjectURL(imgFile);
           img.src = objectUrl;
-          await new Promise((resolve) => {
-            img.onload = resolve;
-          });
+          await new Promise((resolve) => { img.onload = resolve; });
           const canvas = document.createElement('canvas');
           canvas.width = img.width;
           canvas.height = img.height;
@@ -360,9 +311,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         const img = new Image();
         const objectUrl = URL.createObjectURL(imgFile);
         img.src = objectUrl;
-        await new Promise((resolve) => {
-          img.onload = resolve;
-        });
+        await new Promise((resolve) => { img.onload = resolve; });
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -396,13 +345,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
       iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
-        position: 'fixed',
-        right: '0',
-        bottom: '0',
-        width: '0',
-        height: '0',
-        border: '0',
-        visibility: 'hidden'
+        position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0', visibility: 'hidden'
       });
       document.body.appendChild(iframe);
 
@@ -412,34 +355,20 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       const style = iframeDoc.createElement('style');
       style.textContent = `
         @page { size: A4; margin: 20mm; }
-        body { 
-          font-family: Arial, sans-serif; 
-          margin: 0; 
-          padding: 20px; 
-          color: #000;
-          background: #fff;
-          -webkit-print-color-adjust: exact; 
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; background: #fff; -webkit-print-color-adjust: exact; }
         .docx-wrapper { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
         section { margin-bottom: 0 !important; box-shadow: none !important; }
         img { max-width: 100%; height: auto; }
         table { border-collapse: collapse; width: 100%; }
       `;
       iframeDoc.head.appendChild(style);
-
       const container = iframeDoc.createElement('div');
       iframeDoc.body.appendChild(container);
 
-      await renderAsync(arrayBuffer, container, null, {
-        inWrapper: false,
-        ignoreWidth: false,
-        experimental: true
-      });
-
+      await renderAsync(arrayBuffer, container, null, { inWrapper: false, ignoreWidth: false, experimental: true });
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       setIsProcessing(false);
-      
       alert("Conversion Ready! Please select 'Save as PDF' in the destination.");
 
       try {
@@ -449,206 +378,22 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         console.error('Print blocked', e);
         setError('Pop-up blocked. Please allow pop-ups.');
       }
-
       cleanupTimeout = setTimeout(() => {
-        if (iframe && document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
+        if (iframe && document.body.contains(iframe)) document.body.removeChild(iframe);
       }, 5000);
 
     } catch (err) {
       console.error(err);
       setError('Conversion failed. Please try again.');
       setIsProcessing(false);
-      
-      if (iframe && document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
+      if (iframe && document.body.contains(iframe)) document.body.removeChild(iframe);
       if (cleanupTimeout) clearTimeout(cleanupTimeout);
-    }
-  };
-
-  // --- STANDARD PPTX to PDF (PPTXjs / iframe) ---
-  const convertPptxToPdf = async () => {
-    if (!file) return;
-    setIsProcessing(true);
-    setError(null);
-    
-    let iframe: HTMLIFrameElement | null = null;
-    let cleanupTimeout: NodeJS.Timeout;
-    let fileUrl: string | null = null;
-
-    try {
-      iframe = document.createElement('iframe');
-      Object.assign(iframe.style, {
-        position: 'fixed',
-        left: '-10000px',
-        top: '0',
-        width: '100vw',
-        height: '100vh',
-        border: '0',
-        zIndex: '-100'
-      });
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error('Browser error: Cannot create print frame.');
-
-      fileUrl = URL.createObjectURL(file);
-
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Print PPTX</title>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/css/pptxjs.css">
-          <style>
-            @page { size: landscape; margin: 0; }
-            body { 
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-              -webkit-print-color-adjust: exact;
-              overflow: visible;
-            }
-            #result { 
-              width: 100%; 
-              display: flex; 
-              flex-direction: column; 
-              align-items: center; 
-            }
-            .slide { 
-              margin: 0 !important;
-              margin-bottom: 20px !important; 
-              page-break-after: always !important; 
-              page-break-inside: avoid !important;
-              position: relative !important;
-              display: block !important;
-              border: 1px solid #eee;
-              box-shadow: none !important;
-              transform-origin: top center;
-              max-width: 100% !important; 
-              height: auto !important;
-            }
-            .loading, .error { display: none !important; }
-          </style>
-        </head>
-        <body>
-          <div id="result"></div>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-          <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/js/pptxjs.js"></script>
-          <script>
-            window.onload = function() {
-              $("#result").pptxToHtml({
-                pptxFileUrl: "${fileUrl}",
-                slideMode: false, 
-                keyBoardShortCut: false,
-                mediaProcess: true, 
-                jsZipV2: false,
-                slideMode: false
-              });
-            };
-          </script>
-        </body>
-        </html>
-      `);
-      iframeDoc.close();
-
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
-      setIsProcessing(false);
-      alert("Conversion Ready! Please select 'Save as PDF'.\n\n💡 Tip: Layout me 'Landscape' select karein.");
-      
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } catch (e) {
-        console.error(e);
-        setError('Print blocked. Please allow pop-ups.');
-      }
-
-      cleanupTimeout = setTimeout(() => {
-        if (iframe && document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-          if (fileUrl) URL.revokeObjectURL(fileUrl);
-        }
-      }, 5000);
-
-    } catch (err) {
-      console.error(err);
-      setError('Failed to convert PPTX.');
-      setIsProcessing(false);
-      if (iframe && document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-      if (fileUrl) URL.revokeObjectURL(fileUrl);
-    }
-  };
-
-  // ✅ HIGH QUALITY PPTX to PDF (Server‑side Stream via Google Drive)
-  const convertPptxToPdfDrive = async () => {
-    if (!file) return;
-    setIsProcessing(true);
-    setError(null);
-    
-    try {
-      // 1. Backend se "Secret Upload Link" maango
-      const initResponse = await fetch('/api/get-upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: file.name, 
-          mimeType: file.type,
-          size: file.size 
-        }),
-      });
-      
-      if (!initResponse.ok) throw new Error("Failed to initialize upload");
-      const { uploadUrl } = await initResponse.json();
-
-      // 2. File ko seedha Google Drive par upload karo (Bypass Vercel Limit)
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-            'Content-Type': file.type,
-        },
-      });
-
-      if (!uploadResponse.ok) throw new Error("Upload failed");
-      
-      const uploadData = await uploadResponse.json();
-      const fileId = uploadData.id;
-
-      // 3. Ab Backend ko bolo "Convert karke PDF de do"
-      const convertResponse = await fetch('/api/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId }),
-      });
-
-      if (!convertResponse.ok) throw new Error("Conversion failed");
-
-      // 4. PDF Download karo
-      const blob = await convertResponse.blob();
-      const url = URL.createObjectURL(blob);
-      setDownloadUrl(url);
-      setDownloadName(file.name.replace(/\.[^/.]+$/, "") + ".pdf");
-      
-    } catch (err: any) {
-      console.error(err);
-      setError('Conversion failed: ' + (err.message || "Unknown error"));
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   const handleConvert = async () => {
     setIsProcessing(true);
     setError(null);
-
     try {
       if (mode === 'pdf-to-x') {
         if (targetFormat === 'jpg' || targetFormat === 'png') {
@@ -668,12 +413,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         }
       } else if (mode === 'docx-to-pdf') {
         await convertDocxToPdf();
-      } else if (mode === 'pptx-to-pdf') {
-        if (pptxConversionMethod === 'standard') {
-          await convertPptxToPdf();
-        } else {
-          await convertPptxToPdfDrive();
-        }
       }
     } finally {
       setIsProcessing(false);
@@ -695,21 +434,21 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         <div className="mb-6">
           <h3 className="text-xl font-bold text-slate-900">Universal Converter</h3>
           <p className="text-slate-500">
-            Upload any file to see available conversion options (PDF, JPG, PNG, DOCX, PPTX).
+            Upload any file to see available conversion options (PDF, JPG, PNG, DOCX).
           </p>
         </div>
         <FileUploader
           onFilesSelected={handleFilesSelected}
           allowMultiple={true}
+          // ✅ Updated: Removed PPTX from acceptedFileTypes
           acceptedFileTypes={[
             'application/pdf',
             'image/jpeg',
             'image/png',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           ]}
-          label="Click or Drag PDF, Images, DOCX or PPTX here"
-          subLabel="Support for: PDF, JPG, PNG, DOCX, PPTX"
+          label="Click or Drag PDF, Images, or DOCX here"
+          subLabel="Support for: PDF, JPG, PNG, DOCX"
         />
       </div>
     );
@@ -756,20 +495,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </>
       );
-    } else if (mode === 'pptx-to-pdf' && file) {
-      return (
-        <>
-          <div className="bg-orange-50 p-3 rounded-full text-orange-600">
-            <Presentation size={24} />
-          </div>
-          <div>
-            <h3 className="font-semibold text-slate-900">{file.name}</h3>
-            <p className="text-sm text-slate-500">
-              PowerPoint Presentation • {(file.size / 1024 / 1024).toFixed(2)} MB
-            </p>
-          </div>
-        </>
-      );
     }
     return null;
   };
@@ -805,37 +530,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
               <div className="flex-1">
                 <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
                   <span className="font-medium">Convert to PDF (Browser Print Engine)</span>
-                </div>
-              </div>
-            ) : mode === 'pptx-to-pdf' ? (
-              <div className="flex-1 space-y-2">
-                <label className="block text-sm text-slate-500 mb-1">Conversion Method:</label>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="pptxMethod"
-                      value="standard"
-                      checked={pptxConversionMethod === 'standard'}
-                      onChange={() => setPptxConversionMethod('standard')}
-                      className="text-primary-600"
-                    />
-                    <span className="text-sm">Standard (PPTXjs)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="pptxMethod"
-                      value="drive"
-                      checked={pptxConversionMethod === 'drive'}
-                      onChange={() => setPptxConversionMethod('drive')}
-                      className="text-primary-600"
-                    />
-                    <span className="text-sm flex items-center gap-1">
-                      <ShieldCheck size={16} className="text-green-600" />
-                      High Quality (Google Drive)
-                    </span>
-                  </label>
                 </div>
               </div>
             ) : (
