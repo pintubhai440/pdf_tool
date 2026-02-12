@@ -22,7 +22,7 @@ import { FileUploader } from './FileUploader'; // named import – consistent wi
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
 import { clsx } from 'clsx';
-import { initGoogleDrive, convertPPTXtoPDF } from '../services/googleDriveService'; // ✅ added
+import { initGoogleDrive } from '../services/googleDriveService'; // ✅ only initGoogleDrive needed now
 
 interface ConverterToolProps {}
 
@@ -597,7 +597,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ HIGH QUALITY PPTX to PDF (Google Drive)
+  // ✅ HIGH QUALITY PPTX to PDF (Server-side Stream)
   const convertPptxToPdfDrive = async () => {
     if (!file) return;
     if (!isDriveReady) {
@@ -606,14 +606,55 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
     setIsProcessing(true);
     setError(null);
+    
     try {
-      const pdfBlob = await convertPPTXtoPDF(file);
-      const url = URL.createObjectURL(pdfBlob);
+      // 1. Backend se "Secret Upload Link" maango
+      const initResponse = await fetch('/api/get-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: file.name, 
+          mimeType: file.type,
+          size: file.size 
+        }),
+      });
+      
+      if (!initResponse.ok) throw new Error("Failed to initialize upload");
+      const { uploadUrl } = await initResponse.json();
+
+      // 2. File ko seedha Google Drive par upload karo (Bypass Vercel Limit)
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+            'Content-Type': file.type, // Important
+        },
+      });
+
+      if (!uploadResponse.ok) throw new Error("Upload failed");
+      
+      // Google upload hone par File ID deta hai
+      const uploadData = await uploadResponse.json();
+      const fileId = uploadData.id;
+
+      // 3. Ab Backend ko bolo "Convert karke PDF de do"
+      const convertResponse = await fetch('/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId }),
+      });
+
+      if (!convertResponse.ok) throw new Error("Conversion failed");
+
+      // 4. PDF Download karo
+      const blob = await convertResponse.blob();
+      const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-      setDownloadName(file.name.replace(/\.pptx$/i, '.pdf'));
+      setDownloadName(file.name.replace(/\.[^/.]+$/, "") + ".pdf");
+      
     } catch (err: any) {
       console.error(err);
-      setError('Google Drive conversion failed. Please check popup blocker or login again.');
+      setError('Conversion failed: ' + (err.message || "Unknown error"));
     } finally {
       setIsProcessing(false);
     }
