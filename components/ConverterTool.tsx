@@ -15,21 +15,19 @@ import {
 import { FileUploader } from './FileUploader';
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
-import Head from 'next/head';      // For Next.js – use Helmet in CRA
 
 /**
- * 🔥 SEO‑FIRST UNIVERSAL CONVERTER
+ * 🔥 SEO‑FIRST UNIVERSAL CONVERTER (Vite Compatible)
  * 100% client‑side, secure, lightning fast, and ready to rank #1.
- * Supports: PDF → DOCX/JPG/PNG/TXT, Images → PDF/DOCX/JPG/PNG, DOCX → PDF
  */
 export const ConverterTool: React.FC = () => {
-  // ----- SEO DYNAMIC METADATA -----
+  // ----- SEO DYNAMIC METADATA STATE -----
   const [pageTitle, setPageTitle] = useState('Universal File Converter – PDF, Word, Images');
   const [pageDesc, setPageDesc] = useState(
     'Free online file converter. Convert PDF to Word, Image to PDF, DOCX to PDF and more – securely in your browser, no upload.'
   );
 
-  // ----- STATE -----
+  // ----- APP STATE -----
   const [file, setFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [mode, setMode] = useState<'pdf-to-x' | 'img-to-x' | 'docx-to-pdf' | null>(null);
@@ -39,12 +37,52 @@ export const ConverterTool: React.FC = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
-  // ----- PDF WORKER (prevent version mismatch) -----
+  // ----- ✅ FIX 1: DYNAMIC SEO HANDLING (Replaces next/head) -----
+  useEffect(() => {
+    // 1. Set Document Title
+    document.title = pageTitle;
+
+    // 2. Set Meta Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', pageDesc);
+
+    // 3. Set JSON-LD Schema
+    const scriptId = 'json-ld-schema';
+    let scriptTag = document.getElementById(scriptId);
+    if (!scriptTag) {
+      scriptTag = document.createElement('script');
+      scriptTag.id = scriptId;
+      scriptTag.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptTag);
+    }
+
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Universal File Converter',
+      applicationCategory: 'ProductivityApplication',
+      operatingSystem: 'Web',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      description: pageDesc,
+      featureList: 'PDF to DOCX, PDF to JPG, PDF to PNG, PDF to TXT, JPG to PDF, PNG to PDF, Images to DOCX, DOCX to PDF, Private & Secure'
+    };
+
+    scriptTag.textContent = JSON.stringify(jsonLd);
+
+  }, [pageTitle, pageDesc]);
+
+  // ----- ✅ FIX 2: PDF WORKER INITIALIZATION (Safe Versioning) -----
   useEffect(() => {
     const initPdfWorker = async () => {
       try {
         const pdfjs = await import('pdfjs-dist');
-        const version = pdfjs.version;
+        // Use loaded version or fallback to avoid crashes
+        const version = pdfjs.version || '3.11.174'; 
         if (pdfjs.GlobalWorkerOptions && !pdfjs.GlobalWorkerOptions.workerSrc) {
           pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
         }
@@ -55,12 +93,12 @@ export const ConverterTool: React.FC = () => {
     initPdfWorker();
   }, []);
 
-  // ----- LAZY LOADERS (improve LCP) -----
+  // ----- LAZY LOADERS (Performance Optimization) -----
   const loadJSZip = async () => (await import('jszip')).default;
   const loadDocx = async () => await import('docx');
   const loadDocxPreview = async () => await import('docx-preview');
 
-  // ----- FILE SELECTION HANDLER (updates SEO) -----
+  // ----- FILE SELECTION HANDLER -----
   const handleFilesSelected = useCallback((files: File[]) => {
     setError(null);
     setDownloadUrl(null);
@@ -465,26 +503,10 @@ export const ConverterTool: React.FC = () => {
     setPageDesc('Free online file converter. Convert PDF to Word, Image to PDF, DOCX to PDF and more – securely in your browser.');
   };
 
-  // ----- SCHEMA MARKUP (Rich Snippets) -----
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Universal File Converter',
-    applicationCategory: 'ProductivityApplication',
-    operatingSystem: 'Web',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    description: 'Convert PDF to Word, Image to PDF, and DOCX files securely in your browser. 100% free, no upload.',
-    featureList: 'PDF to DOCX, PDF to JPG, PDF to PNG, PDF to TXT, JPG to PDF, PNG to PDF, Images to DOCX, DOCX to PDF, Private & Secure'
-  };
-
   // ----- RENDER -----
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDesc} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      </Head>
+      {/* No <Head> tag here - managed via useEffect */}
 
       <section aria-label="File Converter Interface" className="mb-16">
         {!mode ? (
@@ -647,7 +669,7 @@ export const ConverterTool: React.FC = () => {
         )}
       </section>
 
-      {/* ----- SEO‑RICH CONTENT (boosts ranking, keywords, dwell time) ----- */}
+      {/* ----- SEO‑RICH CONTENT ----- */}
       <article className="prose prose-slate max-w-none mt-20 border-t border-slate-200 pt-16">
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
