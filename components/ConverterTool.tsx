@@ -15,7 +15,7 @@ import {
   Loader2,
   AlertCircle,
   FileCheck,
-  Presentation // ✅ Added PPTX icon
+  Presentation // ✅ PPTX icon
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
@@ -27,13 +27,10 @@ interface ConverterToolProps {}
 export const ConverterTool: React.FC<ConverterToolProps> = () => {
   const [file, setFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-
-  // ✅ Added 'pptx-to-pdf' to the allowed mode types
   const [mode, setMode] = useState<'pdf-to-x' | 'img-to-x' | 'docx-to-pdf' | 'pptx-to-pdf' | null>(null);
   const [targetFormat, setTargetFormat] = useState<ConversionFormat>('jpg');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
@@ -48,7 +45,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     initPdfWorker();
   }, []);
 
-  // ✅ Updated file detection to include PPTX
+  // ✅ File detection includes PPTX
   const handleFilesSelected = (files: File[]) => {
     setError(null);
     setDownloadUrl(null);
@@ -73,7 +70,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       firstFile.name.endsWith('.pptx') ||
       firstFile.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ) {
-      // ✅ PPTX Handling Added
       setMode('pptx-to-pdf');
       setFile(firstFile);
       setTargetFormat('pdf');
@@ -148,7 +144,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // Smart PDF to DOCX (Handles Scanned/Image PDFs)
   const convertPdfToDocx = async () => {
     if (!file) return;
     try {
@@ -165,12 +160,9 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-
-        // Check if page has text – if very few items, treat as scanned/image page
         const hasText = textContent.items.length > 5;
 
         if (!hasText) {
-          // --- CASE A: IMAGE / SCANNED PDF ---
           const viewport = page.getViewport({ scale: 1.5 });
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
@@ -181,7 +173,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
 
             await page.render({ canvasContext: context, viewport }).promise;
 
-            // Convert canvas to JPEG buffer
             const imgDataUrl = canvas.toDataURL('image/jpeg', 0.8);
             const response = await fetch(imgDataUrl);
             const buffer = await response.arrayBuffer();
@@ -201,28 +192,25 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                   ],
                   spacing: { after: 200 },
                 }),
-                new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }), // Page break
+                new Paragraph({ children: [new TextRun({ text: '', break: 1 })] }),
               ],
             });
           }
         } else {
-          // --- CASE B: TEXT PDF ---
           const items = textContent.items.map((item: any) => ({
             text: item.str,
             x: item.transform[4],
             y: item.transform[5],
           }));
 
-          // Sort: top-to-bottom, left-to-right
           items.sort((a, b) => {
             const lineThreshold = 5;
             if (Math.abs(a.y - b.y) < lineThreshold) return a.x - b.x;
-            return b.y - a.y; // PDF Y is inverted
+            return b.y - a.y;
           });
 
           const paragraphs = [];
 
-          // Page header
           paragraphs.push(
             new Paragraph({
               children: [new TextRun({ text: `[Page ${i}]`, bold: true, color: '888888' })],
@@ -389,7 +377,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ DOCX to PDF using browser print engine
+  // --- DOCX to PDF using browser print engine ---
   const convertDocxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -401,7 +389,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     try {
       const arrayBuffer = await file.arrayBuffer();
 
-      // 1. Create an invisible Iframe
       iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
         position: 'fixed',
@@ -417,7 +404,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       const iframeDoc = iframe.contentWindow?.document;
       if (!iframeDoc) throw new Error('Browser limitation: Cannot create print frame.');
 
-      // 2. Add Print Styles (A4 Page formatting)
       const style = iframeDoc.createElement('style');
       style.textContent = `
         @page { size: A4; margin: 20mm; }
@@ -436,7 +422,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       `;
       iframeDoc.head.appendChild(style);
 
-      // 3. Render DOCX inside the Iframe
       const container = iframeDoc.createElement('div');
       iframeDoc.body.appendChild(container);
 
@@ -446,10 +431,8 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         experimental: true
       });
 
-      // 4. Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 5. Trigger Print Dialog (Chrome's PDF Engine)
       setIsProcessing(false);
       
       alert("Conversion Ready! Please select 'Save as PDF' in the destination.");
@@ -462,7 +445,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         setError('Pop-up blocked. Please allow pop-ups.');
       }
 
-      // 6. Cleanup after printing
       cleanupTimeout = setTimeout(() => {
         if (iframe && document.body.contains(iframe)) {
           document.body.removeChild(iframe);
@@ -481,7 +463,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ NEW: PPTX to PDF using PPTXjs in Iframe
+  // ✅ FIXED: Perfect PPTX to PDF (Visible Iframe for Correct Layout)
   const convertPptxToPdf = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -489,19 +471,20 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     
     let iframe: HTMLIFrameElement | null = null;
     let cleanupTimeout: NodeJS.Timeout;
-    let fileUrl: string | null = null;  // Moved outside try for proper cleanup
+    let fileUrl: string | null = null;
 
     try {
-      // 1. Create Iframe
+      // 1. Create Iframe (Visible but Off-Screen)
+      // ⚠️ IMPORTANT: Width '0' se layout tut jata hai. Hum width 100% denge par screen se bahar rakhenge.
       iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
         position: 'fixed',
-        right: '0',
-        bottom: '0',
-        width: '0',
-        height: '0',
+        left: '-10000px', // Screen se bahar
+        top: '0',
+        width: '100vw',   // Full Width taaki layout calculate ho sake
+        height: '100vh',
         border: '0',
-        visibility: 'hidden'
+        zIndex: '-100'
       });
       document.body.appendChild(iframe);
 
@@ -511,7 +494,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       // 2. Prepare File URL
       fileUrl = URL.createObjectURL(file);
 
-      // 3. Write HTML with PPTXjs CDN Scripts
+      // 3. Write HTML with PPTXjs & Print Styles
       iframeDoc.open();
       iframeDoc.write(`
         <!DOCTYPE html>
@@ -520,19 +503,40 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           <title>Print PPTX</title>
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/css/pptxjs.css">
           <style>
-            @page { size: landscape; margin: 0; } /* Default Landscape for PPT */
-            body { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; }
-            #result { width: 100%; }
+            /* ✅ Force Landscape for PDF */
+            @page { size: landscape; margin: 0; }
             
-            /* Make slides stack vertically for printing */
+            body { 
+              margin: 0; 
+              padding: 0; 
+              background: white; 
+              -webkit-print-color-adjust: exact;
+              overflow: visible;
+            }
+
+            #result { 
+              width: 100%; 
+              display: flex; 
+              flex-direction: column; 
+              align-items: center; 
+            }
+            
+            /* ✅ Slide Styling - Fit to Page */
             .slide { 
+              margin: 0 !important;
               margin-bottom: 20px !important; 
               page-break-after: always !important; 
+              page-break-inside: avoid !important;
               position: relative !important;
               display: block !important;
-              border: 1px solid #ddd;
+              border: 1px solid #eee;
               box-shadow: none !important;
+              transform-origin: top center;
+              /* Agar slide badi ho toh page me fit karein */
+              max-width: 100% !important; 
+              height: auto !important;
             }
+
             /* Hide Loading/Errors in print */
             .loading, .error { display: none !important; }
           </style>
@@ -545,7 +549,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           <script src="https://cdn.jsdelivr.net/gh/meshesha/PPTXjs@1.21.1/js/pptxjs.js"></script>
 
           <script>
-            // Trigger conversion once scripts load
             window.onload = function() {
               $("#result").pptxToHtml({
                 pptxFileUrl: "${fileUrl}",
@@ -553,7 +556,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                 keyBoardShortCut: false,
                 mediaProcess: true, 
                 jsZipV2: false,
-                slideMode: false // Show all slides
+                slideMode: false
               });
             };
           </script>
@@ -562,12 +565,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       `);
       iframeDoc.close();
 
-      // 4. Wait for Rendering (PPTX takes a bit longer)
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      // 4. Wait for Rendering (Thoda zyada time dein taaki layout set ho jaye)
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       // 5. Print
       setIsProcessing(false);
-      alert("Conversion Ready! Please select 'Save as PDF' (Layout: Landscape recommended).");
+      alert("Conversion Ready! Please select 'Save as PDF'.\n\n💡 Tip: Layout me 'Landscape' select karein.");
       
       try {
         iframe.contentWindow?.focus();
@@ -619,7 +622,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         }
       } else if (mode === 'docx-to-pdf') {
         await convertDocxToPdf();
-      } else if (mode === 'pptx-to-pdf') { // ✅ Added PPTX case
+      } else if (mode === 'pptx-to-pdf') {
         await convertPptxToPdf();
       }
     } finally {
@@ -653,7 +656,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
             'image/jpeg',
             'image/png',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation' // ✅ Added PPTX
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
           ]}
           label="Click or Drag PDF, Images, DOCX or PPTX here"
           subLabel="Support for: PDF, JPG, PNG, DOCX, PPTX"
@@ -703,7 +706,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
           </div>
         </>
       );
-    } else if (mode === 'pptx-to-pdf' && file) { // ✅ PPTX file info
+    } else if (mode === 'pptx-to-pdf' && file) {
       return (
         <>
           <div className="bg-orange-50 p-3 rounded-full text-orange-600">
@@ -754,7 +757,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                   <span className="font-medium">Convert to PDF (Browser Print Engine)</span>
                 </div>
               </div>
-            ) : mode === 'pptx-to-pdf' ? ( // ✅ Static message for PPTX
+            ) : mode === 'pptx-to-pdf' ? (
               <div className="flex-1">
                 <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-600">
                   <span className="font-medium">Convert to PDF (PPTX to PDF)</span>
