@@ -23,7 +23,8 @@
     "mammoth": "^1.6.0",
     "jspdf": "^2.5.1",
     "html2canvas": "^1.4.1",
-    "docx-preview": "^0.3.2"
+    "docx-preview": "^0.3.2",
+    "gapi-script": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
