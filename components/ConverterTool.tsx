@@ -16,13 +16,12 @@ import {
   AlertCircle,
   FileCheck,
   Presentation,
-  ShieldCheck // ✅ added for Google Drive
+  ShieldCheck
 } from 'lucide-react';
-import { FileUploader } from './FileUploader'; // named import – consistent with big component
+import { FileUploader } from './FileUploader';
 import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
 import { clsx } from 'clsx';
-import { initGoogleDrive } from '../services/googleDriveService'; // ✅ only initGoogleDrive needed now
 
 interface ConverterToolProps {}
 
@@ -36,8 +35,7 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState<string>('');
 
-  // ✅ Google Drive state
-  const [isDriveReady, setIsDriveReady] = useState(false);
+  // ✅ PPTX conversion method state (kept for user preference)
   const [pptxConversionMethod, setPptxConversionMethod] = useState<'standard' | 'drive'>('standard');
 
   // ✅ Initialize PDF.js worker
@@ -49,13 +47,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       }
     };
     initPdfWorker();
-  }, []);
-
-  // ✅ Initialize Google Drive API
-  useEffect(() => {
-    initGoogleDrive()
-      .then(() => setIsDriveReady(true))
-      .catch((err) => console.error('Drive Init Failed:', err));
   }, []);
 
   // ✅ File detection includes PPTX
@@ -86,7 +77,6 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
       setMode('pptx-to-pdf');
       setFile(firstFile);
       setTargetFormat('pdf');
-      // default to standard method, but user can switch
       setPptxConversionMethod('standard');
     } else {
       setError('Unsupported file type. Please upload PDF, DOCX, PPTX, or Images.');
@@ -597,13 +587,9 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
     }
   };
 
-  // ✅ HIGH QUALITY PPTX to PDF (Server-side Stream)
+  // ✅ HIGH QUALITY PPTX to PDF (Server‑side Stream via Google Drive)
   const convertPptxToPdfDrive = async () => {
     if (!file) return;
-    if (!isDriveReady) {
-      setError('Google Drive API ready nahi hai. Page refresh karein.');
-      return;
-    }
     setIsProcessing(true);
     setError(null);
     
@@ -627,13 +613,12 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
         method: 'PUT',
         body: file,
         headers: {
-            'Content-Type': file.type, // Important
+            'Content-Type': file.type,
         },
       });
 
       if (!uploadResponse.ok) throw new Error("Upload failed");
       
-      // Google upload hone par File ID deta hai
       const uploadData = await uploadResponse.json();
       const fileId = uploadData.id;
 
@@ -845,19 +830,13 @@ export const ConverterTool: React.FC<ConverterToolProps> = () => {
                       checked={pptxConversionMethod === 'drive'}
                       onChange={() => setPptxConversionMethod('drive')}
                       className="text-primary-600"
-                      disabled={!isDriveReady}
                     />
                     <span className="text-sm flex items-center gap-1">
-                      <ShieldCheck size={16} className={isDriveReady ? 'text-green-600' : 'text-gray-400'} />
+                      <ShieldCheck size={16} className="text-green-600" />
                       High Quality (Google Drive)
                     </span>
                   </label>
                 </div>
-                {!isDriveReady && pptxConversionMethod === 'drive' && (
-                  <p className="text-xs text-amber-600">
-                    Google Drive API is loading. Please wait or use standard conversion.
-                  </p>
-                )}
               </div>
             ) : (
               <div className="flex-1">
