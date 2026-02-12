@@ -24,6 +24,7 @@
     "jspdf": "^2.5.1",
     "html2canvas": "^1.4.1",
     "docx-preview": "^0.3.2",
+    "googleapis": "^144.0.0",
     "gapi-script": "^1.2.0"
   },
   "devDependencies": {
