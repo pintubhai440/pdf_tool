@@ -220,12 +220,36 @@ const SEO_METADATA: Record<AppMode, {
 };
 
 function App() {
-  const [mode, setMode] = useState<AppMode>('home');
+  // URL check karke sahi tool open karne ka logic
+  const getInitialMode = (): AppMode => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.includes('/merge')) return 'merge';
+      if (path.includes('/split')) return 'split';
+      if (path.includes('/convert')) return 'convert';
+      if (path.includes('/compress')) return 'compress';
+      if (path.includes('/resize')) return 'resize';
+      if (path.includes('/about')) return 'about';
+      if (path.includes('/contact')) return 'contact';
+      if (path.includes('/policy')) return 'policy';
+      if (path.includes('/terms')) return 'terms';
+    }
+    return 'home';
+  };
+
+  const [mode, setMode] = useState<AppMode>(getInitialMode);
   const [files, setFiles] = useState<PdfFile[]>([]);
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Browser ke Back/Forward button support ke liye
+  useEffect(() => {
+    const handlePopState = () => setMode(getInitialMode());
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // ==================== 🔥 SUPERCHARGED SEO INJECTION ====================
   useEffect(() => {
