@@ -203,3 +203,4 @@ export const Terms: React.FC = () => {
     </div>
   );
 };
+export default Terms;
