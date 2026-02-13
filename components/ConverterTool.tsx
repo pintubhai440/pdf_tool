@@ -525,21 +525,26 @@ export const ConverterTool: React.FC = () => {
         <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
           
           {!mode ? (
-            // ----- UPLOAD STATE -----
+            // ----- UPLOAD STATE (Updated with fixes) -----
             <div className="p-8 md:p-12 bg-slate-50/50">
-              <FileUploader
-                onFilesSelected={handleFilesSelected}
-                allowMultiple={true}
-                acceptedFileTypes={[
-                  'application/pdf',
-                  'image/jpeg',
-                  'image/png',
-                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                ]}
-                label="Click or Drag files to Convert"
-                subLabel="Supported: PDF, DOCX, JPG, PNG"
-              />
-              <div className="mt-6 flex justify-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+              {/* ✨ FIX: Mobile ke liye aspect-square add kiya hai */}
+              <div className="w-full aspect-square md:aspect-auto">
+                <FileUploader
+                  onFilesSelected={handleFilesSelected}
+                  allowMultiple={true}
+                  acceptedFileTypes={[
+                    'application/pdf',
+                    'image/jpeg',
+                    'image/png',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                  ]}
+                  label="Click or Drag files to Convert"
+                  subLabel="Supported: PDF, DOCX, JPG, PNG"
+                />
+              </div>
+
+              {/* ✨ FIX: Text cut hone se bachane ke liye flex-wrap aur gap adjust kiya */}
+              <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                 <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> PDF</div>
                 <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> DOCX</div>
                 <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><ImageIcon size={16}/> PNG/JPG</div>
