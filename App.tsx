@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import {
   ArrowDownAZ,
@@ -722,6 +723,9 @@ function App() {
         }
         .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       `}</style>
+
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
