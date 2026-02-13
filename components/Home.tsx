@@ -20,16 +20,16 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ setMode }) => {
   // ------------------------------------------------------------------
-  //  🚀 ADVANCED SEO & META MANAGEMENT (100% client-side, no next/head)
+  //  ADVANCED SEO & META MANAGEMENT (100% client-side, no next/head)
   //  - Dynamically updates title, meta tags, JSON-LD
   //  - Prevents duplicates, cleans up on unmount (SPA safe)
   //  - Includes Open Graph, Twitter Card, Canonical, Robots
   // ------------------------------------------------------------------
   useEffect(() => {
-    // ----- 1. DOCUMENT TITLE (Primary Keyword) -----
+    // Document title
     document.title = 'Genz PDF - Free Online PDF Tools: Merge, Split, Compress, Convert';
 
-    // ----- 2. META DESCRIPTION (Secondary Keyword + USP) -----
+    // Meta description
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement('meta');
@@ -41,7 +41,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       'The #1 free online PDF suite. Merge PDF, split PDF, compress PDF, convert to Word/JPG, resize images. 100% secure, client‑side, no uploads.'
     );
 
-    // ----- 3. OPEN GRAPH (Facebook, LinkedIn) -----
+    // Open Graph tags
     const ogTags = [
       { property: 'og:title', content: 'Genz PDF – All‑in‑One Free PDF Tools' },
       { property: 'og:description', content: 'Merge, split, compress, convert & resize – all in your browser. Zero uploads, maximum privacy.' },
@@ -60,7 +60,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       tag.setAttribute('content', content);
     });
 
-    // ----- 4. TWITTER CARD -----
+    // Twitter Card tags
     const twitterTags = [
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: 'Genz PDF – Free Online PDF Tools' },
@@ -78,7 +78,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       tag.setAttribute('content', content);
     });
 
-    // ----- 5. CANONICAL URL (Prevents duplicate content) -----
+    // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
@@ -87,7 +87,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
     }
     canonical.setAttribute('href', 'https://genzpdf.com/');
 
-    // ----- 6. ROBOTS (Index & Follow) -----
+    // Robots meta
     let robots = document.querySelector('meta[name="robots"]');
     if (!robots) {
       robots = document.createElement('meta');
@@ -96,7 +96,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
     }
     robots.setAttribute('content', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
 
-    // ----- 7. JSON-LD STRUCTURED DATA (ItemList + Organization) -----
+    // JSON-LD structured data
     const scriptId = 'json-ld-home';
     let scriptTag = document.getElementById(scriptId) as HTMLScriptElement;
     if (!scriptTag) {
@@ -165,16 +165,8 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
   }, []); // Empty deps = runs once on mount
 
   // ------------------------------------------------------------------
-  //  SPA NAVIGATION – SEO friendly <a> tags with preventDefault
-  // ------------------------------------------------------------------
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, mode: AppMode) => {
-    e.preventDefault();
-    setMode(mode);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // ------------------------------------------------------------------
-  //  MODERN GLASS‑MORPHISM UI (taken verbatim from the second code)
+  //  TOOL DEFINITIONS – merged from both codes
+  //  (detailed descriptions from first, gradients from second)
   // ------------------------------------------------------------------
   const tools = [
     {
@@ -184,7 +176,8 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       icon: Files,
       iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
       shadow: 'hover:shadow-blue-500/20',
-      border: 'hover:border-blue-500/50'
+      border: 'hover:border-blue-500/50',
+      gradient: 'from-blue-500 to-indigo-600'
     },
     {
       id: 'split',
@@ -193,7 +186,8 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       icon: Scissors,
       iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
       shadow: 'hover:shadow-rose-500/20',
-      border: 'hover:border-rose-500/50'
+      border: 'hover:border-rose-500/50',
+      gradient: 'from-rose-500 to-pink-600'
     },
     {
       id: 'convert',
@@ -202,7 +196,8 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       icon: ArrowRightLeft,
       iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
       shadow: 'hover:shadow-violet-500/20',
-      border: 'hover:border-violet-500/50'
+      border: 'hover:border-violet-500/50',
+      gradient: 'from-violet-500 to-purple-600'
     },
     {
       id: 'compress',
@@ -211,7 +206,8 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       icon: Minimize2,
       iconBg: 'bg-gradient-to-br from-orange-400 to-red-500',
       shadow: 'hover:shadow-orange-500/20',
-      border: 'hover:border-orange-500/50'
+      border: 'hover:border-orange-500/50',
+      gradient: 'from-orange-500 to-red-500'
     },
     {
       id: 'resize',
@@ -220,14 +216,15 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       icon: Scaling,
       iconBg: 'bg-gradient-to-br from-emerald-400 to-green-600',
       shadow: 'hover:shadow-emerald-500/20',
-      border: 'hover:border-emerald-500/50'
+      border: 'hover:border-emerald-500/50',
+      gradient: 'from-emerald-500 to-green-600'
     }
   ];
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-slate-50">
       
-      {/* ✨ DESIGN: Background Decor (Gradients & Grid) */}
+      {/* ✨ DESIGN: Background Decor (Gradients, Noise & Grid) */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 blur-[120px]"></div>
@@ -259,23 +256,25 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
           </p>
         </header>
 
-        {/* 2. TOOLS GRID (Glassmorphism Cards) */}
+        {/* 2. TOOLS GRID – Glassmorphism Cards with Gradient Top Line */}
         <section aria-label="PDF Tools Collection" className="mb-24">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {tools.map((tool, idx) => (
               <a
                 key={tool.id}
                 href={`/${tool.id}-pdf`}
-                // onClick wali line hata di hai taaki naya page load ho
                 className={`
                   group relative flex flex-col p-8 rounded-3xl 
                   bg-white/70 backdrop-blur-xl border border-slate-200/60
                   transition-all duration-300 ease-out
-                  hover:-translate-y-2 hover:bg-white 
+                  hover:-translate-y-2 hover:bg-white hover:shadow-2xl
                   ${tool.shadow} ${tool.border}
                 `}
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
+                {/* Top Gradient Line (from second code) */}
+                <div className={`absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${tool.gradient} rounded-t-3xl`}></div>
+                
                 {/* Icon Container with Glow */}
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg text-white ${tool.iconBg} transform group-hover:scale-110 transition-transform duration-300`}>
                   <tool.icon size={32} strokeWidth={2} />
@@ -289,11 +288,11 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
                   {tool.desc}
                 </p>
                 
-                {/* Arrow Button */}
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100">
+                {/* Bottom Action with enhanced hover */}
+                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 group-hover:border-slate-200 transition-colors">
                   <span className="text-sm font-bold text-slate-900">Open Tool</span>
-                  <div className="p-2 rounded-full bg-slate-50 group-hover:bg-indigo-50 transition-colors">
-                    <ArrowRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
+                  <div className="p-2 rounded-full bg-slate-50 group-hover:bg-indigo-600 transition-colors duration-300">
+                    <ArrowRight size={18} className="text-slate-400 group-hover:text-white transition-all group-hover:translate-x-1" />
                   </div>
                 </div>
               </a>
@@ -301,26 +300,31 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
           </div>
         </section>
 
-        {/* 3. FEATURES / TRUST SECTION */}
-        <section aria-label="Why Choose Us" className="relative">
-           {/* Decorative Line */}
-           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-indigo-200 to-transparent rounded-full"></div>
-           
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16">
-              {[
-                { icon: ShieldCheck, color: 'text-emerald-500', title: 'Private & Secure', desc: 'Files process locally. No servers involved.' },
-                { icon: Zap, color: 'text-amber-500', title: 'Lightning Fast', desc: 'Instant results powered by WebAssembly.' },
-                { icon: Globe, color: 'text-blue-500', title: 'Cross Platform', desc: 'Works on Mac, Windows, Linux & Mobile.' },
-              ].map((feat, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-white/50 transition-colors duration-300">
-                   <div className={`p-4 rounded-full bg-white shadow-sm mb-4 ${feat.color}`}>
-                      <feat.icon size={32} />
-                   </div>
-                   <h3 className="text-lg font-bold text-slate-900 mb-2">{feat.title}</h3>
-                   <p className="text-sm text-slate-500 max-w-[200px]">{feat.desc}</p>
-                </div>
-              ))}
-           </div>
+        {/* 3. TRUST INDICATORS – taken from second code (enhanced) */}
+        <section className="relative py-16 bg-white/50 backdrop-blur-sm rounded-[3rem] border border-slate-100 mb-16 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto px-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-emerald-50 text-emerald-600 rounded-full mb-2">
+                <ShieldCheck size={32} />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900">Secure Processing</h3>
+              <p className="text-sm text-slate-500">Files process locally on your device via WebAssembly. No uploads.</p>
+            </div>
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-full mb-2">
+                <Zap size={32} />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900">Lightning Fast</h3>
+              <p className="text-sm text-slate-500">Optimized algorithms ensure your tasks complete in seconds.</p>
+            </div>
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-blue-50 text-blue-600 rounded-full mb-2">
+                <Globe size={32} />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900">Universal Access</h3>
+              <p className="text-sm text-slate-500">Works perfectly on Mac, Windows, Android, and iOS.</p>
+            </div>
+          </div>
         </section>
 
       </main>
