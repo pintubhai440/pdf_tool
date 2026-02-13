@@ -525,9 +525,10 @@ export const ConverterTool: React.FC = () => {
         <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
           
           {!mode ? (
-            // ----- UPLOAD STATE (Updated with fixes) -----
+            // ----- UPLOAD STATE -----
             <div className="p-8 md:p-12 bg-slate-50/50">
-              {/* ✨ FIX: Mobile ke liye aspect-square add kiya hai */}
+              
+              {/* ✨ FIX: Mobile par Square box (aspect-square), Laptop par normal (md:aspect-auto) */}
               <div className="w-full aspect-square md:aspect-auto">
                 <FileUploader
                   onFilesSelected={handleFilesSelected}
@@ -543,11 +544,17 @@ export const ConverterTool: React.FC = () => {
                 />
               </div>
 
-              {/* ✨ FIX: Text cut hone se bachane ke liye flex-wrap aur gap adjust kiya */}
+              {/* ✨ FIX: Text cut na ho isliye 'flex-wrap' aur 'gap-4' (kam gap) lagaya hai */}
               <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> PDF</div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><FileType size={16}/> DOCX</div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400"><ImageIcon size={16}/> PNG/JPG</div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
+                  <FileType size={16}/> PDF
+                </div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
+                  <FileType size={16}/> DOCX
+                </div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
+                  <ImageIcon size={16}/> PNG/JPG
+                </div>
               </div>
             </div>
           ) : (
