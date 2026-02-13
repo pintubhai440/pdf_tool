@@ -75,3 +75,4 @@ export const Policy: React.FC = () => {
     </div>
   );
 };
+export default Policy;
