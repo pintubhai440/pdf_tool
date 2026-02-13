@@ -29,7 +29,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     canonical: 'https://genzpdf.com/split-pdf',
     siteName: 'Genz PDF',
     locale: 'en_US',
-    image: 'https://genzpdf.com/social/split-pdf-preview.jpg', // Replace with actual image
+    image: 'https://genzpdf.com/social/split-pdf-preview.jpg',
     twitterHandle: '@genzpdf',
     keywords:
       'split PDF, remove pages from PDF, delete PDF pages, PDF page remover, free PDF splitter, extract PDF pages online, PDF editor no upload, secure PDF tool',
@@ -47,14 +47,14 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
   // ---------- MASTER SEO INJECTION & PDF WORKER INIT ----------
   useEffect(() => {
-    // 1. PDF.js Worker (CDN with stable CORS)
+    // 1. PDF.js Worker
     const lib = (pdfjsLib as any).default || pdfjsLib;
     if (lib?.GlobalWorkerOptions) {
       lib.GlobalWorkerOptions.workerSrc =
         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    // 2. Basic meta tags (title, description, canonical, robots, viewport, etc.)
+    // 2. Meta tags (title, description, canonical, etc.)
     document.title = SEO.title;
 
     const upsertMeta = (attr: string, value: string, isProperty = false) => {
@@ -70,14 +70,12 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
       meta.setAttribute('content', value);
     };
 
-    // Standard meta
     upsertMeta('description', SEO.description);
     upsertMeta('robots', 'index, follow');
     upsertMeta('viewport', 'width=device-width, initial-scale=1');
     upsertMeta('author', SEO.author);
     upsertMeta('keywords', SEO.keywords);
 
-    // Canonical link
     let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonicalLink) {
       canonicalLink = document.createElement('link');
@@ -86,7 +84,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     }
     canonicalLink.setAttribute('href', SEO.canonical);
 
-    // Open Graph
     upsertMeta('og:title', SEO.title, true);
     upsertMeta('og:description', SEO.description, true);
     upsertMeta('og:url', SEO.canonical, true);
@@ -95,14 +92,13 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     upsertMeta('og:site_name', SEO.siteName, true);
     upsertMeta('og:locale', SEO.locale, true);
 
-    // Twitter Card
     upsertMeta('twitter:card', 'summary_large_image');
     upsertMeta('twitter:title', SEO.title);
     upsertMeta('twitter:description', SEO.description);
     upsertMeta('twitter:image', SEO.image);
     upsertMeta('twitter:site', SEO.twitterHandle);
 
-    // 3. JSON-LD STRUCTURED DATA (SoftwareApplication + WebSite + FAQPage)
+    // 3. JSON-LD STRUCTURED DATA
     const scriptId = 'json-ld-split-pdf';
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
@@ -289,30 +285,66 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
           <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-rose-900/5 border border-white/60 overflow-hidden min-h-[500px] transition-all duration-500">
             
             {!file ? (
-              /* UPLOAD STATE (Optimized Mobile Padding) */
-              <div className="px-4 py-10 md:p-20 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
-                <div className="w-full max-w-xl mx-auto transform hover:scale-[1.01] transition-transform duration-300">
-                  <FileUploader onFilesSelected={handleFileSelected} allowMultiple={false} />
+              /* ✅ REDESIGNED UPLOAD STATE (Square Box + Horizontal Features) */
+              <div className="px-6 py-12 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-20 h-full min-h-[500px]">
+                
+                {/* 1. SQUARE UPLOAD BOX */}
+                <div className="w-full max-w-[320px] md:max-w-[380px] aspect-square relative group shrink-0 mx-auto md:mx-0">
+                  {/* Animated Glow */}
+                  <div className="absolute -inset-2 bg-gradient-to-tr from-rose-400 to-orange-400 rounded-[2.5rem] blur-xl opacity-30 group-hover:opacity-60 animate-pulse transition duration-700"></div>
+                  
+                  <div className="relative h-full bg-white rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50">
+                    <div className="absolute inset-0 flex flex-col">
+                       {/* Force FileUploader to fill the square */}
+                       <div className="h-full w-full [&>div]:h-full [&>div]:border-dashed [&>div]:border-2 [&>div]:border-rose-200 [&>div]:bg-rose-50/30">
+                          <FileUploader 
+                            onFilesSelected={handleFileSelected} 
+                            allowMultiple={false} 
+                            label="Drop PDF Here"
+                            subLabel="to Split Pages"
+                          />
+                       </div>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Feature Pills (Stack on mobile) */}
-                <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-3 md:gap-4">
-                  {[
-                    { icon: ShieldCheck, text: "Secure" },
-                    { icon: Scissors, text: "Precise" },
-                    { icon: Zap, text: "Fast" }
-                  ].map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-rose-50 shadow-sm text-slate-600 text-xs md:text-sm font-semibold">
-                      <f.icon size={14} className="text-rose-500" /> {f.text}
-                    </div>
-                  ))}
+                {/* 2. SIDE FEATURES (Horizontal on Desktop) */}
+                <div className="flex flex-col gap-6 max-w-sm w-full text-center md:text-left">
+                   <div className="space-y-2 mb-2">
+                      <h3 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
+                        Professional <br/>
+                        <span className="text-rose-600">PDF Splitter</span>
+                      </h3>
+                      <p className="text-slate-500 font-medium">
+                        Securely separate pages in your browser.
+                      </p>
+                   </div>
+
+                   <div className="grid gap-4">
+                      {[
+                        { icon: ShieldCheck, title: "100% Secure", desc: "Files never leave your device" },
+                        { icon: Scissors, title: "Precise Control", desc: "Select exact pages to delete" },
+                        { icon: Zap, title: "Lightning Fast", desc: "No upload waiting time" }
+                      ].map((f, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all group cursor-default text-left">
+                          <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
+                            <f.icon size={22} />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800">{f.title}</h4>
+                            <p className="text-sm text-slate-500">{f.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                   </div>
                 </div>
+
               </div>
             ) : (
-              /* EDITOR STATE */
+              /* EDITOR STATE (unchanged) */
               <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* 1. STICKY TOOLBAR (Fixed for Mobile - sits below header) */}
+                {/* 1. STICKY TOOLBAR */}
                 <div className="sticky top-16 md:top-20 z-30 bg-white/90 backdrop-blur-md border-b border-rose-100 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shadow-sm transition-all duration-300">
                   <div className="flex items-center gap-3 md:gap-4">
                     <div className="bg-gradient-to-br from-rose-500 to-orange-500 p-2 md:p-2.5 rounded-xl text-white shadow-lg shadow-rose-200">
@@ -365,7 +397,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                   </div>
                 )}
 
-                {/* 2. MAIN CONTENT AREA (Grid) */}
+                {/* 2. MAIN CONTENT AREA */}
                 <div className="p-4 md:p-10 bg-slate-50/50 flex-1 overflow-y-auto min-h-[60vh]">
                   
                   {isLoading ? (
@@ -401,7 +433,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                         </div>
                       </div>
 
-                      {/* The Grid (Mobile Optimized Gaps) */}
+                      {/* The Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-8 pb-10">
                         {pageImages.map((img, idx) => {
                           const isSelected = selectedPages.has(idx);
@@ -434,7 +466,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                                 Page {idx + 1}
                               </div>
 
-                              {/* Deletion Overlay Animation */}
+                              {/* Deletion Overlay */}
                               <div className={clsx(
                                 "absolute inset-0 flex items-center justify-center transition-all duration-200 z-20",
                                 isSelected ? "bg-rose-900/10 opacity-100" : "opacity-0 group-hover:opacity-100 md:bg-black/5"
