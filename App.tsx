@@ -16,8 +16,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   Zap,
-  Plus,
-  Home
+  Plus
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -463,7 +462,6 @@ function App() {
 
           {/* Full tool navigation - now includes all 5 tools */}
           <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/50">
-            <NavButton targetMode="home" icon={Home} label="Home" />
             <NavButton targetMode="merge" icon={Files} label="Merge" />
             <NavButton targetMode="split" icon={Scissors} label="Split" />
             <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
