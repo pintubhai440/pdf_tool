@@ -165,8 +165,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
   }, []); // Empty deps = runs once on mount
 
   // ------------------------------------------------------------------
-  //  TOOL DEFINITIONS – merged from both codes
-  //  (detailed descriptions from first, gradients from second)
+  //  TOOL DEFINITIONS – detailed descriptions + gradient styling
   // ------------------------------------------------------------------
   const tools = [
     {
@@ -235,7 +234,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
 
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         
-        {/* 1. HERO SECTION */}
+        {/* 1. HERO SECTION (with animation from first code) */}
         <header className="text-center mb-20 animate-in fade-in slide-in-from-bottom-6 duration-1000">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-slate-200 shadow-sm backdrop-blur-md text-slate-600 text-xs font-bold uppercase tracking-widest mb-8 hover:scale-105 transition-transform cursor-default">
              <Star size={12} className="fill-yellow-400 text-yellow-400" />
@@ -266,13 +265,13 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
                 className={`
                   group relative flex flex-col p-8 rounded-3xl 
                   bg-white/70 backdrop-blur-xl border border-slate-200/60
-                  transition-all duration-300 ease-out
+                  transition-all duration-300 ease-out overflow-hidden
                   hover:-translate-y-2 hover:bg-white hover:shadow-2xl
                   ${tool.shadow} ${tool.border}
                 `}
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
-                {/* Top Gradient Line (from second code) */}
+                {/* Top Gradient Line */}
                 <div className={`absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${tool.gradient} rounded-t-3xl`}></div>
                 
                 {/* Icon Container with Glow */}
@@ -300,7 +299,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
           </div>
         </section>
 
-        {/* 3. TRUST INDICATORS – taken from second code (enhanced) */}
+        {/* 3. TRUST INDICATORS – Enhanced version from second code */}
         <section className="relative py-16 bg-white/50 backdrop-blur-sm rounded-[3rem] border border-slate-100 mb-16 text-center">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto px-6">
             <div className="flex flex-col items-center gap-4">
