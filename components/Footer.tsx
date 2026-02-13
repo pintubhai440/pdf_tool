@@ -7,11 +7,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ setMode }) => {
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, mode: AppMode) => {
-    e.preventDefault();
-    setMode(mode);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // 🟢 NOTE: Maine 'handleNav' function hata diya hai taaki links direct open hon (New Page Load)
 
   return (
     <>
@@ -81,7 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
             >
               <a
                 href="/"
-                onClick={(e) => handleNav(e, 'home')}
+                // 🟢 CHANGE: onClick hata diya hai
                 className="inline-flex items-center gap-3 group"
                 aria-label="Genz PDF – Home"
                 itemProp="url"
@@ -168,7 +164,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   >
                     <a
                       href={item.url}
-                      onClick={(e) => handleNav(e, item.id as AppMode)}
+                      // 🟢 CHANGE: onClick hata diya hai
                       className="group flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-slate-200 hover:bg-white hover:shadow-sm transition-all duration-300"
                       title={`Free tool to ${item.label.toLowerCase()}`}
                       itemProp="url"
@@ -219,7 +215,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   >
                     <a
                       href={item.url}
-                      onClick={(e) => handleNav(e, item.id as AppMode)}
+                      // 🟢 CHANGE: onClick hata diya hai
                       className="inline-block text-sm text-slate-500 hover:text-slate-900 font-medium hover:translate-x-1 transition-transform duration-300"
                       itemProp="url"
                     >
