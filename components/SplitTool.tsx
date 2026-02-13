@@ -341,7 +341,7 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
               </div>
             ) : (
-              /* EDITOR STATE (unchanged) */
+              /* EDITOR STATE */
               <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
                 
                 {/* 1. STICKY TOOLBAR */}
