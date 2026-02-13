@@ -431,7 +431,7 @@ function App() {
   };
 
   // ---------- UI Helpers ----------
-  // 🆕 IMPROVED NAVBUTTON with Home support and clean paths, now also supports mobile styling
+  // 🆕 SMART NAVIGATION BUTTON with Home support and clean paths, mobile support
   const NavButton = ({ targetMode, icon: Icon, label, mobile = false }: { targetMode: AppMode, icon: any, label: string, mobile?: boolean }) => {
     // Determine if this button is active
     const isActive = 
@@ -466,7 +466,7 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
-      {/* --- PREMIUM GLASS HEADER --- */}
+      {/* --- PREMIUM GLASS HEADER with Mobile Menu --- */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
           
