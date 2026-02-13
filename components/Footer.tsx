@@ -150,7 +150,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                 id="footer-tools-heading"
                 className="text-xs font-extrabold text-slate-900 uppercase tracking-[0.2em] mb-6"
               >
-                Utilities
+                PRODUCT
               </h4>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
@@ -241,7 +241,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
               <p className="text-slate-300 text-[11px] font-bold tracking-widest uppercase group-hover:text-white transition-colors">
-                © {new Date().getFullYear()} Genz PDF.
+                © {new Date().getFullYear()} Genz PDF. ALL RIGHTS RESERVED.
               </p>
             </div>
 
@@ -277,7 +277,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
             {/* ---------- Developer profiles (Person microdata) ---------- */}
             <div className="order-2 xl:order-3 flex items-center gap-4">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
-                Built by
+                Develoved by
               </span>
 
               <div className="flex -space-x-2 hover:space-x-1 transition-all duration-300">
