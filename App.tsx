@@ -17,7 +17,10 @@ import {
   ShieldCheck,
   Zap,
   Plus,
-  Home as HomeIcon // 👈 Home icon added
+  Home as HomeIcon,
+  Menu,
+  X,
+  ChevronRight
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -243,6 +246,7 @@ function App() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // 👈 Mobile Menu State
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Browser ke Back/Forward button support ke liye
@@ -263,6 +267,7 @@ function App() {
     // 2. Title
     document.title = meta.title;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMobileMenuOpen(false); // Page change par menu band karein
 
     // 3. Meta tag helper (works for name or property)
     const upsertMeta = (attr: string, content: string, attribute: 'name' | 'property' = 'name') => {
@@ -426,8 +431,8 @@ function App() {
   };
 
   // ---------- UI Helpers ----------
-  // 🆕 IMPROVED NAVBUTTON with Home support and clean paths
-  const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => {
+  // 🆕 IMPROVED NAVBUTTON with Home support and clean paths, now also supports mobile styling
+  const NavButton = ({ targetMode, icon: Icon, label, mobile = false }: { targetMode: AppMode, icon: any, label: string, mobile?: boolean }) => {
     // Determine if this button is active
     const isActive = 
       (mode === targetMode) || 
@@ -437,38 +442,46 @@ function App() {
     return (
       <a
         href={targetMode === 'home' ? '/' : `/${targetMode}`} // clean URLs
+        onClick={() => mobile && setIsMobileMenuOpen(false)} // Mobile menu close on click
         className={clsx(
-          "relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
+          "flex items-center gap-3 transition-all duration-300 font-medium rounded-xl",
+          // Mobile vs Desktop Styles
+          mobile 
+            ? "w-full p-4 text-base border border-slate-100 hover:bg-slate-50"
+            : "px-4 py-2 text-sm hover:bg-white/50",
           isActive
-            ? "bg-white text-indigo-600 shadow-md ring-1 ring-black/5 scale-105"
-            : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+            ? "bg-white text-indigo-600 shadow-sm ring-1 ring-indigo-100"
+            : "text-slate-600 hover:text-slate-900"
         )}
       >
-        <Icon size={18} className={isActive ? "text-indigo-600" : "text-slate-400"} />
+        <div className={clsx("p-2 rounded-lg", isActive ? "bg-indigo-50" : "bg-slate-100")}>
+          <Icon size={mobile ? 20 : 18} className={isActive ? "text-indigo-600" : "text-slate-500"} />
+        </div>
         {label}
+        {mobile && <ChevronRight size={16} className="ml-auto text-slate-300" />}
       </a>
     );
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
       {/* --- PREMIUM GLASS HEADER --- */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 h-18 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
           
           {/* Logo linking to home */}
-          <a href="/" className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-6 transition-transform">
-              <img src="/logo.png" alt="Genz PDF Logo" className="w-7 h-7 object-contain brightness-0 invert" width="40" height="40" />
+          <a href="/" className="flex items-center gap-3 group z-50 relative">
+            <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200/50 group-hover:rotate-6 transition-transform duration-300">
+              <img src="/logo.png" alt="Genz PDF Logo" className="w-6 h-6 md:w-7 md:h-7 object-contain brightness-0 invert" />
             </div>
-            <span className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+            <span className="text-xl md:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
               Genz<span className="text-indigo-600">PDF</span>
             </span>
           </a>
 
-          {/* Full tool navigation - now includes Home and all 5 tools */}
-          <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/50">
+          {/* Full tool navigation - Desktop */}
+          <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner">
             <NavButton targetMode="home" icon={HomeIcon} label="Home" />
             <NavButton targetMode="merge" icon={Files} label="Merge" />
             <NavButton targetMode="split" icon={Scissors} label="Split" />
@@ -477,22 +490,63 @@ function App() {
             <NavButton targetMode="resize" icon={Scaling} label="Resize" />
           </div>
 
-          <button 
-            onClick={() => setIsAiOpen(true)}
-            className="group flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-xl shadow-slate-200 font-bold text-sm"
-          >
-            <Sparkles size={16} className="group-hover:animate-pulse" />
-            <span>AI Assistant</span>
-          </button>
+          {/* Right Actions */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsAiOpen(true)}
+              className="hidden md:flex group items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-xl shadow-slate-200 font-bold text-sm"
+            >
+              <Sparkles size={16} className="group-hover:animate-pulse" />
+              <span>AI Assistant</span>
+            </button>
+
+            {/* MOBILE MENU TOGGLE BUTTON */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors z-50 relative"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* 📱 MOBILE MENU DROPDOWN (Smooth Animation) */}
+        <div className={clsx(
+          "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out flex flex-col pt-24 px-6 pb-8",
+          isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
+        )}>
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-120px)] pb-10">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
+            <NavButton targetMode="home" icon={HomeIcon} label="Home" mobile />
+            <NavButton targetMode="merge" icon={Files} label="Merge PDF" mobile />
+            <NavButton targetMode="split" icon={Scissors} label="Split PDF" mobile />
+            <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert PDF" mobile />
+            <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
+            <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
+            
+            <div className="my-2 border-t border-slate-100"></div>
+            
+            <button 
+              onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
+              className="w-full p-4 flex items-center gap-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl shadow-lg shadow-slate-200"
+            >
+              <div className="p-2 bg-white/10 rounded-lg">
+                <Sparkles size={20} />
+              </div>
+              <span className="font-bold">Open AI Assistant</span>
+            </button>
+          </div>
         </div>
       </header>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 md:py-20">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
         
         <Suspense fallback={
-          <div className="flex justify-center py-20">
-            <Loader2 className="animate-spin text-indigo-600" size={40}/>
+          <div className="flex flex-col items-center justify-center py-40">
+            <Loader2 className="animate-spin text-indigo-600 mb-4" size={48}/>
+            <p className="text-slate-400 font-medium animate-pulse">Loading Tools...</p>
           </div>
         }>
           {mode === 'home' ? (
@@ -511,23 +565,23 @@ function App() {
               />
 
               {files.length === 0 ? (
-                <div className="text-center max-w-3xl mx-auto">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-100">
-                    <Zap size={14} /> 100% Secure Processing
+                <div className="text-center max-w-4xl mx-auto py-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-wider mb-8 border border-indigo-100">
+                    <Zap size={14} /> Secure & Private
                   </div>
                   <h1 className="text-4xl md:text-6xl font-[900] text-slate-900 mb-6 tracking-tight leading-[1.1]">
-                    Combine PDF files in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Seconds</span>
+                    Merge PDF Files <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Instantly</span>
                   </h1>
-                  <p className="text-lg text-slate-500 mb-12">
-                    Select multiple PDF files and merge them into one professional document. No signup, no watermarks, completely free.
+                  <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Combine multiple PDFs into one document. Drag & drop, reorder, and merge securely in your browser. No signup, no watermarks, completely free.
                   </p>
                   
-                  <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100">
+                  <div className="bg-white p-2 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-2xl mx-auto transform hover:scale-[1.01] transition-transform duration-300">
                     <FileUploader 
                       onFilesSelected={handleFilesSelected} 
                       allowMultiple={true} 
                       acceptedFileTypes={['application/pdf']} 
-                      label="Drop PDFs here or Click to Browse" 
+                      label="Drop PDFs here to Merge" 
                     />
                   </div>
 
@@ -551,7 +605,7 @@ function App() {
                   
                   {/* Left: File List (Order Control) */}
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
                       <div>
                         <h1 className="text-2xl font-black text-slate-900">Merge Queue</h1>
                         <p className="text-sm text-slate-400 font-medium">Reorder your files for the final output</p>
@@ -559,21 +613,21 @@ function App() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => handleSort(SortOrder.ASC)} 
-                          className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
+                          className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
                           title="Sort A-Z"
                         >
                           <ArrowDownAZ size={20}/>
                         </button>
                         <button 
                           onClick={() => handleSort(SortOrder.DESC)} 
-                          className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
+                          className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
                           title="Sort Z-A"
                         >
                           <ArrowUpAZ size={20}/>
                         </button>
                         <button 
                           onClick={handleClearAll} 
-                          className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100"
+                          className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100"
                           title="Clear All"
                         >
                           <Trash2 size={20}/>
@@ -581,11 +635,11 @@ function App() {
                       </div>
                     </div>
                     
-                    <div className="bg-white p-2 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                    <div className="bg-white p-4 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
                       <FileList files={files} setFiles={setFiles} onRemove={handleRemoveFile} />
                       <button 
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full mt-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all font-bold"
+                        className="w-full mt-4 py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all font-bold"
                       >
                         <Plus size={20} /> Add More Documents
                       </button>
@@ -593,18 +647,18 @@ function App() {
                   </div>
 
                   {/* Right: Actions Card */}
-                  <div className="sticky top-24 space-y-6">
+                  <div className="lg:sticky lg:top-24 space-y-6">
                     <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200">
-                      <h3 className="text-xl font-black mb-4">Ready to Merge?</h3>
+                      <h3 className="text-xl font-black mb-6">Summary</h3>
                       <div className="space-y-4 mb-8">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-400">Total Files:</span>
+                        <div className="flex justify-between text-sm border-b border-slate-700 pb-3">
+                          <span className="text-slate-400">Total Files</span>
                           <span className="font-bold">{files.length}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-slate-400">Security:</span>
+                          <span className="text-slate-400">Status</span>
                           <span className="text-emerald-400 font-bold flex items-center gap-1">
-                            <ShieldCheck size={14}/> Encrypted
+                            <ShieldCheck size={14}/> Ready
                           </span>
                         </div>
                       </div>
@@ -612,25 +666,25 @@ function App() {
                       <button 
                         onClick={handleMerge} 
                         disabled={files.length < 2 || isMerging}
-                        className="w-full py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-3"
+                        className="w-full py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-2xl font-black text-lg shadow-lg transition-all flex items-center justify-center gap-3"
                       >
                         {isMerging ? <Loader2 className="animate-spin" /> : <FileStack />}
-                        {isMerging ? "Processing..." : "Merge Now"}
+                        {isMerging ? "Merging..." : "Merge Files"}
                       </button>
                     </div>
 
                     {mergedPdfUrl && (
-                      <div className="bg-emerald-500 p-8 rounded-[2.5rem] text-white animate-bounce-in">
+                      <div className="bg-emerald-500 p-6 rounded-[2rem] text-white animate-bounce-in shadow-xl shadow-emerald-200">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="p-2 bg-white/20 rounded-lg"><CheckCircle2 /></div>
-                          <span className="font-black text-xl">Completed!</span>
+                          <div className="p-2 bg-white/20 rounded-full"><CheckCircle2 /></div>
+                          <span className="font-bold text-lg">Merge Success!</span>
                         </div>
                         <a 
                           href={mergedPdfUrl} 
                           download="merged-genzpdf.pdf" 
-                          className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black text-center block hover:bg-slate-50 transition-colors shadow-lg"
+                          className="w-full py-3.5 bg-white text-emerald-600 rounded-xl font-black text-center block hover:bg-emerald-50 transition-colors shadow-sm"
                         >
-                          <Download className="inline mr-2" size={20}/> Download Now
+                          <Download className="inline mr-2" size={18}/> Download PDF
                         </a>
                       </div>
                     )}
@@ -640,7 +694,7 @@ function App() {
             </article>
           ) : (
             /* Fallback for all other tools (Split, Convert, Compress, Resize, About, Contact, Policy, Terms) */
-            <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-100">
+            <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
               {mode === 'split' && <SplitTool />}
               {mode === 'convert' && <ConverterTool />}
               {mode === 'compress' && <CompressTool />}
