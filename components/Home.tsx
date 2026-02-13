@@ -266,7 +266,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
               <a
                 key={tool.id}
                 href={`/${tool.id}-pdf`}
-                onClick={(e) => handleNav(e, tool.id as AppMode)}
+                // onClick wali line hata di hai taaki naya page load ho
                 className={`
                   group relative flex flex-col p-8 rounded-3xl 
                   bg-white/70 backdrop-blur-xl border border-slate-200/60
