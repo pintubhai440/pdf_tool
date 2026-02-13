@@ -677,3 +677,4 @@ export const CompressTool: React.FC = () => {
     </div>
   );
 };
+export default CompressTool;
