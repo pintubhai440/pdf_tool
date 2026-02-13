@@ -425,19 +425,21 @@ function App() {
   };
 
   // ---------- UI Helpers ----------
+  // 🔁 REPLACED NAVBUTTON WITH THE NEW VERSION (USING <a> AND window.location.pathname)
   const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => (
-    <button
-      onClick={() => setMode(targetMode)}
+    <a
+      href={`/${targetMode}-pdf`} // 👈 Button ko Link bana diya
       className={clsx(
         "relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
-        mode === targetMode
+        // Agar current URL match kare toh highlight karo
+        (mode === targetMode || window.location.pathname.includes(targetMode))
           ? "bg-white text-indigo-600 shadow-md ring-1 ring-black/5 scale-105"
           : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
       )}
     >
-      <Icon size={18} className={mode === targetMode ? "text-indigo-600" : "text-slate-400"} />
+      <Icon size={18} className={(mode === targetMode || window.location.pathname.includes(targetMode)) ? "text-indigo-600" : "text-slate-400"} />
       {label}
-    </button>
+    </a>
   );
 
   return (
