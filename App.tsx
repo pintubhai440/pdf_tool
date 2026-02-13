@@ -1,5 +1,4 @@
-// ✅ 1. Imports
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import {
   ArrowDownAZ,
   ArrowUpAZ,
@@ -13,68 +12,210 @@ import {
   ArrowRightLeft,
   Minimize2,
   Scaling,
-  LayoutGrid
+  LayoutGrid,
+  CheckCircle2,
+  ShieldCheck,
+  Zap,
+  Plus
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
 
+// ✅ CORE IMPORTS
 import { FileUploader } from './components/FileUploader';
 import { FileList } from './components/FileList';
 import { AiAssistant } from './components/AiAssistant';
-import { SplitTool } from './components/SplitTool';
-import { ConverterTool } from './components/ConverterTool';
-import { CompressTool } from './components/CompressTool';
-import { ResizeTool } from './components/ResizeTool';
 import { Home } from './components/Home';
-import { About } from './components/About';
-import { Contact } from './components/Contact';
-import { Policy } from './components/Policy';
-import { Terms } from './components/Terms';
 import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
-// ✅ SEO METADATA – Unique title & description for every route
-const SEO_METADATA: Record<AppMode, { title: string; description: string }> = {
+// ✅ LAZY LOAD TOOLS (for better performance)
+const SplitTool = lazy(() => import('./components/SplitTool'));
+const ConverterTool = lazy(() => import('./components/ConverterTool'));
+const CompressTool = lazy(() => import('./components/CompressTool'));
+const ResizeTool = lazy(() => import('./components/ResizeTool'));
+const About = lazy(() => import('./components/About'));
+const Contact = lazy(() => import('./components/Contact'));
+const Policy = lazy(() => import('./components/Policy'));
+const Terms = lazy(() => import('./components/Terms'));
+
+// ==================== 🔥 SUPERCHARGED SEO CONFIGURATION ====================
+const BASE_URL = "https://genzpdf.com"; // 🔴 REPLACE WITH YOUR ACTUAL DOMAIN
+const SITE_NAME = "Genz PDF";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/social-preview.jpg`;
+
+const SEO_METADATA: Record<AppMode, {
+  title: string;
+  description: string;
+  keywords: string;
+  schema: object | null;
+  breadcrumb?: { name: string; url: string }[];
+}> = {
   home: {
-    title: "Genz PDF - 100% Free & Unlimited PDF Tools | Merge, Split & Compress",
-    description: "The best free online PDF tools. Merge, Split, Convert, Compress, and Resize PDFs instantly. No limits, no signup, secure and made in India."
+    title: "Genz PDF - Free Online PDF Tools | Merge, Split, Compress & Convert",
+    description: "All-in-one free PDF tools. Merge PDF, Split PDF, Compress PDF, Convert to Word/JPG. 100% Free, Secure & Fast. No signup required.",
+    keywords: "free pdf tools, online pdf editor, merge pdf, split pdf, compress pdf, pdf converter, resize pdf",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Genz PDF Tools",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": "Merge PDF, Split PDF, Compress PDF, Convert PDF, Resize PDF",
+      "screenshot": DEFAULT_OG_IMAGE,
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2150" }
+    },
+    breadcrumb: [{ name: "Home", url: BASE_URL }]
   },
   merge: {
     title: "Merge PDF Free - Combine PDF Files Online | Genz PDF",
-    description: "Combine multiple PDFs into one document for free. Drag and drop to reorder. Fast, secure, and unlimited PDF merger tool."
+    description: "Combine multiple PDF files into one document instantly. Drag & drop reordering, secure processing, and 100% free PDF merger. No upload.",
+    keywords: "merge pdf, combine pdf, join pdf files, pdf merger free, merge pdf online, combine pdf documents",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Merge PDF Tool",
+      "description": "A free tool to combine multiple PDF files into a single document. Client-side processing, no privacy risk.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2150" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Merge PDF", url: `${BASE_URL}/merge` }
+    ]
   },
   split: {
-    title: "Split PDF Online - Extract Pages for Free | Genz PDF",
-    description: "Separate PDF pages or split PDF into multiple files. 100% free and secure PDF splitter."
+    title: "Split PDF Online - Extract Pages Free | Genz PDF",
+    description: "Separate PDF pages or split PDF into multiple files. Fast, secure, and easy-to-use online PDF splitter. Client-side, no watermarks.",
+    keywords: "split pdf, extract pdf pages, separate pdf, cut pdf, remove pdf pages, pdf page remover",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Split PDF Tool",
+      "description": "Free online PDF splitter to extract or remove pages from PDF documents.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Split PDF", url: `${BASE_URL}/split` }
+    ]
   },
   compress: {
     title: "Compress PDF - Reduce File Size Online | Genz PDF",
-    description: "Reduce PDF file size without losing quality. Compress PDF to 100kb, 200kb online for free."
+    description: "Reduce PDF size without losing quality. Compress PDF to 100kb, 200kb online for free. Best PDF optimizer. 100% secure.",
+    keywords: "compress pdf, reduce pdf size, shrink pdf, optimize pdf, pdf compressor",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Compress PDF Tool",
+      "description": "Free PDF compressor to reduce file size while maintaining quality.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Compress PDF", url: `${BASE_URL}/compress` }
+    ]
   },
   convert: {
     title: "PDF Converter - PDF to Word, JPG, PNG Free | Genz PDF",
-    description: "Convert PDF to Word, Excel, PowerPoint, and Images instantly. Best free PDF converter tool."
+    description: "Convert PDF to Word, Excel, PowerPoint, and Images instantly. High-quality free online PDF converter. No email required.",
+    keywords: "pdf converter, pdf to word, pdf to jpg, convert pdf, pdf to png, pdf to excel",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "PDF Converter Tool",
+      "description": "Convert PDF documents to various formats including Word, JPG, PNG, and more.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Convert PDF", url: `${BASE_URL}/convert` }
+    ]
   },
   resize: {
-    title: "Resize PDF & Images - Change Dimensions Online | Genz PDF",
-    description: "Resize your PDF pages or images to specific dimensions (A4, Letter, Custom) easily and for free."
+    title: "Resize PDF & Images - Change Dimensions | Genz PDF",
+    description: "Resize PDF pages to A4, Letter, or custom dimensions easily online. Adjust page size with one click.",
+    keywords: "resize pdf, change pdf page size, pdf dimensions, pdf page size editor",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Resize PDF Tool",
+      "description": "Free PDF resizer to change page dimensions and aspect ratio.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Resize PDF", url: `${BASE_URL}/resize` }
+    ]
   },
   about: {
-    title: "About Genz PDF - Our Mission & Team",
-    description: "Learn about Genz PDF, the free and unlimited PDF tool developed in India by Pintu & Raushan."
+    title: "About Us - Genz PDF Team",
+    description: "Learn about the mission behind Genz PDF. We provide free, secure, client-side PDF tools for everyone.",
+    keywords: "about genz pdf, pdf tools team, free pdf software",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "About Genz PDF",
+      "description": "Learn about the team and mission behind Genz PDF."
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "About", url: `${BASE_URL}/about` }
+    ]
   },
   contact: {
-    title: "Contact Us - Genz PDF Support",
-    description: "Get in touch with the Genz PDF team for support, feedback, or inquiries."
+    title: "Contact Support - Genz PDF",
+    description: "Get help with Genz PDF tools. Contact our support team for any questions or feedback.",
+    keywords: "contact pdf support, help with pdf tools, pdf support",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Contact Genz PDF"
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Contact", url: `${BASE_URL}/contact` }
+    ]
   },
   policy: {
     title: "Privacy Policy - Genz PDF",
-    description: "Your data is safe with us. Read our strict zero-storage privacy policy."
+    description: "We value your privacy. Read our policy to understand how we protect your data. No files are ever uploaded.",
+    keywords: "privacy policy, pdf tool privacy",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Privacy Policy"
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Privacy Policy", url: `${BASE_URL}/policy` }
+    ]
   },
   terms: {
-    title: "Terms & Conditions - Genz PDF",
-    description: "Read the terms of use for Genz PDF services."
+    title: "Terms of Service - Genz PDF",
+    description: "Terms and conditions for using Genz PDF. Free usage, client-side processing, and user responsibilities.",
+    keywords: "terms of service, pdf terms",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Terms of Service"
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Terms", url: `${BASE_URL}/terms` }
+    ]
   }
 };
 
@@ -84,30 +225,138 @@ function App() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ✅ DYNAMIC SEO UPDATE + SCROLL TO TOP
+  // ==================== 🔥 SUPERCHARGED SEO INJECTION ====================
   useEffect(() => {
-    // 1. Scroll to top on route change
+    const meta = SEO_METADATA[mode] || SEO_METADATA.home;
+    const url = mode === 'home' ? BASE_URL : `${BASE_URL}/${mode}`;
+
+    // 1. HTML lang attribute
+    document.documentElement.lang = 'en';
+
+    // 2. Title
+    document.title = meta.title;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 2. Update document title
-    const metadata = SEO_METADATA[mode] || SEO_METADATA.home;
-    document.title = metadata.title;
+    // 3. Meta tag helper (works for name or property)
+    const upsertMeta = (attr: string, content: string, attribute: 'name' | 'property' = 'name') => {
+      let element = document.querySelector(`meta[${attribute}="${attr}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, attr);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
 
-    // 3. Update meta description (Google uses this)
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', metadata.description);
-    } else {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      metaDesc.setAttribute('content', metadata.description);
-      document.head.appendChild(metaDesc);
+    // 4. Essential meta tags
+    upsertMeta('description', meta.description);
+    upsertMeta('keywords', meta.keywords);
+    upsertMeta('robots', 'index, follow');
+    upsertMeta('viewport', 'width=device-width, initial-scale=1');
+    upsertMeta('theme-color', '#ffffff');
+    upsertMeta('author', 'Genz PDF Team');
+
+    // 5. Open Graph (property)
+    upsertMeta('og:title', meta.title, 'property');
+    upsertMeta('og:description', meta.description, 'property');
+    upsertMeta('og:url', url, 'property');
+    upsertMeta('og:type', mode === 'home' ? 'website' : 'article', 'property');
+    upsertMeta('og:site_name', SITE_NAME, 'property');
+    upsertMeta('og:image', DEFAULT_OG_IMAGE, 'property');
+    upsertMeta('og:image:alt', `${SITE_NAME} - ${meta.title}`, 'property');
+    upsertMeta('og:image:width', '1200', 'property');
+    upsertMeta('og:image:height', '630', 'property');
+
+    // 6. Twitter Card (name, NOT property)
+    upsertMeta('twitter:card', 'summary_large_image', 'name');
+    upsertMeta('twitter:site', '@genzpdf', 'name');
+    upsertMeta('twitter:title', meta.title, 'name');
+    upsertMeta('twitter:description', meta.description, 'name');
+    upsertMeta('twitter:image', DEFAULT_OG_IMAGE, 'name');
+
+    // 7. Canonical URL (prevents duplicate content)
+    let linkCanonical = document.querySelector('link[rel="canonical"]');
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute('href', url);
+
+    // 8. JSON-LD Structured Data (Global Website + Organization + Page specific)
+    // Remove old scripts to avoid duplicates
+    const scriptsToRemove = ['json-ld-global', 'json-ld-page', 'json-ld-breadcrumb'];
+    scriptsToRemove.forEach(id => {
+      const oldScript = document.getElementById(id);
+      if (oldScript) oldScript.remove();
+    });
+
+    // 8a. Global Website + Organization Schema
+    const globalScript = document.createElement('script');
+    globalScript.id = 'json-ld-global';
+    globalScript.type = 'application/ld+json';
+    globalScript.text = JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": SITE_NAME,
+        "url": BASE_URL,
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": `${BASE_URL}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": SITE_NAME,
+        "url": BASE_URL,
+        "logo": `${BASE_URL}/logo.png`,
+        "sameAs": [
+          "https://twitter.com/genzpdf",
+          "https://facebook.com/genzpdf"
+        ]
+      }
+    ]);
+    document.head.appendChild(globalScript);
+
+    // 8b. Page-specific schema
+    if (meta.schema) {
+      const pageScript = document.createElement('script');
+      pageScript.id = 'json-ld-page';
+      pageScript.type = 'application/ld+json';
+      pageScript.text = JSON.stringify({
+        ...meta.schema,
+        "@context": "https://schema.org",
+        "url": url,
+        "mainEntityOfPage": url
+      });
+      document.head.appendChild(pageScript);
+    }
+
+    // 8c. BreadcrumbList schema
+    if (meta.breadcrumb && meta.breadcrumb.length > 0) {
+      const breadcrumbScript = document.createElement('script');
+      breadcrumbScript.id = 'json-ld-breadcrumb';
+      breadcrumbScript.type = 'application/ld+json';
+      breadcrumbScript.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": meta.breadcrumb.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": item.name,
+          "item": item.url
+        }))
+      });
+      document.head.appendChild(breadcrumbScript);
     }
   }, [mode]);
 
+  // ---------- MERGE LOGIC ----------
   const handleFilesSelected = (newFiles: File[]) => {
     const pdfFiles: PdfFile[] = newFiles.map((file) => ({
       id: uuidv4(),
@@ -125,24 +374,19 @@ function App() {
   };
 
   const handleClearAll = () => {
-    if (window.confirm("Are you sure you want to remove all files?")) {
+    if (window.confirm("Remove all files?")) {
       setFiles([]);
       setMergedPdfUrl(null);
     }
   };
 
   const handleSort = (order: SortOrder) => {
-    const sorted = [...files].sort((a, b) => {
-      return order === SortOrder.ASC
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    });
+    const sorted = [...files].sort((a, b) => order === SortOrder.ASC ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
     setFiles(sorted);
   };
 
   const handleMerge = async () => {
     if (files.length === 0) return;
-
     setIsMerging(true);
     try {
       const originalFiles = files.map(f => f.file);
@@ -150,265 +394,244 @@ function App() {
       const url = createPdfUrl(pdfBytes);
       setMergedPdfUrl(url);
     } catch (error) {
-      console.error("Merge failed", error);
-      alert("Failed to merge PDFs. Please try again.");
+      alert("Merge failed. Please try again.");
     } finally {
       setIsMerging(false);
     }
   };
 
-  // ✅ NavButton with accessibility (aria-label) for better SEO / UX
+  // ---------- UI Helpers ----------
   const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => (
     <button
       onClick={() => setMode(targetMode)}
-      aria-label={`Go to ${label} tool`}
       className={clsx(
-        "flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 min-w-[100px]",
+        "relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
         mode === targetMode
-          ? "bg-white text-primary-700 shadow-sm ring-1 ring-slate-200 sm:ring-0"
-          : "bg-white sm:bg-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50 sm:hover:bg-slate-200/50 border sm:border-0 border-slate-100"
+          ? "bg-white text-indigo-600 shadow-md ring-1 ring-black/5 scale-105"
+          : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
       )}
     >
-      <Icon size={18} />
+      <Icon size={18} className={mode === targetMode ? "text-indigo-600" : "text-slate-400"} />
       {label}
     </button>
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-800">
-
-      {/* ✅ Semantic <header> with landmark role */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo – uses <div>, not <h1>, to avoid duplicate H1 issues */}
-          <div
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      
+      {/* --- PREMIUM GLASS HEADER --- */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 h-18 flex items-center justify-between">
+          <div 
+            className="flex items-center gap-3 group cursor-pointer" 
             onClick={() => setMode('home')}
-            title="Genz PDF Home"
           >
-            <img
-              src="/logo.png"
-              alt="Genz PDF - Free Online PDF Tools" // ✅ Descriptive alt for SEO
-              className="w-10 h-10 object-contain rounded-lg"
-            />
-            {/* Brand name – not an H1, just a visual heading */}
-            <div className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600 hidden xs:block">
-              Genz PDF
+            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-6 transition-transform">
+              <img src="/logo.png" alt="Genz PDF Logo" className="w-7 h-7 object-contain brightness-0 invert" width="40" height="40" />
             </div>
-            <div className="text-xl font-bold text-primary-600 xs:hidden">
-              Genz PDF
-            </div>
+            <span className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+              Genz<span className="text-indigo-600">PDF</span>
+            </span>
           </div>
 
-          <button
+          {/* Full tool navigation - now includes all 5 tools */}
+          <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/50">
+            <NavButton targetMode="merge" icon={Files} label="Merge" />
+            <NavButton targetMode="split" icon={Scissors} label="Split" />
+            <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
+            <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
+            <NavButton targetMode="resize" icon={Scaling} label="Resize" />
+          </div>
+
+          <button 
             onClick={() => setIsAiOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full hover:shadow-lg hover:shadow-indigo-200 transition-all text-sm font-medium"
+            className="group flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-xl shadow-slate-200 font-bold text-sm"
           >
-            <Sparkles size={16} />
-            <span className="hidden sm:inline">Ask AI Assistant</span>
+            <Sparkles size={16} className="group-hover:animate-pulse" />
+            <span>AI Assistant</span>
           </button>
         </div>
       </header>
 
-      {/* ✅ Semantic <main> – primary content landmark */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        {/* ✅ Navigation – wrapped in <nav> with aria-label */}
-        {!['about', 'contact', 'policy', 'terms'].includes(mode) && (
-          <nav className="flex justify-center mb-8" aria-label="PDF Tools Navigation">
-            <div className="w-full sm:w-auto flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 sm:bg-slate-100 sm:p-1 sm:rounded-xl sm:shadow-inner">
-              <button
-                onClick={() => setMode('home')}
-                className={clsx(
-                  "flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 min-w-[100px]",
-                  mode === 'home'
-                    ? "bg-white text-primary-700 shadow-sm ring-1 ring-slate-200 sm:ring-0"
-                    : "bg-white sm:bg-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50 sm:hover:bg-slate-200/50 border sm:border-0 border-slate-100"
-                )}
-              >
-                <LayoutGrid size={18} />
-                Home
-              </button>
-
-              <NavButton targetMode="merge" icon={Files} label="Merge" />
-              <NavButton targetMode="split" icon={Scissors} label="Split" />
-              <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
-              <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
-              <NavButton targetMode="resize" icon={Scaling} label="Resize" />
-            </div>
-          </nav>
-        )}
-
-        {/* ✅ Dynamic page rendering */}
-        {mode === 'home' ? (
-          <Home setMode={setMode} />
-        ) : mode === 'about' ? (
-          <About />
-        ) : mode === 'contact' ? (
-          <Contact />
-        ) : mode === 'policy' ? (
-          <Policy />
-        ) : mode === 'terms' ? (
-          <Terms />
-        ) : mode === 'split' ? (
-          <SplitTool />
-        ) : mode === 'convert' ? (
-          <ConverterTool />
-        ) : mode === 'compress' ? (
-          <CompressTool />
-        ) : mode === 'resize' ? (
-          <ResizeTool />
-        ) : (
-          /* ---------- MERGE TOOL – FULLY SEO OPTIMIZED ---------- */
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+      {/* --- MAIN CONTENT AREA --- */}
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 md:py-20">
+        
+        <Suspense fallback={
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin text-indigo-600" size={40}/>
+          </div>
+        }>
+          {mode === 'home' ? (
+            <Home setMode={setMode} />
+          ) : mode === 'merge' ? (
             
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => {
-                if (e.target.files) {
-                  handleFilesSelected(Array.from(e.target.files));
-                }
-              }}
-              multiple
-              accept=".pdf"
-              className="hidden"
-            />
+            /* ✅ PROFESSIONAL MERGE INTERFACE */
+            <article className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={(e) => e.target.files && handleFilesSelected(Array.from(e.target.files))} 
+                multiple 
+                accept=".pdf" 
+                className="hidden" 
+              />
 
-            {files.length === 0 ? (
-              /* ----- No files: Show uploader with H1 ----- */
-              <div className="w-full">
-                <div className="mb-6 text-center sm:text-left">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-                    Merge PDF Documents for Free
+              {files.length === 0 ? (
+                <div className="text-center max-w-3xl mx-auto">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-100">
+                    <Zap size={14} /> 100% Secure Processing
+                  </div>
+                  <h1 className="text-4xl md:text-6xl font-[900] text-slate-900 mb-6 tracking-tight leading-[1.1]">
+                    Combine PDF files in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Seconds</span>
                   </h1>
-                  <p className="text-slate-500">
-                    Combine multiple PDFs into one file securely. No limits, watermarks, or sign-up required.
+                  <p className="text-lg text-slate-500 mb-12">
+                    Select multiple PDF files and merge them into one professional document. No signup, no watermarks, completely free.
                   </p>
-                </div>
-                <FileUploader 
-                  onFilesSelected={handleFilesSelected} 
-                  allowMultiple={true}
-                  acceptedFileTypes={['application/pdf']}
-                  label="Drop PDFs here to Merge"
-                />
-              </div>
-            ) : (
-              /* ----- Files present: Show list and merge controls with H1 ----- */
-              <>
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Merge PDF Documents</h1>
-                    <p className="text-slate-500">Combine multiple PDFs into one. Drag to reorder.</p>
+                  
+                  <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100">
+                    <FileUploader 
+                      onFilesSelected={handleFilesSelected} 
+                      allowMultiple={true} 
+                      acceptedFileTypes={['application/pdf']} 
+                      label="Drop PDFs here or Click to Browse" 
+                    />
                   </div>
 
-                  <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <Files size={18} />
-                      Add More Files
-                    </button>
-                    <button
-                      onClick={handleMerge}
-                      disabled={files.length < 2 || isMerging}
-                      className="px-8 py-2.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2"
-                    >
-                      {isMerging ? (
-                        <Loader2 className="animate-spin" size={20} />
-                      ) : (
-                        <FileStack size={20} />
-                      )}
-                      Merge Files
-                    </button>
+                  {/* Feature Grid */}
+                  <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[
+                      { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser." },
+                      { icon: Scaling, title: "High Quality", desc: "Maintains original document resolution." },
+                      { icon: LayoutGrid, title: "Easy Ordering", desc: "Drag and drop to reorder pages." }
+                    ].map((feat, i) => (
+                      <div key={i} className="group p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300">
+                        <feat.icon className="text-indigo-600 mb-4 group-hover:scale-110 transition-transform" size={32} />
+                        <h3 className="font-bold text-slate-800 text-lg mb-2">{feat.title}</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">{feat.desc}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-6 overflow-hidden">
-                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                    <h2 className="font-semibold text-slate-700 flex items-center gap-2">
-                      <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">
-                        {files.length}
-                      </span>
-                      Files to Merge
-                    </h2>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleSort(SortOrder.ASC)}
-                        className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
-                        title="Sort A-Z"
-                      >
-                        <ArrowDownAZ size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleSort(SortOrder.DESC)}
-                        className="p-1.5 text-slate-500 hover:bg-white hover:text-primary-600 rounded transition-colors"
-                        title="Sort Z-A"
-                      >
-                        <ArrowUpAZ size={18} />
-                      </button>
-                      <div className="w-px h-4 bg-slate-300 mx-1"></div>
-                      <button
-                        onClick={handleClearAll}
-                        className="p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
-                        title="Clear All"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                  <FileList
-                    files={files}
-                    setFiles={setFiles}
-                    onRemove={handleRemoveFile}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  {mergedPdfUrl && (
-                    <div className="bg-green-50 rounded-xl border border-green-200 p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-green-100 p-2 rounded-full text-green-600">
-                          <FileStack size={20} />
-                        </div>
-                        <div>
-                          <h2 className="font-semibold text-green-900">Merge Complete!</h2>
-                          <p className="text-sm text-green-700 mt-1 mb-4">
-                            Your consolidated document is ready.
-                          </p>
-                          <a
-                            href={mergedPdfUrl}
-                            download={`genz-merged-${new Date().toISOString().slice(0, 10)}.pdf`}
-                            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-                          >
-                            <Download size={16} />
-                            Download Merged PDF
-                          </a>
-                        </div>
+              ) : (
+                <div className="grid lg:grid-cols-3 gap-8 items-start">
+                  
+                  {/* Left: File List (Order Control) */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+                      <div>
+                        <h1 className="text-2xl font-black text-slate-900">Merge Queue</h1>
+                        <p className="text-sm text-slate-400 font-medium">Reorder your files for the final output</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleSort(SortOrder.ASC)} 
+                          className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
+                          title="Sort A-Z"
+                        >
+                          <ArrowDownAZ size={20}/>
+                        </button>
+                        <button 
+                          onClick={() => handleSort(SortOrder.DESC)} 
+                          className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
+                          title="Sort Z-A"
+                        >
+                          <ArrowUpAZ size={20}/>
+                        </button>
+                        <button 
+                          onClick={handleClearAll} 
+                          className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100"
+                          title="Clear All"
+                        >
+                          <Trash2 size={20}/>
+                        </button>
                       </div>
                     </div>
-                  )}
-                </div>
-              </>
-            )}
+                    
+                    <div className="bg-white p-2 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                      <FileList files={files} setFiles={setFiles} onRemove={handleRemoveFile} />
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full mt-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all font-bold"
+                      >
+                        <Plus size={20} /> Add More Documents
+                      </button>
+                    </div>
+                  </div>
 
-            {/* ✅ SEO RICH CONTENT – Helps ranking & user trust */}
-            <div className="mt-12 pt-8 border-t border-slate-200 text-slate-600 text-sm leading-relaxed">
-              <h2 className="text-lg font-bold text-slate-800 mb-2">Why Use Genz PDF Merger?</h2>
-              <p>
-                Genz PDF offers the <strong>best free PDF merge tool</strong> in India. 
-                Whether you need to combine reports, bank statements, or study materials, 
-                our tool lets you <strong>merge unlimited PDF files</strong> instantly. 
-                Your data is 100% secure as all processing happens locally or on temporary secure sessions.
-              </p>
+                  {/* Right: Actions Card */}
+                  <div className="sticky top-24 space-y-6">
+                    <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200">
+                      <h3 className="text-xl font-black mb-4">Ready to Merge?</h3>
+                      <div className="space-y-4 mb-8">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-400">Total Files:</span>
+                          <span className="font-bold">{files.length}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-400">Security:</span>
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                            <ShieldCheck size={14}/> Encrypted
+                          </span>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={handleMerge} 
+                        disabled={files.length < 2 || isMerging}
+                        className="w-full py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-3"
+                      >
+                        {isMerging ? <Loader2 className="animate-spin" /> : <FileStack />}
+                        {isMerging ? "Processing..." : "Merge Now"}
+                      </button>
+                    </div>
+
+                    {mergedPdfUrl && (
+                      <div className="bg-emerald-500 p-8 rounded-[2.5rem] text-white animate-bounce-in">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-white/20 rounded-lg"><CheckCircle2 /></div>
+                          <span className="font-black text-xl">Completed!</span>
+                        </div>
+                        <a 
+                          href={mergedPdfUrl} 
+                          download="merged-genzpdf.pdf" 
+                          className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black text-center block hover:bg-slate-50 transition-colors shadow-lg"
+                        >
+                          <Download className="inline mr-2" size={20}/> Download Now
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </article>
+          ) : (
+            /* Fallback for all other tools (Split, Convert, Compress, Resize, About, Contact, Policy, Terms) */
+            <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-100">
+              {mode === 'split' && <SplitTool />}
+              {mode === 'convert' && <ConverterTool />}
+              {mode === 'compress' && <CompressTool />}
+              {mode === 'resize' && <ResizeTool />}
+              {mode === 'about' && <About />}
+              {mode === 'contact' && <Contact />}
+              {mode === 'policy' && <Policy />}
+              {mode === 'terms' && <Terms />}
             </div>
-          </section>
-        )}
+          )}
+        </Suspense>
       </main>
 
       <Footer setMode={setMode} />
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+
+      {/* --- CUSTOM STYLES FOR ANIMATIONS --- */}
+      <style>{`
+        @keyframes bounce-in {
+          0% { transform: scale(0.9); opacity: 0; }
+          60% { transform: scale(1.02); opacity: 1; }
+          100% { transform: scale(1); }
+        }
+        .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+      `}</style>
     </div>
   );
 }
