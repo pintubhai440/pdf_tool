@@ -541,3 +541,4 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     </div>
   );
 };
+export default SplitTool;
