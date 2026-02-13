@@ -510,35 +510,37 @@ function App() {
             </button>
           </div>
         </div>
+      </header> 
+      {/* 👈 HEADER यहाँ बंद हो गया */}
 
-        {/* 📱 MOBILE MENU DROPDOWN (Smooth Animation) */}
-        <div className={clsx(
-          "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out flex flex-col pt-24 px-6 pb-8",
-          isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
-        )}>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-120px)] pb-10">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
-            <NavButton targetMode="home" icon={HomeIcon} label="Home" mobile />
-            <NavButton targetMode="merge" icon={Files} label="Merge PDF" mobile />
-            <NavButton targetMode="split" icon={Scissors} label="Split PDF" mobile />
-            <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert PDF" mobile />
-            <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
-            <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
-            
-            <div className="my-2 border-t border-slate-100"></div>
-            
-            <button 
-              onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
-              className="w-full p-4 flex items-center gap-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl shadow-lg shadow-slate-200"
-            >
-              <div className="p-2 bg-white/10 rounded-lg">
-                <Sparkles size={20} />
-              </div>
-              <span className="font-bold">Open AI Assistant</span>
-            </button>
-          </div>
+      {/* 👇 MOBILE MENU अब HEADER के बाहर है (ताकि पूरी स्क्रीन पर दिखे) */}
+      <div className={clsx(
+        "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out flex flex-col pt-24 px-6 pb-8",
+        isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
+      )}>
+        <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-120px)] pb-10">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
+          <NavButton targetMode="home" icon={HomeIcon} label="Home" mobile />
+          <NavButton targetMode="merge" icon={Files} label="Merge PDF" mobile />
+          <NavButton targetMode="split" icon={Scissors} label="Split PDF" mobile />
+          <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert PDF" mobile />
+          <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
+          <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
+          
+          <div className="my-2 border-t border-slate-100"></div>
+          
+          <button 
+            onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
+            className="w-full p-4 flex items-center gap-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl shadow-lg shadow-slate-200"
+          >
+            <div className="p-2 bg-white/10 rounded-lg">
+              <Sparkles size={20} />
+            </div>
+            <span className="font-bold">Open AI Assistant</span>
+          </button>
         </div>
-      </header>
+      </div>
+      {/* 👆 MOBILE MENU समाप्त */}
 
       {/* --- MAIN CONTENT AREA --- */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
