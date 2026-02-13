@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   Zap,
-  Plus
+  Plus,
+  Home as HomeIcon // 👈 Home icon added
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -425,22 +426,29 @@ function App() {
   };
 
   // ---------- UI Helpers ----------
-  // 🔁 REPLACED NAVBUTTON WITH THE NEW VERSION (USING <a> AND window.location.pathname)
-  const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => (
-    <a
-      href={`/${targetMode}-pdf`} // 👈 Button ko Link bana diya
-      className={clsx(
-        "relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
-        // Agar current URL match kare toh highlight karo
-        (mode === targetMode || window.location.pathname.includes(targetMode))
-          ? "bg-white text-indigo-600 shadow-md ring-1 ring-black/5 scale-105"
-          : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
-      )}
-    >
-      <Icon size={18} className={(mode === targetMode || window.location.pathname.includes(targetMode)) ? "text-indigo-600" : "text-slate-400"} />
-      {label}
-    </a>
-  );
+  // 🆕 IMPROVED NAVBUTTON with Home support and clean paths
+  const NavButton = ({ targetMode, icon: Icon, label }: { targetMode: AppMode, icon: any, label: string }) => {
+    // Determine if this button is active
+    const isActive = 
+      (mode === targetMode) || 
+      (targetMode === 'home' && window.location.pathname === '/') ||
+      (targetMode !== 'home' && window.location.pathname.includes(targetMode));
+
+    return (
+      <a
+        href={targetMode === 'home' ? '/' : `/${targetMode}`} // clean URLs
+        className={clsx(
+          "relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
+          isActive
+            ? "bg-white text-indigo-600 shadow-md ring-1 ring-black/5 scale-105"
+            : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+        )}
+      >
+        <Icon size={18} className={isActive ? "text-indigo-600" : "text-slate-400"} />
+        {label}
+      </a>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -448,20 +456,20 @@ function App() {
       {/* --- PREMIUM GLASS HEADER --- */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 h-18 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-3 group cursor-pointer" 
-            onClick={() => setMode('home')}
-          >
+          
+          {/* Logo linking to home */}
+          <a href="/" className="flex items-center gap-3 group cursor-pointer">
             <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-6 transition-transform">
               <img src="/logo.png" alt="Genz PDF Logo" className="w-7 h-7 object-contain brightness-0 invert" width="40" height="40" />
             </div>
             <span className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
               Genz<span className="text-indigo-600">PDF</span>
             </span>
-          </div>
+          </a>
 
-          {/* Full tool navigation - now includes all 5 tools */}
+          {/* Full tool navigation - now includes Home and all 5 tools */}
           <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/50">
+            <NavButton targetMode="home" icon={HomeIcon} label="Home" />
             <NavButton targetMode="merge" icon={Files} label="Merge" />
             <NavButton targetMode="split" icon={Scissors} label="Split" />
             <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
