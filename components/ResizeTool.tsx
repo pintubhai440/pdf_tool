@@ -219,17 +219,22 @@ export const ResizeTool: React.FC = () => {
 
           <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden transition-all duration-300">
             {!file ? (
-              <div className="p-10 md:p-14 text-center">
-                <FileUploader
-                  onFilesSelected={handleFileSelected}
-                  allowMultiple={false}
-                  acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
-                  label="Upload Image to Resize"
-                  subLabel="Drag & Drop or Click to Browse"
-                />
+              // UPDATED: Reduced padding on mobile (p-6) vs desktop (p-14)
+              <div className="p-6 md:p-14 text-center">
+                
+                {/* UPDATED: Added aspect-square wrapper for mobile to fix 'too tall' issue */}
+                <div className="w-full aspect-square md:aspect-auto flex flex-col justify-center">
+                    <FileUploader
+                    onFilesSelected={handleFileSelected}
+                    allowMultiple={false}
+                    acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
+                    label="Upload Image to Resize"
+                    subLabel="Drag & Drop or Click to Browse"
+                    />
+                </div>
 
-                {/* Trust badges */}
-                <div className="mt-10 flex flex-wrap justify-center gap-4">
+                {/* UPDATED: Changed to GRID for mobile to force horizontal layout */}
+                <div className="mt-6 md:mt-10 grid grid-cols-3 md:flex md:flex-wrap justify-center gap-2 md:gap-4">
                   {[
                     { icon: ShieldCheck, text: '100% Secure' },
                     { icon: Maximize2, text: 'HD Quality' },
@@ -237,9 +242,10 @@ export const ResizeTool: React.FC = () => {
                   ].map((feat, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full border border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-wide"
+                      // UPDATED: Smaller padding on mobile (px-2 py-1.5) and adjusted text size
+                      className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-slate-50 rounded-full border border-slate-200 text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap"
                     >
-                      <feat.icon size={14} /> {feat.text}
+                      <feat.icon size={14} className="shrink-0" /> <span>{feat.text}</span>
                     </div>
                   ))}
                 </div>
@@ -492,7 +498,7 @@ export const ResizeTool: React.FC = () => {
           </div>
           <div className="text-center p-4">
             <h4 className="font-bold text-slate-900">Free Forever</h4>
-            <p className="text-sm text-slate-500">No hidden costs or limits</p>
+ <p className="text-sm text-slate-500">No hidden costs or limits</p>
           </div>
         </div>
       </div>
