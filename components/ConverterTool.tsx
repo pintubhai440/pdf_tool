@@ -511,7 +511,7 @@ export const ConverterTool: React.FC = () => {
           <Zap size={14} className="fill-indigo-700" />
           v2.0 • 100% Client-Side
         </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+        <h1 className="text-3xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
           Convert <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Anything</span> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Everything</span>
         </h1>
         <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
@@ -526,7 +526,7 @@ export const ConverterTool: React.FC = () => {
           
           {!mode ? (
             // ----- UPLOAD STATE -----
-            <div className="p-8 md:p-12 bg-slate-50/50">
+            <div className="p-6 md:p-12 bg-slate-50/50">
               
               {/* ✨ FIX: Mobile par Square box (aspect-square), Laptop par normal (md:aspect-auto) */}
               <div className="w-full aspect-square md:aspect-auto">
@@ -544,16 +544,19 @@ export const ConverterTool: React.FC = () => {
                 />
               </div>
 
-              {/* ✨ FIX: Text cut na ho isliye 'flex-wrap' aur 'gap-4' (kam gap) lagaya hai */}
-              <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
-                  <FileType size={16}/> PDF
+              {/* ✨ FIX: Premium Badges for Mobile - Colorful & Clean */}
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
+                  <div className="p-1 bg-red-100 rounded text-red-600"><FileType size={14}/></div>
+                  <span>PDF</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
-                  <FileType size={16}/> DOCX
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
+                   <div className="p-1 bg-blue-100 rounded text-blue-600"><FileType size={14}/></div>
+                  <span>DOCX</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-400">
-                  <ImageIcon size={16}/> PNG/JPG
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
+                   <div className="p-1 bg-purple-100 rounded text-purple-600"><ImageIcon size={14}/></div>
+                  <span>IMG</span>
                 </div>
               </div>
             </div>
