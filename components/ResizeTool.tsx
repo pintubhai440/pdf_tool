@@ -499,3 +499,4 @@ export const ResizeTool: React.FC = () => {
     </div>
   );
 };
+export default ResizeTool;
