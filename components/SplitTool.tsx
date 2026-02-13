@@ -47,14 +47,12 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
   // ---------- MASTER SEO INJECTION & PDF WORKER INIT ----------
   useEffect(() => {
-    // 1. PDF.js Worker
     const lib = (pdfjsLib as any).default || pdfjsLib;
     if (lib?.GlobalWorkerOptions) {
       lib.GlobalWorkerOptions.workerSrc =
         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    // 2. Meta tags (title, description, canonical, etc.)
     document.title = SEO.title;
 
     const upsertMeta = (attr: string, value: string, isProperty = false) => {
@@ -98,7 +96,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
     upsertMeta('twitter:image', SEO.image);
     upsertMeta('twitter:site', SEO.twitterHandle);
 
-    // 3. JSON-LD STRUCTURED DATA
     const scriptId = 'json-ld-split-pdf';
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
@@ -194,7 +191,6 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
         const pdf = await lib.getDocument({ data: buff }).promise;
         const images: string[] = [];
 
-        // Optimize scale based on device pixel ratio for sharper mobile thumbnails
         const scale = window.devicePixelRatio > 1 ? 0.5 : 0.35;
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -251,51 +247,49 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
   // ---------- RENDER ----------
   return (
-    <div className="min-h-screen bg-[#FDF8F6] font-sans text-slate-900 selection:bg-rose-100 selection:text-rose-700 pb-20">
+    <div className="min-h-screen bg-[#FDF8F6] font-sans text-slate-900 selection:bg-rose-100 selection:text-rose-700 pb-10 md:pb-20">
       
-      {/* PROFESSIONAL BACKGROUND */}
+      {/* BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-white via-[#FFF0F0] to-transparent opacity-80" />
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-rose-200/20 rounded-full blur-[120px]" />
         <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] bg-orange-100/30 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+      <div className="relative w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 md:py-12">
         
-        {/* HEADER SECTION (Responsive Padding) */}
-        <header className="text-center mb-10 md:mb-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-rose-100 shadow-sm text-rose-600 text-xs font-bold uppercase tracking-widest mb-6">
-            <Zap size={14} className="fill-rose-600" />
+        {/* HEADER */}
+        <header className="text-center mb-6 md:mb-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-rose-100 shadow-sm text-rose-600 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 md:mb-6">
+            <Zap size={12} className="fill-rose-600" />
             V2.0 • Lightning Fast
           </div>
-          <h1 className="text-4xl md:text-7xl font-black text-slate-900 tracking-tight mb-4 md:mb-6 leading-tight">
+          <h1 className="text-3xl md:text-7xl font-black text-slate-900 tracking-tight mb-2 md:mb-6 leading-tight">
             Split PDF & <br className="hidden md:block"/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-orange-600">
               Delete Pages Instantly
             </span>
           </h1>
-          <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-4">
+          <p className="text-sm md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-2">
             Professional grade tool to remove unwanted pages.
             <span className="font-medium text-slate-800"> Secure, Private, and Free.</span>
           </p>
         </header>
 
-        {/* MAIN INTERFACE CARD */}
+        {/* MAIN CARD */}
         <div className="relative z-10">
-          <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-rose-900/5 border border-white/60 overflow-hidden min-h-[500px] transition-all duration-500">
+          <div className="bg-white/60 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl shadow-rose-900/5 border border-white/60 overflow-hidden min-h-[400px] md:min-h-[500px] transition-all duration-500">
             
             {!file ? (
-              /* ✅ REDESIGNED UPLOAD STATE (Square Box + Horizontal Features) */
-              <div className="px-6 py-12 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-20 h-full min-h-[500px]">
+              /* ---------- UPLOAD STATE (Mobile Optimized) ---------- */
+              <div className="px-4 py-8 md:px-12 md:py-20 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-20 h-full min-h-[400px] md:min-h-[500px]">
                 
                 {/* 1. SQUARE UPLOAD BOX */}
-                <div className="w-full max-w-[320px] md:max-w-[380px] aspect-square relative group shrink-0 mx-auto md:mx-0">
-                  {/* Animated Glow */}
-                  <div className="absolute -inset-2 bg-gradient-to-tr from-rose-400 to-orange-400 rounded-[2.5rem] blur-xl opacity-30 group-hover:opacity-60 animate-pulse transition duration-700"></div>
+                <div className="w-full max-w-[280px] md:max-w-[380px] aspect-square relative group shrink-0 mx-auto md:mx-0">
+                  <div className="absolute -inset-2 bg-gradient-to-tr from-rose-400 to-orange-400 rounded-[2rem] blur-xl opacity-30 group-hover:opacity-60 animate-pulse transition duration-700"></div>
                   
-                  <div className="relative h-full bg-white rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50">
+                  <div className="relative h-full bg-white rounded-[1.8rem] md:rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50">
                     <div className="absolute inset-0 flex flex-col">
-                       {/* Force FileUploader to fill the square */}
                        <div className="h-full w-full [&>div]:h-full [&>div]:border-dashed [&>div]:border-2 [&>div]:border-rose-200 [&>div]:bg-rose-50/30">
                           <FileUploader 
                             onFilesSelected={handleFileSelected} 
@@ -308,31 +302,31 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                   </div>
                 </div>
                 
-                {/* 2. SIDE FEATURES (Horizontal on Desktop) */}
-                <div className="flex flex-col gap-6 max-w-sm w-full text-center md:text-left">
-                   <div className="space-y-2 mb-2">
-                      <h3 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
+                {/* 2. FEATURES (compact on mobile) */}
+                <div className="flex flex-col gap-4 max-w-sm w-full text-center md:text-left">
+                   <div className="space-y-1 mb-2">
+                      <h3 className="text-xl md:text-3xl font-black text-slate-800 leading-tight">
                         Professional <br/>
                         <span className="text-rose-600">PDF Splitter</span>
                       </h3>
-                      <p className="text-slate-500 font-medium">
+                      <p className="text-xs md:text-base text-slate-500 font-medium">
                         Securely separate pages in your browser.
                       </p>
                    </div>
 
-                   <div className="grid gap-4">
+                   <div className="grid gap-3">
                       {[
                         { icon: ShieldCheck, title: "100% Secure", desc: "Files never leave your device" },
                         { icon: Scissors, title: "Precise Control", desc: "Select exact pages to delete" },
                         { icon: Zap, title: "Lightning Fast", desc: "No upload waiting time" }
                       ].map((f, i) => (
-                        <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all group cursor-default text-left">
-                          <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
-                            <f.icon size={22} />
+                        <div key={i} className="flex items-center gap-3 p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all group cursor-default text-left">
+                          <div className="shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
+                            <f.icon size={16} className="md:w-[22px] md:h-[22px]" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-slate-800">{f.title}</h4>
-                            <p className="text-sm text-slate-500">{f.desc}</p>
+                            <h4 className="font-bold text-slate-800 text-sm md:text-base">{f.title}</h4>
+                            <p className="text-xs md:text-sm text-slate-500">{f.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -341,31 +335,31 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
               </div>
             ) : (
-              /* EDITOR STATE */
+              /* ---------- EDITOR STATE ---------- */
               <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* 1. STICKY TOOLBAR */}
-                <div className="sticky top-16 md:top-20 z-30 bg-white/90 backdrop-blur-md border-b border-rose-100 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shadow-sm transition-all duration-300">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="bg-gradient-to-br from-rose-500 to-orange-500 p-2 md:p-2.5 rounded-xl text-white shadow-lg shadow-rose-200">
-                      <FileText size={20} className="md:w-6 md:h-6" />
+                {/* STICKY TOOLBAR */}
+                <div className="sticky top-0 md:top-20 z-30 bg-white/90 backdrop-blur-md border-b border-rose-100 px-3 md:px-6 py-2 md:py-4 flex items-center justify-between shadow-sm transition-all duration-300">
+                  <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                    <div className="bg-gradient-to-br from-rose-500 to-orange-500 p-1.5 md:p-2.5 rounded-lg md:rounded-xl text-white shadow-lg shadow-rose-200 shrink-0">
+                      <FileText size={16} className="md:w-6 md:h-6" />
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-slate-800 text-sm md:text-base max-w-[120px] md:max-w-xs truncate">{file.name}</h3>
-                      <p className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
+                    <div className="min-w-0 truncate">
+                      <h3 className="font-bold text-slate-800 text-xs md:text-base truncate">{file.name}</h3>
+                      <p className="text-[8px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
                         {pageImages.length} Pages • {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 md:gap-3">
+                  <div className="flex items-center gap-1 md:gap-3 shrink-0">
                     {!resultUrl && (
                       <button 
                         onClick={reset}
-                        className="p-2 md:p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        className="p-1.5 md:p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg md:rounded-xl transition-all"
                         title="Start Over"
                       >
-                        <RefreshCcw size={18} className="md:w-5 md:h-5" />
+                        <RefreshCcw size={14} className="md:w-5 md:h-5" />
                       </button>
                     )}
 
@@ -373,17 +367,18 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                       <a
                         href={resultUrl}
                         download={`edited-${file.name}`}
-                        className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 md:px-6 md:py-3 rounded-xl font-bold shadow-lg shadow-emerald-200 hover:-translate-y-0.5 transition-all text-sm md:text-base"
+                        className="flex items-center gap-1 md:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 md:px-6 md:py-3 rounded-lg md:rounded-xl font-bold shadow-lg shadow-emerald-200 hover:-translate-y-0.5 transition-all text-xs md:text-base"
                       >
-                        <Download size={18} /> <span className="hidden sm:inline">Download</span>
+                        <Download size={14} className="md:w-[18px] md:h-[18px]" /> 
+                        <span className="hidden sm:inline">Download</span>
                       </a>
                     ) : (
                       <button
                         onClick={processPdf}
                         disabled={selectedPages.size === 0 || isProcessing}
-                        className="flex items-center gap-2 bg-slate-900 hover:bg-rose-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-rose-200 transition-all duration-300 text-sm md:text-base"
+                        className="flex items-center gap-1 md:gap-2 bg-slate-900 hover:bg-rose-600 text-white px-3 py-1.5 md:px-6 md:py-3 rounded-lg md:rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-rose-200 transition-all duration-300 text-xs md:text-base"
                       >
-                        {isProcessing ? <Loader2 className="animate-spin w-4 h-4 md:w-5 md:h-5" /> : <Trash2 size={18} className="md:w-5 md:h-5" />}
+                        {isProcessing ? <Loader2 className="animate-spin w-3 h-3 md:w-5 md:h-5" /> : <Trash2 size={14} className="md:w-[18px] md:h-[18px]" />}
                         <span>Remove <span className="hidden sm:inline">Pages</span></span>
                       </button>
                     )}
@@ -392,33 +387,33 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
 
                 {/* ERROR ALERT */}
                 {error && (
-                  <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3 text-sm animate-in slide-in-from-top-2">
-                    <AlertCircle size={18} /> {error}
+                  <div className="mx-3 mt-3 p-2 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2 text-xs animate-in slide-in-from-top-2">
+                    <AlertCircle size={14} /> {error}
                   </div>
                 )}
 
-                {/* 2. MAIN CONTENT AREA */}
-                <div className="p-4 md:p-10 bg-slate-50/50 flex-1 overflow-y-auto min-h-[60vh]">
+                {/* MAIN CONTENT AREA */}
+                <div className="p-3 md:p-10 bg-slate-50/50 flex-1 overflow-y-auto min-h-[50vh] md:min-h-[60vh]">
                   
                   {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 md:py-32">
+                    <div className="flex flex-col items-center justify-center py-12 md:py-32">
                       <div className="relative">
                         <div className="absolute inset-0 bg-rose-200 rounded-full blur-xl animate-pulse" />
-                        <Loader2 className="relative z-10 w-12 h-12 md:w-16 md:h-16 animate-spin text-rose-600" />
+                        <Loader2 className="relative z-10 w-8 h-8 md:w-16 md:h-16 animate-spin text-rose-600" />
                       </div>
-                      <p className="mt-6 md:mt-8 text-base md:text-lg font-medium text-slate-500">Generating Previews...</p>
+                      <p className="mt-4 md:mt-8 text-sm md:text-lg font-medium text-slate-500">Generating Previews...</p>
                     </div>
                   ) : resultUrl ? (
                     /* SUCCESS STATE */
-                    <div className="flex flex-col items-center justify-center py-10 md:py-20 text-center animate-in zoom-in-95 duration-500">
-                      <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-green-200 mb-6 md:mb-8">
-                        <CheckCircle2 size={40} className="md:w-12 md:h-12" />
+                    <div className="flex flex-col items-center justify-center py-8 md:py-20 text-center animate-in zoom-in-95 duration-500">
+                      <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-green-200 mb-4 md:mb-8">
+                        <CheckCircle2 size={28} className="md:w-12 md:h-12" />
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">PDF Processed!</h3>
-                      <p className="text-slate-500 mb-6 md:mb-8 max-w-md text-base md:text-lg">
+                      <h3 className="text-xl md:text-3xl font-bold text-slate-900 mb-2 md:mb-4">PDF Processed!</h3>
+                      <p className="text-slate-500 mb-4 md:mb-8 max-w-md text-sm md:text-lg">
                         We have successfully removed {selectedPages.size} pages from your document.
                       </p>
-                      <button onClick={reset} className="text-slate-400 hover:text-slate-800 font-semibold underline underline-offset-4 transition-colors">
+                      <button onClick={reset} className="text-slate-400 hover:text-slate-800 font-semibold underline underline-offset-4 text-sm md:text-base transition-colors">
                         Process Another File
                       </button>
                     </div>
@@ -426,15 +421,15 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                     /* GRID EDITOR */
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                       {/* Hint Bar */}
-                      <div className="flex justify-center mb-6 md:mb-8">
-                        <div className="bg-white px-4 py-1.5 md:px-5 md:py-2 rounded-full border border-slate-200 shadow-sm flex items-center gap-2 text-xs md:text-sm text-slate-500">
-                          <MousePointerClick size={14} />
+                      <div className="flex justify-center mb-4 md:mb-8">
+                        <div className="bg-white px-3 py-1 md:px-5 md:py-2 rounded-full border border-slate-200 shadow-sm flex items-center gap-1 md:gap-2 text-[10px] md:text-sm text-slate-500">
+                          <MousePointerClick size={12} className="md:w-[14px] md:h-[14px]" />
                           Tap to mark for <span className="text-rose-600 font-bold">Deletion</span>
                         </div>
                       </div>
 
                       {/* The Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-8 pb-10">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-8 pb-6 md:pb-10">
                         {pageImages.map((img, idx) => {
                           const isSelected = selectedPages.has(idx);
                           return (
@@ -442,42 +437,39 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                               key={idx}
                               onClick={() => togglePage(idx)}
                               className={clsx(
-                                "group relative aspect-[3/4] rounded-xl cursor-pointer transition-all duration-200 ease-out",
+                                "group relative aspect-[3/4] rounded-lg md:rounded-xl cursor-pointer transition-all duration-200 ease-out",
                                 isSelected 
-                                  ? "ring-4 ring-rose-500 shadow-xl shadow-rose-200 transform scale-[0.96]" 
-                                  : "bg-white shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 hover:ring-2 hover:ring-rose-200"
+                                  ? "ring-2 md:ring-4 ring-rose-500 shadow-lg shadow-rose-200 transform scale-[0.96]" 
+                                  : "bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 hover:ring-1 hover:ring-rose-200"
                               )}
                             >
-                              {/* Paper Sheet Look */}
-                              <div className="absolute inset-0 bg-white rounded-xl overflow-hidden">
+                              <div className="absolute inset-0 bg-white rounded-lg md:rounded-xl overflow-hidden">
                                 <img 
                                   src={img} 
                                   alt={`Page ${idx + 1}`} 
                                   className={clsx(
-                                    "w-full h-full object-contain p-2 md:p-4 transition-all duration-300",
-                                    isSelected && "opacity-20 grayscale blur-[1px]"
+                                    "w-full h-full object-contain p-1 md:p-4 transition-all duration-300",
+                                    isSelected && "opacity-20 grayscale blur-[0.5px]"
                                   )} 
                                   loading="lazy"
                                 />
                               </div>
 
-                              {/* Page Number */}
-                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-sm text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10 whitespace-nowrap">
-                                Page {idx + 1}
+                              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-sm text-white text-[7px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10 whitespace-nowrap">
+                                P.{idx + 1}
                               </div>
 
-                              {/* Deletion Overlay */}
                               <div className={clsx(
                                 "absolute inset-0 flex items-center justify-center transition-all duration-200 z-20",
                                 isSelected ? "bg-rose-900/10 opacity-100" : "opacity-0 group-hover:opacity-100 md:bg-black/5"
                               )}>
                                 <div className={clsx(
-                                  "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 transform",
+                                  "w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 transform",
                                   isSelected 
                                     ? "bg-rose-600 text-white scale-110" 
-                                    : "bg-white text-slate-400 scale-75 translate-y-4 group-hover:translate-y-0 group-hover:scale-100"
+                                    : "bg-white text-slate-400 scale-75 translate-y-2 md:translate-y-4 group-hover:translate-y-0 group-hover:scale-100"
                                 )}>
-                                  <Trash2 size={20} className="md:w-6 md:h-6" />
+                                  <Trash2 size={12} className="md:w-6 md:h-6" />
                                 </div>
                               </div>
                             </div>
@@ -492,8 +484,8 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
           </div>
         </div>
 
-        {/* FEATURE HIGHLIGHTS */}
-        <section className="mt-24 grid md:grid-cols-3 gap-8">
+        {/* FEATURE HIGHLIGHTS (Mobile adjusted) */}
+        <section className="mt-12 md:mt-24 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 px-2 md:px-0">
           {[
             {
               title: "Visual Selection",
@@ -514,23 +506,22 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
               style: "bg-orange-50 text-orange-600"
             }
           ].map((item, i) => (
-            <div key={i} className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-              <div className={`w-14 h-14 ${item.style} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <item.icon size={28} />
+            <div key={i} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className={`w-10 h-10 md:w-14 md:h-14 ${item.style} rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <item.icon size={20} className="md:w-[28px] md:h-[28px]" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
-              <p className="text-slate-500 leading-relaxed">{item.desc}</p>
+              <h3 className="text-base md:text-xl font-bold text-slate-900 mb-1 md:mb-3">{item.title}</h3>
+              <p className="text-xs md:text-base text-slate-500 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </section>
 
-        {/* HOW TO & FAQ */}
-        <section className="mt-24 max-w-4xl mx-auto">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-lg p-8 md:p-12">
-            <h2 className="text-3xl font-black text-center text-slate-900 mb-12">How It Works</h2>
+        {/* HOW TO & FAQ (Mobile adjusted) */}
+        <section className="mt-12 md:mt-24 max-w-4xl mx-auto px-2 md:px-0">
+          <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-lg p-5 md:p-12">
+            <h2 className="text-2xl md:text-3xl font-black text-center text-slate-900 mb-8 md:mb-12">How It Works</h2>
             
-            <div className="grid md:grid-cols-3 gap-12 relative">
-               {/* Connecting Line (Desktop) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 relative">
                <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-rose-200 to-orange-200 z-0" />
 
                {[
@@ -539,30 +530,30 @@ export const SplitTool: React.FC<SplitToolProps> = () => {
                  { step: "3", title: "Download", text: "Get your new PDF" }
                ].map((s, i) => (
                  <div key={i} className="relative z-10 text-center group">
-                   <div className="w-14 h-14 mx-auto bg-white border-2 border-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm mb-4 group-hover:border-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all duration-300">
+                   <div className="w-12 h-12 md:w-14 md:h-14 mx-auto bg-white border-2 border-rose-100 text-rose-600 rounded-xl md:rounded-2xl flex items-center justify-center text-lg md:text-xl font-bold shadow-sm mb-3 md:mb-4 group-hover:border-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all duration-300">
                      {s.step}
                    </div>
-                   <h3 className="text-lg font-bold text-slate-900">{s.title}</h3>
-                   <p className="text-sm text-slate-500 mt-1">{s.text}</p>
+                   <h3 className="text-base md:text-lg font-bold text-slate-900">{s.title}</h3>
+                   <p className="text-xs md:text-sm text-slate-500 mt-1">{s.text}</p>
                  </div>
                ))}
             </div>
 
-            <div className="mt-16 pt-10 border-t border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <ArrowRight className="text-rose-500" /> Frequently Asked Questions
+            <div className="mt-10 md:mt-16 pt-6 md:pt-10 border-t border-slate-100">
+              <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4 md:mb-6 flex items-center gap-2">
+                <ArrowRight className="text-rose-500 w-4 h-4 md:w-5 md:h-5" /> Frequently Asked Questions
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {[
                   { q: "Is this tool free?", a: "Yes, completely free with no limits." },
                   { q: "Does it work on Mac/Windows?", a: "It works on any device with a browser." },
                   { q: "Is my data safe?", a: "Absolutely. No file upload occurs." }
                 ].map((faq, i) => (
-                  <details key={i} className="group bg-slate-50 rounded-xl overflow-hidden cursor-pointer">
-                    <summary className="flex justify-between items-center p-4 font-semibold text-slate-700 hover:text-rose-600 transition-colors list-none">
-                      {faq.q} <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                  <details key={i} className="group bg-slate-50 rounded-lg md:rounded-xl overflow-hidden cursor-pointer">
+                    <summary className="flex justify-between items-center p-3 md:p-4 font-semibold text-slate-700 hover:text-rose-600 transition-colors text-sm md:text-base list-none">
+                      {faq.q} <span className="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
                     </summary>
-                    <div className="px-4 pb-4 text-slate-500 text-sm">
+                    <div className="px-3 pb-3 md:px-4 md:pb-4 text-slate-500 text-xs md:text-sm">
                       {faq.a}
                     </div>
                   </details>
