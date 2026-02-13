@@ -196,12 +196,9 @@ export const ResizeTool: React.FC = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-200/30 rounded-full blur-[100px]" />
       </div>
 
-      {/* UPDATED: Reduced px-6 to px-3 for mobile to utilize more width.
-         Reduced py-12 to py-6 for mobile to remove top gap.
-      */}
-      <div className="relative w-full max-w-5xl mx-auto px-3 md:px-6 py-6 md:py-12">
+      {/* UPDATED: PX reduced to 2 for mobile to maximize width */}
+      <div className="relative w-full max-w-5xl mx-auto px-2 md:px-6 py-6 md:py-12">
         {/* ---------- HERO SECTION ---------- */}
-        {/* UPDATED: Reduced bottom margin from mb-14 to mb-8 for mobile */}
         <header className="text-center mb-8 md:mb-14 animate-in fade-in slide-in-from-bottom-6 duration-700">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 shadow-sm text-indigo-600 text-xs font-bold uppercase tracking-wider mb-4 md:mb-6 hover:shadow-md transition-all">
             <Zap size={14} className="fill-indigo-600" />
@@ -223,8 +220,8 @@ export const ResizeTool: React.FC = () => {
 
           <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden transition-all duration-300">
             {!file ? (
-              // UPDATED: Reduced padding to p-4 on mobile to maximize internal space
-              <div className="p-4 md:p-14 text-center">
+              // UPDATED: Padding reduced to p-3 for mobile
+              <div className="p-3 md:p-14 text-center">
                 
                 {/* Square aspect ratio for mobile */}
                 <div className="w-full aspect-square md:aspect-auto flex flex-col justify-center">
@@ -237,11 +234,12 @@ export const ResizeTool: React.FC = () => {
                     />
                 </div>
 
-                {/* UPDATED: Grid layout for badges.
-                   Added 'w-full' to ensure they fill the width.
-                   Reduced text size significantly for mobile [9px] so they don't squash.
+                {/* UPDATED: 
+                    - Used flex-col (icon top, text bottom) for mobile layout
+                    - Reduced padding and font size
+                    - This fixes the overlapping issue
                 */}
-                <div className="mt-4 md:mt-10 grid grid-cols-3 gap-2 md:gap-4 w-full">
+                <div className="mt-4 md:mt-10 grid grid-cols-3 gap-2 w-full">
                   {[
                     { icon: ShieldCheck, text: '100% Secure' },
                     { icon: Maximize2, text: 'HD Quality' },
@@ -249,10 +247,10 @@ export const ResizeTool: React.FC = () => {
                   ].map((feat, i) => (
                     <div
                       key={i}
-                      className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-1 py-2 md:px-4 md:py-2 bg-slate-50 rounded-lg md:rounded-full border border-slate-200 text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wide whitespace-nowrap w-full"
+                      className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-1 py-2 md:px-4 md:py-2 bg-slate-50 rounded-xl md:rounded-full border border-slate-200 text-slate-500 text-[9px] md:text-xs font-bold uppercase tracking-wide w-full"
                     >
-                      <feat.icon size={12} className="shrink-0 md:w-3.5 md:h-3.5" /> 
-                      <span className="truncate">{feat.text}</span>
+                      <feat.icon size={14} className="shrink-0 md:w-3.5 md:h-3.5 mb-0.5 md:mb-0" /> 
+                      <span className="text-center leading-none">{feat.text}</span>
                     </div>
                   ))}
                 </div>
@@ -287,8 +285,8 @@ export const ResizeTool: React.FC = () => {
                 </div>
 
                 {/* Editor Area */}
-                {/* UPDATED: Reduced padding to p-5 for mobile */}
-                <div className="p-5 md:p-10">
+                {/* UPDATED: Reduced padding to p-3 for mobile */}
+                <div className="p-3 md:p-10">
                   {!downloadUrl ? (
                     <div className="space-y-6 md:space-y-8">
                       {/* Dimensions Inputs */}
@@ -413,7 +411,6 @@ export const ResizeTool: React.FC = () => {
         </div>
 
         {/* ---------- FEATURES GRID (SEO ENRICHED) ---------- */}
-        {/* UPDATED: Reduced top margin from mt-24 to mt-12 for mobile */}
         <section className="grid md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto mt-12 md:mt-24">
           {[
             {
@@ -454,7 +451,6 @@ export const ResizeTool: React.FC = () => {
         </section>
 
         {/* ---------- FAQ SECTION ---------- */}
-        {/* UPDATED: Reduced margins for mobile */}
         <section className="max-w-3xl mx-auto mt-12 md:mt-24 border-t border-slate-200 pt-12 md:pt-16">
           <div className="text-center mb-8 md:mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 md:mb-4">Frequently Asked Questions</h2>
