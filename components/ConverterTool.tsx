@@ -19,7 +19,7 @@ import { imagesToPdf, createPdfUrl } from '../services/pdfService';
 import { ConversionFormat } from '../types';
 
 /**
- * 🔥 SEO‑FIRST UNIVERSAL CONVERTER (Vite Compatible)
+ * 🔥 SEO‑FIRST UNIVERSAL CONVERTER (Vite Compatible + Mobile Optimized)
  * 100% client‑side, secure, lightning fast, and ready to rank #1.
  */
 export const ConverterTool: React.FC = () => {
@@ -502,19 +502,22 @@ export const ConverterTool: React.FC = () => {
     setPageDesc('Free online file converter. Convert PDF to Word, Image to PDF, DOCX to PDF and more – securely in your browser, no upload.');
   };
 
-  // ----- UI RENDER (Premium, SEO‑Rich) -----
+  // ----- UI RENDER (Premium, SEO‑Rich, Mobile Optimized) -----
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8">
+    // ✨ FIX 1: Reduced outer padding on mobile (px-3 py-6 instead of px-4 py-8)
+    <div className="w-full max-w-5xl mx-auto px-3 py-6 md:px-4 md:py-8">
+      
       {/* HERO SECTION */}
-      <section className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wide mb-6">
-          <Zap size={14} className="fill-indigo-700" />
+      {/* ✨ FIX 2: Reduced bottom margin (mb-8 instead of mb-12) */}
+      <section className="text-center mb-8 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] md:text-xs font-bold uppercase tracking-wide mb-4 md:mb-6">
+          <Zap size={12} className="fill-indigo-700" />
           v2.0 • 100% Client-Side
         </div>
-        <h1 className="text-3xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+        <h1 className="text-2xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-4 md:mb-6">
           Convert <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Anything</span> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Everything</span>
         </h1>
-        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
           The most secure file converter on the web. Transform PDFs, Images, and Documents instantly without your data ever leaving this browser tab.
         </p>
       </section>
@@ -522,14 +525,15 @@ export const ConverterTool: React.FC = () => {
       {/* MAIN TOOL CARD */}
       <section className="relative z-10 max-w-3xl mx-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-500 transform rotate-1 rounded-3xl opacity-20 blur-xl"></div>
-        <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+        <div className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
           
           {!mode ? (
             // ----- UPLOAD STATE -----
-            <div className="p-4 md:p-12 bg-slate-50/50">
+            // ✨ FIX 3: Reduced internal padding (p-5 instead of p-8/p-12)
+            <div className="p-5 md:p-12 bg-slate-50/50">
               
-              {/* ✨ FIX: Mobile Full Width Square Box */}
-              <div className="w-full aspect-square md:aspect-auto shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl overflow-hidden bg-white">
+              {/* ✨ FIX 4: Removed aspect-square to fix mobile height issue */}
+              <div className="w-full min-h-[220px] md:min-h-auto shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl overflow-hidden bg-white">
                 <FileUploader
                   onFilesSelected={handleFilesSelected}
                   allowMultiple={true}
@@ -544,18 +548,18 @@ export const ConverterTool: React.FC = () => {
                 />
               </div>
 
-              {/* ✨ FIX: Premium Badges for Mobile - Colorful & Clean */}
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
-                  <div className="p-1.5 bg-red-100 rounded-lg text-red-600"><FileType size={16}/></div>
+              {/* ✨ FIX 5: Horizontal Badges with smaller padding/gap */}
+              <div className="mt-4 flex flex-row flex-wrap justify-center gap-2 md:gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-[11px] md:text-xs font-bold text-slate-600">
+                  <div className="p-1 bg-red-100 rounded text-red-600"><FileType size={14}/></div>
                   <span>PDF</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
-                   <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600"><FileType size={16}/></div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-[11px] md:text-xs font-bold text-slate-600">
+                   <div className="p-1 bg-blue-100 rounded text-blue-600"><FileType size={14}/></div>
                   <span>DOCX</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
-                   <div className="p-1.5 bg-purple-100 rounded-lg text-purple-600"><ImageIcon size={16}/></div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-[11px] md:text-xs font-bold text-slate-600">
+                   <div className="p-1 bg-purple-100 rounded text-purple-600"><ImageIcon size={14}/></div>
                   <span>IMG</span>
                 </div>
               </div>
@@ -564,30 +568,30 @@ export const ConverterTool: React.FC = () => {
             // ----- CONVERSION WORKFLOW -----
             <div className="p-0">
               {/* File info header */}
-              <div className="bg-slate-50 px-8 py-6 border-b border-slate-200 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl shadow-sm ${mode.includes('img') ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
-                    {mode === 'img-to-x' ? <ImageIcon size={24} /> : <FileText size={24} />}
+              <div className="bg-slate-50 px-4 py-4 md:px-8 md:py-6 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 md:p-3 rounded-xl shadow-sm ${mode.includes('img') ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                    {mode === 'img-to-x' ? <ImageIcon size={20} /> : <FileText size={20} />}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 text-lg truncate max-w-[200px] md:max-w-xs">
+                    <h3 className="font-bold text-slate-800 text-sm md:text-lg truncate max-w-[150px] md:max-w-xs">
                       {mode === 'img-to-x' ? `${imageFiles.length} Image${imageFiles.length > 1 ? 's' : ''}` : file?.name}
                     </h3>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] md:text-xs font-medium text-slate-500 uppercase tracking-wider">
                       {mode === 'img-to-x' ? 'Batch Processing' : 'Single File'}
                     </p>
                   </div>
                 </div>
                 <button onClick={handleReset} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-red-500">
-                  <RefreshCw size={20} />
+                  <RefreshCw size={18} />
                 </button>
               </div>
 
-              {/* Body */}
-              <div className="p-8 space-y-8">
+              {/* Body - Reduced Padding on Mobile */}
+              <div className="p-5 md:p-8 space-y-6 md:space-y-8">
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-in slide-in-from-top-2">
-                    <AlertCircle size={20} /> <span className="font-medium">{error}</span>
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in slide-in-from-top-2">
+                    <AlertCircle size={18} /> <span className="font-medium">{error}</span>
                   </div>
                 )}
 
@@ -595,12 +599,12 @@ export const ConverterTool: React.FC = () => {
                   <div className="space-y-6">
                     {mode !== 'docx-to-pdf' ? (
                       <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Target Format</label>
+                        <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wide">Target Format</label>
                         <div className="relative">
                           <select 
                             value={targetFormat} 
                             onChange={(e) => setTargetFormat(e.target.value as ConversionFormat)}
-                            className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-800 text-lg font-medium rounded-xl px-5 py-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all cursor-pointer"
+                            className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-800 text-base md:text-lg font-medium rounded-xl px-4 py-3 md:px-5 md:py-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all cursor-pointer"
                           >
                             {mode === 'pdf-to-x' && (
                               <>
@@ -619,7 +623,7 @@ export const ConverterTool: React.FC = () => {
                               </>
                             )}
                           </select>
-                          <ArrowRightLeft className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
+                          <ArrowRightLeft className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                         </div>
                       </div>
                     ) : (
@@ -632,7 +636,7 @@ export const ConverterTool: React.FC = () => {
                     <button
                       onClick={handleConvert}
                       disabled={isProcessing}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transform transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-3"
+                      className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-base md:text-lg font-bold py-3.5 md:py-4 rounded-xl shadow-lg shadow-indigo-200 transform transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-3"
                     >
                       {isProcessing ? (
                         <><Loader2 className="animate-spin" /> Converting...</>
@@ -644,13 +648,13 @@ export const ConverterTool: React.FC = () => {
                 ) : (
                   // ----- SUCCESS / DOWNLOAD STATE -----
                   <div className="text-center animate-in zoom-in-95 duration-300">
-                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                      <CheckCircle2 size={40} />
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-inner">
+                      <CheckCircle2 size={32} />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2">It's Ready!</h2>
-                    <p className="text-slate-500 mb-8">Your file has been successfully converted.</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-2">It's Ready!</h2>
+                    <p className="text-sm md:text-base text-slate-500 mb-6 md:mb-8">Your file has been successfully converted.</p>
                     
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <a 
                         href={downloadUrl} 
                         download={downloadName}
@@ -673,42 +677,44 @@ export const ConverterTool: React.FC = () => {
         </div>
       </section>
 
-      {/* FEATURES GRID (SEO Content) */}
-      <section className="mt-24 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {/* FEATURES GRID */}
+      {/* ✨ FIX 6: Reduced top margin */}
+      <section className="mt-12 md:mt-24 grid md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto">
         {[
           {
-            icon: <ShieldCheck size={32} />,
+            icon: <ShieldCheck size={28} />,
             title: "Private & Secure",
             desc: "We process files locally. No data is ever uploaded to a server.",
             color: "text-emerald-600", bg: "bg-emerald-50"
           },
           {
-            icon: <Zap size={32} />,
+            icon: <Zap size={28} />,
             title: "Lightning Fast",
             desc: "Powered by WebAssembly for instant conversions without lag.",
             color: "text-amber-600", bg: "bg-amber-50"
           },
           {
-            icon: <FileCheck size={32} />,
+            icon: <FileCheck size={28} />,
             title: "High Precision",
             desc: "Preserves layout, fonts, and images during conversion.",
             color: "text-blue-600", bg: "bg-blue-50"
           }
         ].map((feature, idx) => (
-          <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-            <div className={`w-14 h-14 ${feature.bg} ${feature.color} rounded-2xl flex items-center justify-center mb-6`}>
+          // ✨ FIX 7: Smaller padding on mobile cards
+          <div key={idx} className="bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className={`w-10 h-10 md:w-14 md:h-14 ${feature.bg} ${feature.color} rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6`}>
               {feature.icon}
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-            <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-2">{feature.title}</h3>
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed">{feature.desc}</p>
           </div>
         ))}
       </section>
 
-      {/* FAQ SECTION (Rich Snippets target) */}
-      <section className="mt-20 max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-slate-900 mb-10">Frequently Asked Questions</h2>
-        <div className="space-y-4">
+      {/* FAQ SECTION */}
+      <section className="mt-12 md:mt-20 max-w-3xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-6 md:mb-10">Frequently Asked Questions</h2>
+        <div className="space-y-3 md:space-y-4">
           {[
             { q: "How do I convert PDF to Word for free?", a: "Upload your PDF, select DOCX as the format, and click Convert. It runs instantly in your browser." },
             { q: "Is it safe to use this converter?", a: "Yes. Unlike other sites, we do NOT upload your files. Everything happens on your computer." },
@@ -717,11 +723,11 @@ export const ConverterTool: React.FC = () => {
             { q: "What if I have a password-protected PDF?", a: "The tool does not support password-protected PDFs. Please remove password protection first." }
           ].map((item, i) => (
             <details key={i} className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer transition-all hover:border-indigo-200">
-              <summary className="flex justify-between items-center p-6 font-semibold text-slate-800 list-none">
+              <summary className="flex justify-between items-center p-4 md:p-6 font-semibold text-slate-800 list-none text-sm md:text-base">
                 {item.q}
                 <span className="transform group-open:rotate-180 transition-transform text-indigo-500">▼</span>
               </summary>
-              <div className="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-50 pt-4">
+              <div className="px-4 pb-4 md:px-6 md:pb-6 text-sm md:text-base text-slate-600 leading-relaxed border-t border-slate-50 pt-3 md:pt-4">
                 {item.a}
               </div>
             </details>
