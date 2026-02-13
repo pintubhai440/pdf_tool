@@ -526,10 +526,10 @@ export const ConverterTool: React.FC = () => {
           
           {!mode ? (
             // ----- UPLOAD STATE -----
-            <div className="p-6 md:p-12 bg-slate-50/50">
+            <div className="p-4 md:p-12 bg-slate-50/50">
               
-              {/* ✨ FIX: Mobile par Square box (aspect-square), Laptop par normal (md:aspect-auto) */}
-              <div className="w-full aspect-square md:aspect-auto">
+              {/* ✨ FIX: Mobile Full Width Square Box */}
+              <div className="w-full aspect-square md:aspect-auto shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl overflow-hidden bg-white">
                 <FileUploader
                   onFilesSelected={handleFilesSelected}
                   allowMultiple={true}
@@ -539,23 +539,23 @@ export const ConverterTool: React.FC = () => {
                     'image/png',
                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
                   ]}
-                  label="Click or Drag files to Convert"
-                  subLabel="Supported: PDF, DOCX, JPG, PNG"
+                  label="Tap to Upload"
+                  subLabel="PDF, DOCX, JPG, PNG"
                 />
               </div>
 
               {/* ✨ FIX: Premium Badges for Mobile - Colorful & Clean */}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
-                  <div className="p-1 bg-red-100 rounded text-red-600"><FileType size={14}/></div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+                  <div className="p-1.5 bg-red-100 rounded-lg text-red-600"><FileType size={16}/></div>
                   <span>PDF</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
-                   <div className="p-1 bg-blue-100 rounded text-blue-600"><FileType size={14}/></div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+                   <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600"><FileType size={16}/></div>
                   <span>DOCX</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-bold text-slate-600">
-                   <div className="p-1 bg-purple-100 rounded text-purple-600"><ImageIcon size={14}/></div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+                   <div className="p-1.5 bg-purple-100 rounded-lg text-purple-600"><ImageIcon size={16}/></div>
                   <span>IMG</span>
                 </div>
               </div>
