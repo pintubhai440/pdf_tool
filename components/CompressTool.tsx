@@ -33,8 +33,8 @@ export const CompressTool: React.FC = () => {
   const TOOL_NAME = 'Free PDF & Image Compressor – Reduce File Size Instantly';
   const TOOL_DESCRIPTION =
     'Compress PDF, JPG, PNG and WebP files directly in your browser. 100% secure, no upload, no file size limits. Get the smallest file without visible quality loss.';
-  const CANONICAL_URL = 'https://yourdomain.com/compress'; // 🔁 Replace with your actual URL
-  const SITE_NAME = 'YourToolName'; // 🔁 Replace
+  const CANONICAL_URL = 'https://genzpdf.com'; // 🔁 Replace with your actual URL
+  const SITE_NAME = 'Genz PDF'; // 🔁 Replace
 
   // ---------- STATE ----------
   const [file, setFile] = useState<File | null>(null);
