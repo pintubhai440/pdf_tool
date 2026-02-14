@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import {
   ArrowDownAZ,
@@ -715,6 +716,7 @@ function App() {
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
 
       <Analytics />
+      <SpeedInsights />
 
       {/* --- CUSTOM STYLES FOR ANIMATIONS --- */}
       <style>{`
