@@ -714,6 +714,8 @@ function App() {
       <Footer setMode={setMode} />
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
 
+      <Analytics />
+
       {/* --- CUSTOM STYLES FOR ANIMATIONS --- */}
       <style>{`
         @keyframes bounce-in {
@@ -724,8 +726,6 @@ function App() {
         .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       `}</style>
 
-      {/* Vercel Analytics */}
-      <Analytics />
     </div>
   );
 }
