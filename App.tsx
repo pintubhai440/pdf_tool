@@ -60,8 +60,8 @@ const SEO_METADATA: Record<AppMode, {
 }> = {
   home: {
     title: "Genz PDF - Free Online PDF Tools | Merge, Split, Compress & Convert",
-    description: "All-in-one free PDF tools. Merge PDF, Split PDF, Compress PDF, Convert to Word/JPG. 100% Free, Secure & Fast. No signup required.",
-    keywords: "free pdf tools, online pdf editor, merge pdf, split pdf, compress pdf, pdf converter, resize pdf",
+    description: "All-in-one free online PDF tools: Merge PDF, Split PDF, Compress PDF, Convert to Word/JPG. 100% client-side, secure & private. No upload, no signup, unlimited usage. Best free PDF website India.",
+    keywords: "free pdf tools, client-side pdf editor, secure pdf merger, compress pdf 100kb, no upload pdf tools, genz pdf, unlimited pdf converter, Free online PDF tools, Secure PDF editor, Client-side PDF tools, No upload PDF merger, Unlimited PDF tools free, Privacy-focused PDF editor, Merge split compress PDF offline, Best free PDF website India",
     schema: {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -76,9 +76,9 @@ const SEO_METADATA: Record<AppMode, {
     breadcrumb: [{ name: "Home", url: BASE_URL }]
   },
   merge: {
-    title: "Merge PDF Free - Combine PDF Files Online | Genz PDF",
-    description: "Combine multiple PDF files into one document instantly. Drag & drop reordering, secure processing, and 100% free PDF merger. No upload.",
-    keywords: "merge pdf, combine pdf, join pdf files, pdf merger free, merge pdf online, combine pdf documents",
+    title: "Merge PDF Free - Combine PDF Files Online Without Uploading | Genz PDF",
+    description: "Combine multiple PDF files into one instantly. Client-side merge, no upload, secure and private. Arrange PDF pages online free and merge multiple PDFs securely. Unlimited PDF merger free.",
+    keywords: "merge pdf, combine pdf, join pdf files, pdf merger free, merge pdf online, combine pdf without uploading, arrange PDF pages online free, merge multiple pdfs securely, unlimited pdf merger free",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -95,9 +95,9 @@ const SEO_METADATA: Record<AppMode, {
     ]
   },
   split: {
-    title: "Split PDF Online - Extract Pages Free | Genz PDF",
-    description: "Separate PDF pages or split PDF into multiple files. Fast, secure, and easy-to-use online PDF splitter. Client-side, no watermarks.",
-    keywords: "split pdf, extract pdf pages, separate pdf, cut pdf, remove pdf pages, pdf page remover",
+    title: "Split PDF Online - Extract or Remove Pages Free | Genz PDF",
+    description: "Separate PDF pages, extract pages from PDF free, remove pages from PDF online. Split large PDF files, delete PDF pages without watermark. Secure client-side processing.",
+    keywords: "split pdf, extract pdf pages, separate pdf, cut pdf, remove pdf pages, pdf page remover, extract pages from PDF free, remove pages from PDF online, split large PDF files, delete PDF pages no watermark",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -113,9 +113,9 @@ const SEO_METADATA: Record<AppMode, {
     ]
   },
   compress: {
-    title: "Compress PDF - Reduce File Size Online | Genz PDF",
-    description: "Reduce PDF size without losing quality. Compress PDF to 100kb, 200kb online for free. Best PDF optimizer. 100% secure.",
-    keywords: "compress pdf, reduce pdf size, shrink pdf, optimize pdf, pdf compressor",
+    title: "Compress PDF - Reduce PDF Size to 100kb Free | Genz PDF",
+    description: "Reduce PDF file size for email or web. Compress PDF to 100kb, 200kb without losing quality. Optimize PDF for web, shrink PDF file size free, client-side and secure.",
+    keywords: "compress pdf, reduce pdf size, shrink pdf, optimize pdf, pdf compressor, compress PDF to 100kb, reduce PDF size for email, shrink PDF file size free, compress PDF without losing quality, optimize PDF for web",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -132,8 +132,8 @@ const SEO_METADATA: Record<AppMode, {
   },
   convert: {
     title: "PDF Converter - PDF to Word, JPG, PNG Free | Genz PDF",
-    description: "Convert PDF to Word, Excel, PowerPoint, and Images instantly. High-quality free online PDF converter. No email required.",
-    keywords: "pdf converter, pdf to word, pdf to jpg, convert pdf, pdf to png, pdf to excel",
+    description: "Convert PDF to Word editable, PDF to JPG high quality, convert images to PDF free. Secure DOCX to PDF converter. All client-side, no upload.",
+    keywords: "pdf converter, pdf to word, pdf to jpg, convert pdf, pdf to png, pdf to excel, convert PDF to Word editable, PDF to JPG high quality, convert images to PDF free, DOCX to PDF converter secure",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -149,9 +149,9 @@ const SEO_METADATA: Record<AppMode, {
     ]
   },
   resize: {
-    title: "Resize PDF & Images - Change Dimensions | Genz PDF",
-    description: "Resize PDF pages to A4, Letter, or custom dimensions easily online. Adjust page size with one click.",
-    keywords: "resize pdf, change pdf page size, pdf dimensions, pdf page size editor",
+    title: "Resize PDF & Images - Change Dimensions & KB | Genz PDF",
+    description: "Resize PDF pages to A4, letter, or custom dimensions. Resize image in kb, change photo dimensions online, resize JPG for signature. Client-side free tool.",
+    keywords: "resize pdf, change pdf page size, pdf dimensions, pdf page size editor, resize image in kb, change photo dimensions online, resize JPG for signature, resize PDF page to A4",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -577,7 +577,7 @@ function App() {
                     Merge PDF Files <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Instantly</span>
                   </h1>
                   <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Combine multiple PDFs into one document. Drag & drop, reorder, and merge securely in your browser. No signup, no watermarks, completely free.
+                    Combine multiple PDFs into one document securely without uploading. Drag & drop, reorder, and merge offline in your browser. No upload, no signup, no watermarks. Unlimited PDF merger free.
                   </p>
                   
                   <div className="bg-white p-2 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-2xl mx-auto transform hover:scale-[1.01] transition-transform duration-300">
@@ -592,9 +592,9 @@ function App() {
                   {/* Feature Grid */}
                   <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
                     {[
-                      { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser." },
-                      { icon: Scaling, title: "High Quality", desc: "Maintains original document resolution." },
-                      { icon: LayoutGrid, title: "Easy Ordering", desc: "Drag and drop to reorder pages." }
+                      { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser. Client-side processing." },
+                      { icon: Scaling, title: "High Quality", desc: "Maintains original document resolution without losing quality." },
+                      { icon: LayoutGrid, title: "Easy Ordering", desc: "Drag and drop to reorder pages before merging." }
                     ].map((feat, i) => (
                       <div key={i} className="group p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300">
                         <feat.icon className="text-indigo-600 mb-4 group-hover:scale-110 transition-transform" size={32} />
