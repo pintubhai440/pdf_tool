@@ -23,7 +23,7 @@ import {
   Menu,
   X,
   ChevronRight,
-  Lock                      // ✅ 1. Lock icon import kiya
+  Lock // ✅ Protect Tool Icon
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -37,19 +37,19 @@ import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
-// ✅ LAZY LOAD TOOLS (for better performance)
+// ✅ LAZY LOAD TOOLS (Performance Optimization)
 const SplitTool = lazy(() => import('./components/SplitTool'));
 const ConverterTool = lazy(() => import('./components/ConverterTool'));
 const CompressTool = lazy(() => import('./components/CompressTool'));
 const ResizeTool = lazy(() => import('./components/ResizeTool'));
-const ProtectTool = lazy(() => import('./components/ProtectTool'));   // ✅ 2. ProtectTool lazy load
+const ProtectTool = lazy(() => import('./components/ProtectTool')); // ✅ Protect Tool
 const About = lazy(() => import('./components/About'));
 const Contact = lazy(() => import('./components/Contact'));
 const Policy = lazy(() => import('./components/Policy'));
 const Terms = lazy(() => import('./components/Terms'));
 
-// ==================== 🔥 SUPERCHARGED SEO CONFIGURATION ====================
-const BASE_URL = "https://genzpdf.com"; // 🔴 REPLACE WITH YOUR ACTUAL DOMAIN
+// ==================== 🚀 SEO CONFIGURATION (THE BRAIN) ====================
+const BASE_URL = "https://genzpdf.com";
 const SITE_NAME = "Genz PDF";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/social-preview.jpg`;
 
@@ -62,8 +62,8 @@ const SEO_METADATA: Record<AppMode, {
 }> = {
   home: {
     title: "Genz PDF - Free Online PDF Tools | Merge, Split, Compress & Convert",
-    description: "All-in-one free online PDF tools: Merge PDF, Split PDF, Compress PDF, Convert to Word/JPG. 100% client-side, secure & private. No upload, no signup, unlimited usage. Best free PDF website India.",
-    keywords: "free pdf tools, client-side pdf editor, secure pdf merger, compress pdf 100kb, no upload pdf tools, genz pdf, unlimited pdf converter, Free online PDF tools, Secure PDF editor, Client-side PDF tools, No upload PDF merger, Unlimited PDF tools free, Privacy-focused PDF editor, Merge split compress PDF offline, Best free PDF website India",
+    description: "All-in-one free online PDF tools: Merge PDF, Split PDF, Compress PDF, Convert to Word/JPG. 100% client-side, secure & private. No upload, no signup, unlimited usage.",
+    keywords: "free pdf tools, client-side pdf editor, secure pdf merger, compress pdf 100kb, no upload pdf tools, genz pdf, unlimited pdf converter, best free pdf website india",
     schema: {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -71,25 +71,22 @@ const SEO_METADATA: Record<AppMode, {
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "featureList": "Merge PDF, Split PDF, Compress PDF, Convert PDF, Resize PDF",
-      "screenshot": DEFAULT_OG_IMAGE,
+      "featureList": "Merge PDF, Split PDF, Compress PDF, Convert PDF, Resize PDF, Protect PDF",
       "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2150" }
     },
     breadcrumb: [{ name: "Home", url: BASE_URL }]
   },
   merge: {
     title: "Merge PDF Free - Combine PDF Files Online Without Uploading | Genz PDF",
-    description: "Combine multiple PDF files into one instantly. Client-side merge, no upload, secure and private. Arrange PDF pages online free and merge multiple PDFs securely. Unlimited PDF merger free.",
-    keywords: "merge pdf, combine pdf, join pdf files, pdf merger free, merge pdf online, combine pdf without uploading, arrange PDF pages online free, merge multiple pdfs securely, unlimited pdf merger free",
+    description: "Combine multiple PDF files into one instantly. Client-side merge, no upload, secure and private. Arrange PDF pages online free. Best PDF Merger.",
+    keywords: "merge pdf, combine pdf, join pdf files, pdf merger free, merge pdf online, combine pdf without uploading, arrange PDF pages online free",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Merge PDF Tool",
-      "description": "A free tool to combine multiple PDF files into a single document. Client-side processing, no privacy risk.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2150" }
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     },
     breadcrumb: [
       { name: "Home", url: BASE_URL },
@@ -98,13 +95,12 @@ const SEO_METADATA: Record<AppMode, {
   },
   split: {
     title: "Split PDF Online - Extract or Remove Pages Free | Genz PDF",
-    description: "Separate PDF pages, extract pages from PDF free, remove pages from PDF online. Split large PDF files, delete PDF pages without watermark. Secure client-side processing.",
-    keywords: "split pdf, extract pdf pages, separate pdf, cut pdf, remove pdf pages, pdf page remover, extract pages from PDF free, remove pages from PDF online, split large PDF files, delete PDF pages no watermark",
+    description: "Separate PDF pages, extract pages from PDF free, remove pages from PDF online. Split large PDF files instantly in your browser.",
+    keywords: "split pdf, extract pdf pages, separate pdf, cut pdf, remove pdf pages, pdf page remover, extract pages from PDF free",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Split PDF Tool",
-      "description": "Free online PDF splitter to extract or remove pages from PDF documents.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -116,13 +112,12 @@ const SEO_METADATA: Record<AppMode, {
   },
   compress: {
     title: "Compress PDF - Reduce PDF Size to 100kb Free | Genz PDF",
-    description: "Reduce PDF file size for email or web. Compress PDF to 100kb, 200kb without losing quality. Optimize PDF for web, shrink PDF file size free, client-side and secure.",
-    keywords: "compress pdf, reduce pdf size, shrink pdf, optimize pdf, pdf compressor, compress PDF to 100kb, reduce PDF size for email, shrink PDF file size free, compress PDF without losing quality, optimize PDF for web",
+    description: "Reduce PDF file size for email or web. Compress PDF to 100kb, 200kb without losing quality. Optimize PDF for web, shrink PDF file size free.",
+    keywords: "compress pdf, reduce pdf size, shrink pdf, optimize pdf, pdf compressor, compress PDF to 100kb, reduce PDF size for email",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Compress PDF Tool",
-      "description": "Free PDF compressor to reduce file size while maintaining quality.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -134,13 +129,12 @@ const SEO_METADATA: Record<AppMode, {
   },
   convert: {
     title: "PDF Converter - PDF to Word, JPG, PNG Free | Genz PDF",
-    description: "Convert PDF to Word editable, PDF to JPG high quality, convert images to PDF free. Secure DOCX to PDF converter. All client-side, no upload.",
-    keywords: "pdf converter, pdf to word, pdf to jpg, convert pdf, pdf to png, pdf to excel, convert PDF to Word editable, PDF to JPG high quality, convert images to PDF free, DOCX to PDF converter secure",
+    description: "Convert PDF to Word editable, PDF to JPG high quality, convert images to PDF free. Secure DOCX to PDF converter. All client-side.",
+    keywords: "pdf converter, pdf to word, pdf to jpg, convert pdf, pdf to png, pdf to excel, convert PDF to Word editable, PDF to JPG high quality",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "PDF Converter Tool",
-      "description": "Convert PDF documents to various formats including Word, JPG, PNG, and more.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -152,13 +146,12 @@ const SEO_METADATA: Record<AppMode, {
   },
   resize: {
     title: "Resize PDF & Images - Change Dimensions & KB | Genz PDF",
-    description: "Resize PDF pages to A4, letter, or custom dimensions. Resize image in kb, change photo dimensions online, resize JPG for signature. Client-side free tool.",
-    keywords: "resize pdf, change pdf page size, pdf dimensions, pdf page size editor, resize image in kb, change photo dimensions online, resize JPG for signature, resize PDF page to A4",
+    description: "Resize PDF pages to A4, letter, or custom dimensions. Resize image in kb, change photo dimensions online. Client-side free tool.",
+    keywords: "resize pdf, change pdf page size, pdf dimensions, pdf page size editor, resize image in kb, change photo dimensions online",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Resize PDF Tool",
-      "description": "Free PDF resizer to change page dimensions and aspect ratio.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -168,16 +161,14 @@ const SEO_METADATA: Record<AppMode, {
       { name: "Resize PDF", url: `${BASE_URL}/resize` }
     ]
   },
-  // ✅ 3. Protect PDF ka SEO metadata add kiya
   protect: {
-    title: "Protect PDF - Add Password Online Free | Genz PDF",
-    description: "Secure your PDF with a password. Encrypt PDF files online for free. 100% client-side security.",
-    keywords: "protect pdf, encrypt pdf, password protect pdf, lock pdf, secure pdf online, pdf security free",
+    title: "Protect PDF - Encrypt & Lock PDF Online Free | Genz PDF",
+    description: "Secure your PDF with a strong password. Encrypt PDF files online for free. 100% client-side military-grade security. No upload needed.",
+    keywords: "protect pdf, encrypt pdf, password protect pdf, lock pdf, secure pdf online, pdf security free, add password to pdf",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Protect PDF Tool",
-      "description": "Free tool to add password protection to PDF files.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -191,63 +182,34 @@ const SEO_METADATA: Record<AppMode, {
     title: "About Us - Genz PDF Team",
     description: "Learn about the mission behind Genz PDF. We provide free, secure, client-side PDF tools for everyone.",
     keywords: "about genz pdf, pdf tools team, free pdf software",
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "AboutPage",
-      "name": "About Genz PDF",
-      "description": "Learn about the team and mission behind Genz PDF."
-    },
-    breadcrumb: [
-      { name: "Home", url: BASE_URL },
-      { name: "About", url: `${BASE_URL}/about` }
-    ]
+    schema: { "@context": "https://schema.org", "@type": "AboutPage", "name": "About Genz PDF" },
+    breadcrumb: [{ name: "Home", url: BASE_URL }, { name: "About", url: `${BASE_URL}/about` }]
   },
   contact: {
     title: "Contact Support - Genz PDF",
     description: "Get help with Genz PDF tools. Contact our support team for any questions or feedback.",
     keywords: "contact pdf support, help with pdf tools, pdf support",
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "ContactPage",
-      "name": "Contact Genz PDF"
-    },
-    breadcrumb: [
-      { name: "Home", url: BASE_URL },
-      { name: "Contact", url: `${BASE_URL}/contact` }
-    ]
+    schema: { "@context": "https://schema.org", "@type": "ContactPage", "name": "Contact Genz PDF" },
+    breadcrumb: [{ name: "Home", url: BASE_URL }, { name: "Contact", url: `${BASE_URL}/contact` }]
   },
   policy: {
     title: "Privacy Policy - Genz PDF",
     description: "We value your privacy. Read our policy to understand how we protect your data. No files are ever uploaded.",
     keywords: "privacy policy, pdf tool privacy",
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Privacy Policy"
-    },
-    breadcrumb: [
-      { name: "Home", url: BASE_URL },
-      { name: "Privacy Policy", url: `${BASE_URL}/policy` }
-    ]
+    schema: { "@context": "https://schema.org", "@type": "WebPage", "name": "Privacy Policy" },
+    breadcrumb: [{ name: "Home", url: BASE_URL }, { name: "Privacy Policy", url: `${BASE_URL}/policy` }]
   },
   terms: {
     title: "Terms of Service - Genz PDF",
     description: "Terms and conditions for using Genz PDF. Free usage, client-side processing, and user responsibilities.",
     keywords: "terms of service, pdf terms",
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Terms of Service"
-    },
-    breadcrumb: [
-      { name: "Home", url: BASE_URL },
-      { name: "Terms", url: `${BASE_URL}/terms` }
-    ]
+    schema: { "@context": "https://schema.org", "@type": "WebPage", "name": "Terms of Service" },
+    breadcrumb: [{ name: "Home", url: BASE_URL }, { name: "Terms", url: `${BASE_URL}/terms` }]
   }
 };
 
 function App() {
-  // URL check karke sahi tool open karne ka logic
+  // --- ROUTING LOGIC ---
   const getInitialMode = (): AppMode => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
@@ -256,7 +218,7 @@ function App() {
       if (path.includes('/convert')) return 'convert';
       if (path.includes('/compress')) return 'compress';
       if (path.includes('/resize')) return 'resize';
-      if (path.includes('/protect')) return 'protect';    // ✅ 4. protect path check
+      if (path.includes('/protect')) return 'protect'; // ✅ Added Route
       if (path.includes('/about')) return 'about';
       if (path.includes('/contact')) return 'contact';
       if (path.includes('/policy')) return 'policy';
@@ -273,27 +235,36 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Browser ke Back/Forward button support ke liye
+  // --- HYBRID NAVIGATION (SPA + SEO) ---
+  // This allows Google to see href links, but users get instant SPA navigation
+  const navigateTo = (targetMode: AppMode, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
+    // Update URL without reload
+    const path = targetMode === 'home' ? '/' : `/${targetMode}`;
+    window.history.pushState({}, '', path);
+    
+    // Update State
+    setMode(targetMode);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle Back/Forward Browser Buttons
   useEffect(() => {
     const handlePopState = () => setMode(getInitialMode());
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // ==================== 🔥 SUPERCHARGED SEO INJECTION ====================
+  // --- DYNAMIC SEO INJECTION ---
   useEffect(() => {
     const meta = SEO_METADATA[mode] || SEO_METADATA.home;
     const url = mode === 'home' ? BASE_URL : `${BASE_URL}/${mode}`;
 
-    // 1. HTML lang attribute
     document.documentElement.lang = 'en';
-
-    // 2. Title
     document.title = meta.title;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setIsMobileMenuOpen(false); // Page change par menu band karein
 
-    // 3. Meta tag helper (works for name or property)
     const upsertMeta = (attr: string, content: string, attribute: 'name' | 'property' = 'name') => {
       let element = document.querySelector(`meta[${attribute}="${attr}"]`);
       if (!element) {
@@ -304,33 +275,27 @@ function App() {
       element.setAttribute('content', content);
     };
 
-    // 4. Essential meta tags
     upsertMeta('description', meta.description);
     upsertMeta('keywords', meta.keywords);
     upsertMeta('robots', 'index, follow');
     upsertMeta('viewport', 'width=device-width, initial-scale=1');
-    upsertMeta('theme-color', '#ffffff');
     upsertMeta('author', 'Genz PDF Team');
 
-    // 5. Open Graph (property)
+    // Open Graph
     upsertMeta('og:title', meta.title, 'property');
     upsertMeta('og:description', meta.description, 'property');
     upsertMeta('og:url', url, 'property');
-    upsertMeta('og:type', mode === 'home' ? 'website' : 'article', 'property');
+    upsertMeta('og:type', 'website', 'property');
     upsertMeta('og:site_name', SITE_NAME, 'property');
     upsertMeta('og:image', DEFAULT_OG_IMAGE, 'property');
-    upsertMeta('og:image:alt', `${SITE_NAME} - ${meta.title}`, 'property');
-    upsertMeta('og:image:width', '1200', 'property');
-    upsertMeta('og:image:height', '630', 'property');
 
-    // 6. Twitter Card (name, NOT property)
+    // Twitter
     upsertMeta('twitter:card', 'summary_large_image', 'name');
-    upsertMeta('twitter:site', '@genzpdf', 'name');
     upsertMeta('twitter:title', meta.title, 'name');
     upsertMeta('twitter:description', meta.description, 'name');
     upsertMeta('twitter:image', DEFAULT_OG_IMAGE, 'name');
 
-    // 7. Canonical URL (prevents duplicate content)
+    // Canonical
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement('link');
@@ -339,14 +304,13 @@ function App() {
     }
     linkCanonical.setAttribute('href', url);
 
-    // 8. JSON-LD Structured Data (Global Website + Organization + Page specific)
+    // JSON-LD Schema
     const scriptsToRemove = ['json-ld-global', 'json-ld-page', 'json-ld-breadcrumb'];
     scriptsToRemove.forEach(id => {
       const oldScript = document.getElementById(id);
       if (oldScript) oldScript.remove();
     });
 
-    // 8a. Global Website + Organization Schema
     const globalScript = document.createElement('script');
     globalScript.id = 'json-ld-global';
     globalScript.type = 'application/ld+json';
@@ -368,15 +332,11 @@ function App() {
         "name": SITE_NAME,
         "url": BASE_URL,
         "logo": `${BASE_URL}/logo.png`,
-        "sameAs": [
-          "https://twitter.com/genzpdf",
-          "https://facebook.com/genzpdf"
-        ]
+        "sameAs": ["https://twitter.com/genzpdf"]
       }
     ]);
     document.head.appendChild(globalScript);
 
-    // 8b. Page-specific schema
     if (meta.schema) {
       const pageScript = document.createElement('script');
       pageScript.id = 'json-ld-page';
@@ -390,8 +350,7 @@ function App() {
       document.head.appendChild(pageScript);
     }
 
-    // 8c. BreadcrumbList schema
-    if (meta.breadcrumb && meta.breadcrumb.length > 0) {
+    if (meta.breadcrumb) {
       const breadcrumbScript = document.createElement('script');
       breadcrumbScript.id = 'json-ld-breadcrumb';
       breadcrumbScript.type = 'application/ld+json';
@@ -409,7 +368,7 @@ function App() {
     }
   }, [mode]);
 
-  // ---------- MERGE LOGIC ----------
+  // --- MERGE LOGIC ---
   const handleFilesSelected = (newFiles: File[]) => {
     const pdfFiles: PdfFile[] = newFiles.map((file) => ({
       id: uuidv4(),
@@ -453,22 +412,16 @@ function App() {
     }
   };
 
-  // ---------- UI Helpers ----------
-  // 🆕 SMART NAVIGATION BUTTON with Home support and clean paths, mobile support
+  // --- NAVIGATION COMPONENT ---
   const NavButton = ({ targetMode, icon: Icon, label, mobile = false }: { targetMode: AppMode, icon: any, label: string, mobile?: boolean }) => {
-    // Determine if this button is active
-    const isActive = 
-      (mode === targetMode) || 
-      (targetMode === 'home' && window.location.pathname === '/') ||
-      (targetMode !== 'home' && window.location.pathname.includes(targetMode));
+    const isActive = (mode === targetMode) || (targetMode === 'home' && mode === 'home');
 
     return (
       <a
         href={targetMode === 'home' ? '/' : `/${targetMode}`}
-        onClick={() => mobile && setIsMobileMenuOpen(false)}
+        onClick={(e) => navigateTo(targetMode, e)}
         className={clsx(
-          "flex items-center gap-3 transition-all duration-300 font-medium rounded-xl",
-          // Mobile vs Desktop Styles
+          "flex items-center gap-3 transition-all duration-300 font-medium rounded-xl group",
           mobile 
             ? "w-full p-4 text-base border border-slate-100 hover:bg-slate-50"
             : "px-4 py-2 text-sm hover:bg-white/50",
@@ -477,7 +430,7 @@ function App() {
             : "text-slate-600 hover:text-slate-900"
         )}
       >
-        <div className={clsx("p-2 rounded-lg", isActive ? "bg-indigo-50" : "bg-slate-100")}>
+        <div className={clsx("p-2 rounded-lg transition-colors", isActive ? "bg-indigo-50" : "bg-slate-100 group-hover:bg-white")}>
           <Icon size={mobile ? 20 : 18} className={isActive ? "text-indigo-600" : "text-slate-500"} />
         </div>
         {label}
@@ -489,12 +442,11 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
-      {/* --- PREMIUM GLASS HEADER with Mobile Menu --- */}
+      {/* --- HEADER --- */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
           
-          {/* Logo linking to home */}
-          <a href="/" className="flex items-center gap-3 group z-50 relative">
+          <a href="/" onClick={(e) => navigateTo('home', e)} className="flex items-center gap-3 group z-50 relative">
             <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200/50 group-hover:rotate-6 transition-transform duration-300">
               <img src="/logo.png" alt="Genz PDF Logo" className="w-6 h-6 md:w-7 md:h-7 object-contain brightness-0 invert" />
             </div>
@@ -503,7 +455,6 @@ function App() {
             </span>
           </a>
 
-          {/* Full tool navigation - Desktop */}
           <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner">
             <NavButton targetMode="home" icon={HomeIcon} label="Home" />
             <NavButton targetMode="merge" icon={Files} label="Merge" />
@@ -511,11 +462,9 @@ function App() {
             <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
             <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
             <NavButton targetMode="resize" icon={Scaling} label="Resize" />
-            {/* ✅ 5. Desktop mein Protect button add kiya (Resize ke baad) */}
             <NavButton targetMode="protect" icon={Lock} label="Protect" />
           </div>
 
-          {/* Right Actions */}
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsAiOpen(true)}
@@ -525,7 +474,6 @@ function App() {
               <span>AI Assistant</span>
             </button>
 
-            {/* MOBILE MENU TOGGLE BUTTON */}
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors z-50 relative"
@@ -537,7 +485,7 @@ function App() {
         </div>
       </header> 
 
-      {/* 👇 MOBILE MENU अब HEADER के बाहर है (ताकि पूरी स्क्रीन पर दिखे) */}
+      {/* --- MOBILE MENU --- */}
       <div className={clsx(
         "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out flex flex-col pt-24 px-6 pb-8",
         isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
@@ -550,7 +498,6 @@ function App() {
           <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert PDF" mobile />
           <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
           <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
-          {/* ✅ 6. Mobile menu mein bhi Protect button add kiya */}
           <NavButton targetMode="protect" icon={Lock} label="Protect PDF" mobile />
           
           <div className="my-2 border-t border-slate-100"></div>
@@ -567,20 +514,25 @@ function App() {
         </div>
       </div>
 
-      {/* --- MAIN CONTENT AREA --- */}
+      {/* --- MAIN CONTENT --- */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
         
         <Suspense fallback={
-          <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="animate-spin text-indigo-600 mb-4" size={48}/>
-            <p className="text-slate-400 font-medium animate-pulse">Loading Tools...</p>
+          <div className="flex flex-col items-center justify-center py-40 animate-in fade-in duration-500">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-white rounded-full"></div>
+              </div>
+            </div>
+            <p className="text-slate-500 font-medium mt-6 animate-pulse">Loading Genz Tools...</p>
           </div>
         }>
           {mode === 'home' ? (
-            <Home setMode={setMode} />
+            <Home setMode={(m) => navigateTo(m)} />
           ) : mode === 'merge' ? (
             
-            /* ✅ PROFESSIONAL MERGE INTERFACE */
+            /* --- MERGE TOOL UI --- */
             <article className="animate-in fade-in slide-in-from-bottom-8 duration-700">
               <input 
                 type="file" 
@@ -600,7 +552,7 @@ function App() {
                     Merge PDF Files <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Instantly</span>
                   </h1>
                   <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Combine multiple PDFs into one document securely without uploading. Drag & drop, reorder, and merge offline in your browser. No upload, no signup, no watermarks. Unlimited PDF merger free.
+                    Combine multiple PDFs into one document securely without uploading. Drag & drop, reorder, and merge offline in your browser.
                   </p>
                   
                   <div className="bg-white p-2 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-2xl mx-auto transform hover:scale-[1.01] transition-transform duration-300">
@@ -630,7 +582,7 @@ function App() {
               ) : (
                 <div className="grid lg:grid-cols-3 gap-8 items-start">
                   
-                  {/* Left: File List (Order Control) */}
+                  {/* Left: File List */}
                   <div className="lg:col-span-2 space-y-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
                       <div>
@@ -638,27 +590,9 @@ function App() {
                         <p className="text-sm text-slate-400 font-medium">Reorder your files for the final output</p>
                       </div>
                       <div className="flex gap-2">
-                        <button 
-                          onClick={() => handleSort(SortOrder.ASC)} 
-                          className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
-                          title="Sort A-Z"
-                        >
-                          <ArrowDownAZ size={20}/>
-                        </button>
-                        <button 
-                          onClick={() => handleSort(SortOrder.DESC)} 
-                          className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100"
-                          title="Sort Z-A"
-                        >
-                          <ArrowUpAZ size={20}/>
-                        </button>
-                        <button 
-                          onClick={handleClearAll} 
-                          className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100"
-                          title="Clear All"
-                        >
-                          <Trash2 size={20}/>
-                        </button>
+                        <button onClick={() => handleSort(SortOrder.ASC)} className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100" title="Sort A-Z"><ArrowDownAZ size={20}/></button>
+                        <button onClick={() => handleSort(SortOrder.DESC)} className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100" title="Sort Z-A"><ArrowUpAZ size={20}/></button>
+                        <button onClick={handleClearAll} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100" title="Clear All"><Trash2 size={20}/></button>
                       </div>
                     </div>
                     
@@ -720,13 +654,12 @@ function App() {
               )}
             </article>
           ) : (
-            /* Fallback for all other tools (Split, Convert, Compress, Resize, Protect, About, Contact, Policy, Terms) */
+            /* --- OTHER TOOLS --- */
             <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
               {mode === 'split' && <SplitTool />}
               {mode === 'convert' && <ConverterTool />}
               {mode === 'compress' && <CompressTool />}
               {mode === 'resize' && <ResizeTool />}
-              {/* ✅ 7. Protect Tool render kiya */}
               {mode === 'protect' && <ProtectTool />}
               {mode === 'about' && <About />}
               {mode === 'contact' && <Contact />}
@@ -737,13 +670,12 @@ function App() {
         </Suspense>
       </main>
 
-      <Footer setMode={setMode} />
+      <Footer setMode={(m) => navigateTo(m)} />
       <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
 
       <Analytics />
       <SpeedInsights />
 
-      {/* --- CUSTOM STYLES FOR ANIMATIONS --- */}
       <style>{`
         @keyframes bounce-in {
           0% { transform: scale(0.9); opacity: 0; }
