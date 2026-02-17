@@ -10,9 +10,11 @@ import {
   EyeOff,
   CheckCircle2,
   AlertCircle,
-  Unlock,
   Zap,
   KeyRound,
+  RefreshCcw,
+  ChevronDown,
+  Unlock,
   Fingerprint
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
@@ -38,7 +40,7 @@ export const ProtectTool: React.FC = () => {
   const [downloadName, setDownloadName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // ---------- ✅ MASTER SEO & SCHEMA INJECTION ----------
+  // ---------- MASTER SEO & SCHEMA INJECTION ----------
   useEffect(() => {
     document.title = SEO.title;
     
@@ -144,6 +146,9 @@ export const ProtectTool: React.FC = () => {
     setError(null);
 
     try {
+      // Simulate slight delay for smooth UI feedback
+      await new Promise(res => setTimeout(res, 500));
+      
       const arrayBuffer = await file.arrayBuffer();
       const pdfBytes = new Uint8Array(arrayBuffer);
 
@@ -175,225 +180,266 @@ export const ProtectTool: React.FC = () => {
 
   // ---------- RENDER ----------
   return (
-    <div className="w-full min-h-screen bg-slate-50 font-sans text-slate-900 pb-16">
+    <div className="w-full min-h-[calc(100vh-80px)] bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700 pb-16 relative overflow-hidden">
       
-      {/* Background Ambience */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50/50 to-transparent" />
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-[120px]" />
+      {/* ---------- BACKGROUND AMBIENCE (Modern & Premium) ---------- */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)', backgroundSize: '32px 32px', opacity: 0.5 }}></div>
+        {/* Soft glowing orbs */}
+        <div className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-indigo-400/20 blur-[100px] mix-blend-multiply"></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] rounded-full bg-fuchsia-400/20 blur-[100px] mix-blend-multiply"></div>
       </div>
 
-      <div className="relative w-full max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <div className="relative w-full max-w-6xl mx-auto px-4 py-12 md:py-20 z-10">
         
-        {/* HERO SECTION */}
-        <header className="text-center mb-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-100 shadow-sm text-indigo-700 text-xs font-bold uppercase tracking-widest mb-6">
-            <ShieldCheck size={14} /> 
-            AES-256 Bit Encryption
+        {/* ---------- HERO SECTION ---------- */}
+        <header className="text-center mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-indigo-100 shadow-[0_4px_20px_rgb(79,70,229,0.1)] text-indigo-700 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-6 transition-transform hover:scale-105">
+            <ShieldCheck size={16} className="text-indigo-500" /> 
+            Bank-Grade AES-256 Encryption
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
-            Protect PDF with <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Password</span>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
+            Secure PDF with <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 drop-shadow-sm">
+              Unbreakable Password
+            </span>
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Secure your sensitive documents instantly. Add a strong password to your PDF files directly in your browser without uploading them.
+          <p className="text-base md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
+            Lock your sensitive documents instantly. Add a strong password directly in your browser. 
+            <span className="text-slate-700 font-bold"> Zero uploads. Total privacy.</span>
           </p>
         </header>
 
-        {/* MAIN TOOL CARD */}
-        <div className="max-w-xl mx-auto relative z-10 mb-20">
-          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-20"></div>
-          
-          <div className="relative bg-white rounded-[1.8rem] shadow-2xl border border-white/50 overflow-hidden">
-            <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient"></div>
+        {/* ---------- MAIN TOOL CARD ---------- */}
+        <div className="max-w-2xl mx-auto mb-24">
+          <div className="relative group">
+            {/* Animated Gradient Border Glow */}
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-purple-500 rounded-[2.5rem] blur-md opacity-30 group-hover:opacity-60 transition duration-700 animate-pulse"></div>
             
-            {!file ? (
-              // UPLOAD STATE - Mobile optimized padding
-              <div className="p-4 md:p-8">
-                <FileUploader 
-                  onFilesSelected={handleFileSelected}
-                  acceptedFileTypes={['application/pdf']}
-                  allowMultiple={false}
-                  label="Drop PDF to Lock"
-                  subLabel="Only PDF files are supported"
-                />
-                
-                {/* Format Warning */}
-                <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3 text-amber-800">
-                  <AlertCircle className="shrink-0" size={20} />
-                  <p className="text-sm leading-relaxed">
-                    <strong>Need to protect Word/PPT?</strong><br/> 
-                    Please use our <a href="/convert-pdf" className="underline font-bold hover:text-amber-900">Convert Tool</a> first to save them as PDF.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              // PROCESSING STATE - Mobile optimized
-              <div className="p-0 animate-in fade-in zoom-in-95 duration-300">
-                {/* File Header - Mobile optimized padding and icon size */}
-                <div className="bg-slate-50 px-4 py-4 md:px-8 md:py-6 border-b border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="p-2 md:p-3 bg-indigo-100 text-indigo-600 rounded-xl">
-                      <FileKey size={20} className="md:w-6 md:h-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-800 truncate max-w-[150px] md:max-w-[180px] text-sm md:text-base">{file.name}</h3>
-                      <p className="text-[10px] md:text-xs text-slate-500 font-medium">Ready to encrypt</p>
+            <div className="relative bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white overflow-hidden transition-all duration-500">
+              
+              {/* Top aesthetic bar */}
+              <div className="h-2 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500"></div>
+              
+              {!file ? (
+                // --- UPLOAD STATE ---
+                <div className="p-6 md:p-12">
+                  <div className="bg-slate-50/50 rounded-3xl p-2 border border-slate-100/50">
+                    <FileUploader 
+                      onFilesSelected={handleFileSelected}
+                      acceptedFileTypes={['application/pdf']}
+                      allowMultiple={false}
+                      label="Drop PDF to Lock"
+                      subLabel="Secure your file locally"
+                    />
+                  </div>
+                  
+                  <div className="mt-8 flex items-start gap-3 p-5 bg-amber-50/80 backdrop-blur-sm rounded-2xl border border-amber-200/50 text-amber-900 shadow-sm transition-all hover:shadow-md">
+                    <AlertCircle className="shrink-0 text-amber-600 mt-0.5" size={20} />
+                    <div className="text-sm leading-relaxed">
+                      <span className="font-bold block mb-1">Need to protect Word or Excel?</span>
+                      Use our <a href="/convert" className="font-bold underline decoration-amber-300 hover:decoration-amber-600 underline-offset-2 transition-colors">Converter Tool</a> to save them as PDF first.
                     </div>
                   </div>
-                  <button onClick={handleReset} className="text-xs md:text-sm text-slate-400 hover:text-red-500 font-bold transition-colors">
-                    Change
-                  </button>
                 </div>
-
-                {/* Main content area - Mobile optimized padding */}
-                <div className="p-4 md:p-8 space-y-6">
-                  {error && (
-                    <div className="p-3 bg-red-50 text-red-600 rounded-xl flex items-center gap-2 text-sm font-medium border border-red-100">
-                      <AlertCircle size={16} /> {error}
-                    </div>
-                  )}
-
-                  {!downloadUrl ? (
-                    <>
-                      <div className="space-y-3">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide ml-1">Set Password</label>
-                        <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                            <Lock size={18} />
-                          </div>
-                          <input 
-                            type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter a strong password"
-                            className="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-bold text-slate-800 placeholder:font-normal"
-                            autoFocus
-                          />
-                          <button 
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors"
-                          >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </button>
-                        </div>
-                        <p className="text-[11px] text-slate-400 px-1">
-                           ⚠️ Note: If you forget this password, the file cannot be recovered.
+              ) : (
+                // --- PROCESSING / SUCCESS STATE ---
+                <div className="p-0 animate-in fade-in zoom-in-95 duration-500">
+                  {/* File Header */}
+                  <div className="bg-gradient-to-b from-slate-50 to-white px-6 py-5 md:px-10 md:py-6 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="p-3 bg-white shadow-sm border border-slate-100 text-indigo-600 rounded-2xl shrink-0">
+                        <FileKey size={24} />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-800 truncate max-w-[150px] md:max-w-[250px] text-base md:text-lg">{file.name}</h3>
+                        <p className="text-[10px] md:text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB • Ready to lock
                         </p>
                       </div>
+                    </div>
+                    <button 
+                      onClick={handleReset} 
+                      className="group flex items-center gap-2 text-xs md:text-sm text-slate-500 hover:text-red-500 font-bold transition-colors bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-red-200 hover:bg-red-50 shadow-sm"
+                    >
+                      <RefreshCcw size={16} className="group-hover:-rotate-180 transition-transform duration-500" />
+                      <span className="hidden sm:inline">Change File</span>
+                    </button>
+                  </div>
 
-                      <button
-                        onClick={handleProtect}
-                        disabled={!password || isProcessing}
-                        className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-indigo-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:scale-[0.98]"
-                      >
-                        {isProcessing ? <Loader2 className="animate-spin" /> : <Lock size={20} />}
-                        {isProcessing ? "Encrypting..." : "Protect PDF Now"}
-                      </button>
-                    </>
-                  ) : (
-                    // SUCCESS STATE
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-4 ring-white">
-                        <CheckCircle2 size={40} />
+                  <div className="p-6 md:p-10 space-y-8">
+                    {error && (
+                      <div className="p-4 bg-red-50 text-red-700 rounded-2xl flex items-start gap-3 text-sm font-medium border border-red-100 shadow-sm animate-in slide-in-from-top-2">
+                        <AlertCircle size={20} className="shrink-0 mt-0.5 text-red-500" /> 
+                        <span className="leading-relaxed">{error}</span>
                       </div>
-                      <h2 className="text-2xl font-bold text-slate-900 mb-2">File Secured!</h2>
-                      <p className="text-slate-500 mb-8 px-4">Your PDF is now encrypted with the password you provided.</p>
-                      
-                      <div className="space-y-3">
-                        <a 
-                          href={downloadUrl} 
-                          download={downloadName}
-                          className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-transform hover:-translate-y-0.5"
+                    )}
+
+                    {!downloadUrl ? (
+                      // --- PASSWORD INPUT SECTION ---
+                      <div className="space-y-6">
+                        <div className="bg-slate-50 rounded-3xl p-6 md:p-8 border border-slate-100 shadow-inner">
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                            <Lock size={14} className="text-indigo-500" /> Set Master Password
+                          </label>
+                          <div className="relative group">
+                            <input 
+                              type={showPassword ? "text" : "password"}
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="Enter a strong password..."
+                              className="w-full pl-6 pr-14 py-4 md:py-5 bg-white border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-lg md:text-xl text-slate-800 placeholder:font-normal placeholder:text-slate-400 shadow-sm"
+                              autoFocus
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute inset-y-0 right-2 px-3 flex items-center text-slate-400 hover:text-indigo-600 transition-colors bg-white m-1 rounded-xl"
+                            >
+                              {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+                            </button>
+                          </div>
+                          
+                          {/* Password Strength Indicator (Visual Only) */}
+                          <div className="mt-4 flex gap-1 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className={clsx("h-full transition-all duration-500", password.length > 0 ? "w-1/3 bg-red-400" : "w-0")}></div>
+                            <div className={clsx("h-full transition-all duration-500", password.length > 5 ? "w-1/3 bg-amber-400" : "w-0")}></div>
+                            <div className={clsx("h-full transition-all duration-500", password.length > 8 ? "w-1/3 bg-emerald-400" : "w-0")}></div>
+                          </div>
+                          
+                          <p className="text-xs text-slate-500 mt-4 px-1 flex items-start gap-2 leading-relaxed">
+                             <AlertCircle size={14} className="text-slate-400 shrink-0 mt-0.5" />
+                             If you forget this password, the file cannot be recovered. Keep it safe.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={handleProtect}
+                          disabled={!password || isProcessing}
+                          className="relative w-full py-5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-lg md:text-xl shadow-[0_10px_20px_rgb(0,0,0,0.1)] flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:scale-[0.98] overflow-hidden group"
                         >
-                          <Download size={20} /> Download Protected PDF
-                        </a>
-                        <button 
-                          onClick={handleReset}
-                          className="w-full py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition-colors"
-                        >
-                          Protect Another File
+                          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+                          <span className="relative z-10 flex items-center gap-3">
+                            {isProcessing ? <Loader2 className="animate-spin" size={24} /> : <Lock size={24} className="group-hover:scale-110 transition-transform" />}
+                            {isProcessing ? "Encrypting File..." : "Lock PDF Now"}
+                          </span>
                         </button>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      // --- SUCCESS STATE ---
+                      <div className="text-center py-6">
+                        <div className="relative inline-block mb-8">
+                          <div className="absolute inset-0 bg-emerald-400 rounded-full blur-2xl opacity-40 animate-pulse"></div>
+                          <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-100 to-green-50 text-emerald-600 rounded-full flex items-center justify-center shadow-xl ring-8 ring-white">
+                            <CheckCircle2 size={48} />
+                          </div>
+                        </div>
+                        <h2 className="text-3xl font-black text-slate-900 mb-3">File Secured!</h2>
+                        <p className="text-slate-500 mb-10 text-lg">Your PDF is now encrypted and safe to share.</p>
+                        
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <a 
+                            href={downloadUrl} 
+                            download={downloadName}
+                            className="flex-1 py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-1 active:scale-[0.98]"
+                          >
+                            <Download size={22} /> Download
+                          </a>
+                          <button 
+                            onClick={handleReset}
+                            className="flex-1 py-4 px-6 bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 rounded-2xl font-bold text-lg transition-all active:scale-[0.98]"
+                          >
+                            Lock Another
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
-        {/* FEATURES GRID (SEO RICH) */}
-        <section className="grid md:grid-cols-3 gap-6 mb-20">
+        {/* ---------- FEATURES GRID ---------- */}
+        <section className="grid md:grid-cols-3 gap-6 md:gap-8 mb-24 max-w-5xl mx-auto">
           {[
             { 
               icon: ShieldCheck, 
-              title: "100% Private", 
-              desc: "Encryption happens locally in your browser. Your sensitive files are never uploaded to our servers.",
-              color: "text-indigo-600",
-              bg: "bg-indigo-50"
+              title: "Absolute Privacy", 
+              desc: "Your files are never uploaded. We use WebAssembly to encrypt the PDF directly inside your web browser.",
+              bg: "bg-blue-50/80",
+              color: "text-blue-600",
+              border: "border-blue-100"
             },
             { 
               icon: Zap, 
-              title: "Instant Encryption", 
-              desc: "No waiting time. Our optimized engine locks your files in milliseconds, regardless of size.",
+              title: "Instant Processing", 
+              desc: "No waiting in queues or uploading large files. Experience lightning-fast encryption powered by your device.",
+              bg: "bg-amber-50/80",
               color: "text-amber-600",
-              bg: "bg-amber-50"
+              border: "border-amber-100"
             },
             { 
               icon: KeyRound, 
-              title: "Strong Security", 
-              desc: "We use standard AES-128/256 bit encryption, compatible with all major PDF readers.",
+              title: "AES-256 Encryption", 
+              desc: "We employ the highest standard of encryption, making it practically impossible for unauthorized access.",
+              bg: "bg-emerald-50/80",
               color: "text-emerald-600",
-              bg: "bg-emerald-50"
+              border: "border-emerald-100"
             }
           ].map((item, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-              <div className={`inline-flex p-3 ${item.bg} ${item.color} rounded-xl mb-4 group-hover:scale-110 transition-transform`}>
-                <item.icon size={24} />
+            <div key={i} className={`bg-white/60 backdrop-blur-sm p-8 rounded-[2rem] border border-slate-200/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 group hover:-translate-y-1`}>
+              <div className={`inline-flex p-4 ${item.bg} ${item.color} rounded-2xl mb-6 shadow-sm border ${item.border} group-hover:scale-110 transition-transform duration-300`}>
+                <item.icon size={28} />
               </div>
-              <h3 className="font-bold text-slate-900 mb-2 text-lg">{item.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+              <h3 className="font-bold text-slate-900 mb-3 text-xl">{item.title}</h3>
+              <p className="text-slate-500 leading-relaxed font-medium">{item.desc}</p>
             </div>
           ))}
         </section>
 
-        {/* FAQ SECTION (Crucial for SEO) */}
-        <section className="max-w-3xl mx-auto border-t border-slate-200 pt-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-black text-slate-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-slate-500">Everything you need to know about PDF encryption.</p>
-          </div>
+        {/* ---------- FAQ SECTION ---------- */}
+        <section className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Common Questions</h2>
+              <p className="text-slate-500 text-lg">Everything you need to know about our PDF protection tool.</p>
+            </div>
 
-          <div className="space-y-4">
-            {[
-              {
-                q: "Is it safe to password protect PDF online?",
-                a: "Absolutely. Genz PDF operates entirely client-side. This means your file is encrypted directly on your device and is never sent to any server."
-              },
-              {
-                q: "Can I open the protected PDF on my phone?",
-                a: "Yes. The encryption standard we use is compatible with all devices (Android, iPhone, Mac, Windows) and all standard PDF readers."
-              },
-              {
-                q: "What happens if I forget the password?",
-                a: "Unfortunately, there is no way to recover a forgotten password. The encryption is designed to be unbreakable without the key. Please store your password safely."
-              },
-              {
-                q: "Is this service free?",
-                a: "Yes, Genz PDF is 100% free to use with no limits on the number of files you can protect."
-              }
-            ].map((item, i) => (
-              <details key={i} className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <summary className="flex justify-between items-center p-5 font-bold text-slate-800 cursor-pointer list-none hover:bg-slate-50 transition-colors">
-                  {item.q}
-                  <span className="transform group-open:rotate-180 transition-transform text-indigo-500">▼</span>
-                </summary>
-                <div className="px-5 pb-5 text-slate-600 text-sm leading-relaxed border-t border-slate-100 pt-4">
-                  {item.a}
-                </div>
-              </details>
-            ))}
+            <div className="space-y-4">
+              {[
+                {
+                  q: "Is it really safe to password protect PDF online?",
+                  a: "Yes, because our tool is built differently. We use 'Client-Side Processing'. This means your PDF never leaves your computer. The encryption happens locally in your browser, making it 100% secure against interception."
+                },
+                {
+                  q: "Will this protected PDF open on my smartphone?",
+                  a: "Absolutely. We use standard PDF encryption protocols that are universally supported by all modern PDF readers across iOS, Android, Windows, and macOS."
+                },
+                {
+                  q: "Can you help me recover a forgotten password?",
+                  a: "No. Since we do not store your files or passwords on our servers, it is mathematically impossible for us to recover or bypass the password. Please keep your password in a safe place."
+                },
+                {
+                  q: "Are there any hidden fees or limits?",
+                  a: "No. Genz PDF is completely free to use. There are no file size limits, no daily usage limits, and no premium tiers."
+                }
+              ].map((item, i) => (
+                <details key={i} className="group bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300 hover:border-indigo-200">
+                  <summary className="flex justify-between items-center p-6 font-bold text-slate-800 text-lg cursor-pointer list-none select-none">
+                    {item.q}
+                    <div className="p-2 rounded-full bg-white shadow-sm text-indigo-500 group-open:rotate-180 transition-transform duration-300">
+                      <ChevronDown size={20} />
+                    </div>
+                  </summary>
+                  <div className="px-6 pb-6 pt-2 text-slate-600 text-base leading-relaxed">
+                    {item.a}
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
