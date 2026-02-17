@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { encryptPDF } from '@pdfsmaller/pdf-encrypt-lite'; // नई लाइब्रेरी इम्पोर्ट की
-// import { PDFDocument } from 'pdf-lib'; // इसकी अब ज़रूरत नहीं है अगर हम सिर्फ पासवर्ड लगा रहे हैं
+import { encryptPDF } from '@pdfsmaller/pdf-encrypt-lite';
 import {
   Lock,
   Download,
@@ -26,7 +25,7 @@ export const ProtectTool: React.FC = () => {
     description: "Secure your PDF documents with military-grade 256-bit encryption. Add passwords to PDF files online for free. 100% client-side, private, and secure.",
     canonical: "https://genzpdf.com/protect-pdf",
     keywords: "protect pdf, encrypt pdf, password protect pdf, lock pdf, secure pdf, add password to pdf, free pdf protector, client-side pdf encryption, aes 256 pdf",
-    image: "https://genzpdf.com/social/protect-pdf-preview.jpg", // Ensure this image exists
+    image: "https://genzpdf.com/social/protect-pdf-preview.jpg",
     siteName: "Genz PDF"
   };
 
@@ -41,7 +40,6 @@ export const ProtectTool: React.FC = () => {
 
   // ---------- ✅ MASTER SEO & SCHEMA INJECTION ----------
   useEffect(() => {
-    // 1. Basic Meta Tags
     document.title = SEO.title;
     
     const upsertMeta = (attr: string, value: string, isProperty = false) => {
@@ -59,7 +57,6 @@ export const ProtectTool: React.FC = () => {
     upsertMeta('keywords', SEO.keywords);
     upsertMeta('robots', 'index, follow');
     
-    // 2. Canonical URL
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement('link');
@@ -68,7 +65,6 @@ export const ProtectTool: React.FC = () => {
     }
     linkCanonical.setAttribute('href', SEO.canonical);
 
-    // 3. Open Graph (Facebook/LinkedIn)
     upsertMeta('og:title', SEO.title, true);
     upsertMeta('og:description', SEO.description, true);
     upsertMeta('og:url', SEO.canonical, true);
@@ -76,13 +72,11 @@ export const ProtectTool: React.FC = () => {
     upsertMeta('og:site_name', SEO.siteName, true);
     upsertMeta('og:image', SEO.image, true);
 
-    // 4. Twitter Cards
     upsertMeta('twitter:card', 'summary_large_image');
     upsertMeta('twitter:title', SEO.title);
     upsertMeta('twitter:description', SEO.description);
     upsertMeta('twitter:image', SEO.image);
 
-    // 5. JSON-LD Structured Data (The "Secret Sauce" for Google Ranking)
     const scriptId = 'json-ld-protect';
     let scriptTag = document.getElementById(scriptId);
     if (!scriptTag) {
@@ -150,18 +144,15 @@ export const ProtectTool: React.FC = () => {
     setError(null);
 
     try {
-      // 1. फाइल को बाइट्स (ArrayBuffer) में बदलें
       const arrayBuffer = await file.arrayBuffer();
       const pdfBytes = new Uint8Array(arrayBuffer);
 
-      // 2. नई लाइब्रेरी से एन्क्रिप्ट करें (पासवर्ड लगाएं)
       const encryptedBytes = await encryptPDF(
         pdfBytes,
-        password, // User Password (to open)
-        password  // Owner Password (to edit - keeping same for simplicity)
+        password,
+        password
       );
 
-      // 3. डाउनलोड के लिए फाइल तैयार करें
       const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 
@@ -216,8 +207,8 @@ export const ProtectTool: React.FC = () => {
             <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient"></div>
             
             {!file ? (
-              // UPLOAD STATE
-              <div className="p-8">
+              // UPLOAD STATE - Mobile optimized padding
+              <div className="p-4 md:p-8">
                 <FileUploader 
                   onFilesSelected={handleFileSelected}
                   acceptedFileTypes={['application/pdf']}
@@ -236,25 +227,26 @@ export const ProtectTool: React.FC = () => {
                 </div>
               </div>
             ) : (
-              // PROCESSING STATE
+              // PROCESSING STATE - Mobile optimized
               <div className="p-0 animate-in fade-in zoom-in-95 duration-300">
-                {/* File Header */}
-                <div className="bg-slate-50 px-8 py-6 border-b border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
-                      <FileKey size={24} />
+                {/* File Header - Mobile optimized padding and icon size */}
+                <div className="bg-slate-50 px-4 py-4 md:px-8 md:py-6 border-b border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="p-2 md:p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+                      <FileKey size={20} className="md:w-6 md:h-6" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-800 truncate max-w-[180px]">{file.name}</h3>
-                      <p className="text-xs text-slate-500 font-medium">Ready to encrypt</p>
+                      <h3 className="font-bold text-slate-800 truncate max-w-[150px] md:max-w-[180px] text-sm md:text-base">{file.name}</h3>
+                      <p className="text-[10px] md:text-xs text-slate-500 font-medium">Ready to encrypt</p>
                     </div>
                   </div>
-                  <button onClick={handleReset} className="text-sm text-slate-400 hover:text-red-500 font-bold transition-colors">
+                  <button onClick={handleReset} className="text-xs md:text-sm text-slate-400 hover:text-red-500 font-bold transition-colors">
                     Change
                   </button>
                 </div>
 
-                <div className="p-8 space-y-6">
+                {/* Main content area - Mobile optimized padding */}
+                <div className="p-4 md:p-8 space-y-6">
                   {error && (
                     <div className="p-3 bg-red-50 text-red-600 rounded-xl flex items-center gap-2 text-sm font-medium border border-red-100">
                       <AlertCircle size={16} /> {error}
