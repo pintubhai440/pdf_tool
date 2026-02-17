@@ -22,7 +22,8 @@ import {
   Home as HomeIcon,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Lock                      // ✅ 1. Lock icon import kiya
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,6 +42,7 @@ const SplitTool = lazy(() => import('./components/SplitTool'));
 const ConverterTool = lazy(() => import('./components/ConverterTool'));
 const CompressTool = lazy(() => import('./components/CompressTool'));
 const ResizeTool = lazy(() => import('./components/ResizeTool'));
+const ProtectTool = lazy(() => import('./components/ProtectTool'));   // ✅ 2. ProtectTool lazy load
 const About = lazy(() => import('./components/About'));
 const Contact = lazy(() => import('./components/Contact'));
 const Policy = lazy(() => import('./components/Policy'));
@@ -166,6 +168,25 @@ const SEO_METADATA: Record<AppMode, {
       { name: "Resize PDF", url: `${BASE_URL}/resize` }
     ]
   },
+  // ✅ 3. Protect PDF ka SEO metadata add kiya
+  protect: {
+    title: "Protect PDF - Add Password Online Free | Genz PDF",
+    description: "Secure your PDF with a password. Encrypt PDF files online for free. 100% client-side security.",
+    keywords: "protect pdf, encrypt pdf, password protect pdf, lock pdf, secure pdf online, pdf security free",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Protect PDF Tool",
+      "description": "Free tool to add password protection to PDF files.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Protect PDF", url: `${BASE_URL}/protect` }
+    ]
+  },
   about: {
     title: "About Us - Genz PDF Team",
     description: "Learn about the mission behind Genz PDF. We provide free, secure, client-side PDF tools for everyone.",
@@ -235,6 +256,7 @@ function App() {
       if (path.includes('/convert')) return 'convert';
       if (path.includes('/compress')) return 'compress';
       if (path.includes('/resize')) return 'resize';
+      if (path.includes('/protect')) return 'protect';    // ✅ 4. protect path check
       if (path.includes('/about')) return 'about';
       if (path.includes('/contact')) return 'contact';
       if (path.includes('/policy')) return 'policy';
@@ -248,7 +270,7 @@ function App() {
   const [isMerging, setIsMerging] = useState(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // 👈 Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Browser ke Back/Forward button support ke liye
@@ -318,7 +340,6 @@ function App() {
     linkCanonical.setAttribute('href', url);
 
     // 8. JSON-LD Structured Data (Global Website + Organization + Page specific)
-    // Remove old scripts to avoid duplicates
     const scriptsToRemove = ['json-ld-global', 'json-ld-page', 'json-ld-breadcrumb'];
     scriptsToRemove.forEach(id => {
       const oldScript = document.getElementById(id);
@@ -443,8 +464,8 @@ function App() {
 
     return (
       <a
-        href={targetMode === 'home' ? '/' : `/${targetMode}`} // clean URLs
-        onClick={() => mobile && setIsMobileMenuOpen(false)} // Mobile menu close on click
+        href={targetMode === 'home' ? '/' : `/${targetMode}`}
+        onClick={() => mobile && setIsMobileMenuOpen(false)}
         className={clsx(
           "flex items-center gap-3 transition-all duration-300 font-medium rounded-xl",
           // Mobile vs Desktop Styles
@@ -490,6 +511,8 @@ function App() {
             <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert" />
             <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
             <NavButton targetMode="resize" icon={Scaling} label="Resize" />
+            {/* ✅ 5. Desktop mein Protect button add kiya (Resize ke baad) */}
+            <NavButton targetMode="protect" icon={Lock} label="Protect" />
           </div>
 
           {/* Right Actions */}
@@ -513,7 +536,6 @@ function App() {
           </div>
         </div>
       </header> 
-      {/* 👈 HEADER यहाँ बंद हो गया */}
 
       {/* 👇 MOBILE MENU अब HEADER के बाहर है (ताकि पूरी स्क्रीन पर दिखे) */}
       <div className={clsx(
@@ -528,6 +550,8 @@ function App() {
           <NavButton targetMode="convert" icon={ArrowRightLeft} label="Convert PDF" mobile />
           <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
           <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
+          {/* ✅ 6. Mobile menu mein bhi Protect button add kiya */}
+          <NavButton targetMode="protect" icon={Lock} label="Protect PDF" mobile />
           
           <div className="my-2 border-t border-slate-100"></div>
           
@@ -542,7 +566,6 @@ function App() {
           </button>
         </div>
       </div>
-      {/* 👆 MOBILE MENU समाप्त */}
 
       {/* --- MAIN CONTENT AREA --- */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
@@ -697,12 +720,14 @@ function App() {
               )}
             </article>
           ) : (
-            /* Fallback for all other tools (Split, Convert, Compress, Resize, About, Contact, Policy, Terms) */
+            /* Fallback for all other tools (Split, Convert, Compress, Resize, Protect, About, Contact, Policy, Terms) */
             <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
               {mode === 'split' && <SplitTool />}
               {mode === 'convert' && <ConverterTool />}
               {mode === 'compress' && <CompressTool />}
               {mode === 'resize' && <ResizeTool />}
+              {/* ✅ 7. Protect Tool render kiya */}
+              {mode === 'protect' && <ProtectTool />}
               {mode === 'about' && <About />}
               {mode === 'contact' && <Contact />}
               {mode === 'policy' && <Policy />}
