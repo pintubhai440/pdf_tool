@@ -22,7 +22,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
               "name": "Genz PDF",
               "url": "https://genzpdf.com",
               "logo": "https://genzpdf.com/logo.png",
-              "description": "The ultimate Free Online PDF Tool. Securely Merge, Split, Convert, and Compress PDF documents directly in your browser. No sign-up required.",
+              "description": "The ultimate Free Online PDF Tool. Securely Merge, Split, Convert, Compress, and Protect PDF documents directly in your browser. No sign-up required.",
               "sameAs": ["https://www.linkedin.com/company/genzpdf"],
               "address": {
                 "@type": "PostalAddress",
@@ -109,7 +109,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                 itemProp="description"
               >
                 The ultimate <strong className="text-slate-700 font-semibold">Free Online PDF Tool</strong>.
-                Securely Merge, Split, Convert, and Compress PDF documents directly in your browser.
+                Securely Merge, Split, Convert, Compress, and Protect PDF documents directly in your browser.
                 <span className="block mt-2 text-slate-400">
                   No servers. No uploads. No limits.
                 </span>
@@ -155,6 +155,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   { id: 'convert', label: 'Convert PDF', position: 3, url: '/convert-pdf' },
                   { id: 'compress', label: 'Compress PDF', position: 4, url: '/compress-pdf' },
                   { id: 'resize', label: 'Resize PDF', position: 5, url: '/resize-pdf' },
+                  { id: 'protect', label: 'Protect PDF', position: 6, url: '/protect-pdf' }, // ✅ Added Protect PDF
                 ].map((item) => (
                   <li
                     key={item.id}
