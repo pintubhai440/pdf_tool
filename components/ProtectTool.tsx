@@ -10,7 +10,8 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Unlock
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 
