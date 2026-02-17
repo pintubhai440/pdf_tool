@@ -639,7 +639,7 @@ export const CompressTool: React.FC = () => {
       {/* ===== FAQ SECTION (always visible, SEO rich) ===== */}
       <section className="max-w-3xl mx-auto border-t border-slate-200 pt-12 md:pt-16">
         <div className="text-center mb-8 md:mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Common Questions</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Frequently Asked Questions</h2>
           <p className="text-sm md:text-base text-slate-500">Everything you need to know about our compressor.</p>
         </div>
 
