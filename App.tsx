@@ -653,6 +653,9 @@ function App() {
                 </div>
               )}
             </article>
+          ) : mode === 'protect' ? (
+            /* --- PROTECT TOOL UI (RENDERED SEPARATELY LIKE MERGE TOOL) --- */
+            <ProtectTool />
           ) : (
             /* --- OTHER TOOLS --- */
             <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
@@ -660,7 +663,7 @@ function App() {
               {mode === 'convert' && <ConverterTool />}
               {mode === 'compress' && <CompressTool />}
               {mode === 'resize' && <ResizeTool />}
-              {mode === 'protect' && <ProtectTool />}
+              {/* Protect Tool yahan se hata diya gaya hai - ab upar render ho raha hai */}
               {mode === 'about' && <About />}
               {mode === 'contact' && <Contact />}
               {mode === 'policy' && <Policy />}
