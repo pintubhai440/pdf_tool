@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PDFDocument } from 'pdf-lib';
+// import { PDFDocument } from 'pdf-lib'; // इसकी अब ज़रूरत नहीं है अगर हम सिर्फ पासवर्ड लगा रहे हैं
+import { encryptPDF } from '@pdfsmaller/pdf-encrypt-lite'; // 👈 नई लाइब्रेरी इम्पोर्ट की
 import {
   Lock,
   Download,
@@ -9,7 +10,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  Unlock,
   AlertCircle
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
@@ -43,33 +43,27 @@ export const ProtectTool: React.FC = () => {
     setIsProcessing(true);
 
     try {
+      // 1. फाइल को बाइट्स (ArrayBuffer) में बदलें
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfBytes = new Uint8Array(arrayBuffer);
 
-      // Encrypt the PDF
-      pdfDoc.encrypt({
-        userPassword: password,
-        ownerPassword: password, // Owner aur User password same rakh rahe hain simple usage ke liye
-        permissions: {
-          printing: 'highResolution',
-          modifying: false,
-          copying: false,
-          annotating: false,
-          fillingForms: false,
-          contentAccessibility: false,
-          documentAssembly: false,
-        },
-      });
+      // 2. नई लाइब्रेरी से एन्क्रिप्ट करें (पासवर्ड लगाएं)
+      // encryptPDF(fileBytes, userPassword, ownerPassword, permissions)
+      const encryptedBytes = await encryptPDF(
+        pdfBytes,
+        password, // खोलने के लिए पासवर्ड
+        password  // एडिट करने के लिए पासवर्ड (फिलहाल सेम रखते हैं)
+      );
 
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      // 3. डाउनलोड के लिए फाइल तैयार करें
+      const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 
       setDownloadUrl(url);
       setDownloadName(`protected-${file.name}`);
     } catch (error) {
       console.error("Error protecting PDF:", error);
-      alert("Failed to protect PDF. Make sure it's not already encrypted.");
+      alert("Failed to protect PDF. Please try again.");
     } finally {
       setIsProcessing(false);
     }
