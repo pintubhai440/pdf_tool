@@ -399,7 +399,7 @@ export const ProtectTool: React.FC = () => {
         <section className="max-w-4xl mx-auto">
           <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-3 sm:mb-4">Common Questions</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-3 sm:mb-4">Frequently Asked Questions</h2>
               <p className="text-sm sm:text-base md:text-lg text-slate-500">Everything you need to know about our PDF protection tool.</p>
             </div>
 
