@@ -6,6 +6,7 @@ import {
   ArrowRightLeft,
   Minimize2,
   Scaling,
+  Lock,              // Added for Protect PDF
   ArrowRight,
   ShieldCheck,
   Zap,
@@ -217,7 +218,18 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       shadow: 'hover:shadow-emerald-500/20',
       border: 'hover:border-emerald-500/50',
       gradient: 'from-emerald-500 to-green-600'
-    }
+    },
+    // 🔐 New Protect PDF tool added
+    {
+      id: 'protect',
+      title: 'Protect PDF',
+      desc: 'Encrypt your PDF with a password. Secure sensitive data instantly.',
+      icon: Lock,
+      iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-600',
+      shadow: 'hover:shadow-indigo-500/20',
+      border: 'hover:border-indigo-500/50',
+      gradient: 'from-indigo-500 to-purple-600'
+    },
   ];
 
   return (
