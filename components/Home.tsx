@@ -6,7 +6,7 @@ import {
   ArrowRightLeft,
   Minimize2,
   Scaling,
-  Lock,             // ✅ Protect PDF Icon
+  Lock,
   ArrowRight,
   ShieldCheck,
   Zap,
@@ -15,6 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { AppMode } from '../types';
+import { ScrollHero } from './ScrollHero'; // 👈 Added ScrollHero import
 
 interface HomeProps {
   setMode: (mode: AppMode) => void;
@@ -269,6 +270,9 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.4 }}></div>
       </div>
+
+      {/* 👇 ScrollHero added here */}
+      <ScrollHero />
 
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         
