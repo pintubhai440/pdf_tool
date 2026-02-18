@@ -647,11 +647,12 @@ function App() {
 
                   {/* Right: Actions Card */}
                   <div className="lg:sticky lg:top-24 space-y-6">
+                    {/* ✅ FIX: Mobile padding reduced (p-6) & Radius reduced (rounded-3xl) */}
                     <motion.div 
                        initial={{ x: 20, opacity: 0 }}
                        animate={{ x: 0, opacity: 1 }}
                        transition={{ delay: 0.2 }}
-                       className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200"
+                       className="bg-slate-900 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200"
                     >
                       <h3 className="text-xl font-black mb-6">Summary</h3>
                       <div className="space-y-4 mb-8">
@@ -694,11 +695,12 @@ function App() {
 
                     <AnimatePresence>
                     {mergedPdfUrl && (
+                      // ✅ FIX: Compact layout for mobile
                       <motion.div 
                         initial={{ scale: 0.8, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="bg-emerald-500 p-6 rounded-[2rem] text-white shadow-xl shadow-emerald-200"
+                        className="bg-emerald-500 p-5 md:p-6 rounded-2xl md:rounded-[2rem] text-white shadow-xl shadow-emerald-200"
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <div className="p-2 bg-white/20 rounded-full"><CheckCircle2 /></div>
