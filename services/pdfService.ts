@@ -1,3 +1,4 @@
+// services/pdfService.ts
 import { PDFDocument } from 'pdf-lib';
 
 export const mergePdfs = async (files: File[]): Promise<Uint8Array> => {
@@ -6,17 +7,24 @@ export const mergePdfs = async (files: File[]): Promise<Uint8Array> => {
   for (const file of files) {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      // यह लाइन Encrypted फाइलों पर फेल हो सकती है
-      const pdf = await PDFDocument.load(arrayBuffer, { 
-        ignoreEncryption: true // (Optional) कुछ मामलों में मदद कर सकता है, लेकिन Password वाली फाइलों के लिए पासवर्ड चाहिए होता है
-      });
+      
+      // सुधार: यहाँ से { ignoreEncryption: true } हटा दिया है।
+      // अब अगर PDF लॉक होगी, तो pdf-lib तुरंत एरर फेंक देगा।
+      const pdf = await PDFDocument.load(arrayBuffer); 
       
       const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
       copiedPages.forEach((page) => mergedPdf.addPage(page));
-    } catch (error) {
+
+    } catch (error: any) {
       console.error(`Error processing file ${file.name}:`, error);
-      // यूजर को बताने के लिए एरर फेंकें कि कौन सी फाइल खराब है
-      throw new Error(`Failed to merge "${file.name}". It might be password protected or corrupted.`);
+
+      // अगर फाइल पासवर्ड प्रोटेक्टेड है, तो यह खास एरर पकड़ लेगा
+      if (error.message && error.message.toLowerCase().includes('encrypted')) {
+         throw new Error(`File "${file.name}" password protected hai. Kripya pehle password hatayein.`);
+      }
+      
+      // अगर फाइल करप्ट है
+      throw new Error(`File "${file.name}" merge nahi ho payi. Ye file corrupted ho sakti hai.`);
     }
   }
 
