@@ -536,6 +536,28 @@ function App() {
                   transition={{ duration: 0.4 }}
                   className="text-center max-w-4xl mx-auto py-6 md:py-10"
                 >
+                  {/* 👇 1. यहाँ हमने वीडियो एनीमेशन जोड़ा है (Badge के ठीक ऊपर) 👇 */}
+                  <div className="flex justify-center mb-6">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl shadow-indigo-200/50 border-4 border-white ring-4 ring-indigo-50">
+                      <video 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        className="w-full h-full object-cover scale-110" // scale-110 वीडियो को थोड़ा ज़ूम रखता है ताकि बॉर्डर न दिखे
+                      >
+                        <source src="/merge-anim.mp4" type="video/mp4" />
+                        {/* अगर वीडियो लोड न हो तो बैकअप के लिए पुराना आइकॉन */}
+                        <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
+                           <Files size={40} className="text-indigo-600"/>
+                        </div>
+                      </video>
+                      
+                      {/* वीडियो के ऊपर एक शाइन इफेक्ट (Optional) */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 to-transparent pointer-events-none"></div>
+                    </div>
+                  </div>
+
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 md:mb-8 border border-indigo-100">
                     <Zap size={12} /> Secure & Private
                   </div>
@@ -654,8 +676,13 @@ function App() {
                         >
                           {isMerging ? (
                             <>
-                              <Loader2 className="animate-spin" size={14} />
-                              Processing...
+                              {/* 👇 2. स्पिनर की जगह छोटा वीडियो 👇 */}
+                              <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white/50 relative">
+                                 <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                                    <source src="/processing-loop.mp4" type="video/mp4" />
+                                 </video>
+                              </div>
+                              <span className="animate-pulse">Processing...</span>
                             </>
                           ) : (
                             <>
