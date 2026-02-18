@@ -645,17 +645,17 @@ function App() {
                     </motion.div>
                   </div>
 
-                  {/* Right: Actions Card */}
-                  <div className="lg:sticky lg:top-24 space-y-6">
-                    {/* ✅ FIX: Mobile padding reduced (p-6) & Radius reduced (rounded-3xl) */}
+                  {/* Right: Actions Card - FIXED FOR MOBILE */}
+                  <div className="lg:sticky lg:top-24 space-y-4 md:space-y-6 w-full">
                     <motion.div 
                        initial={{ x: 20, opacity: 0 }}
                        animate={{ x: 0, opacity: 1 }}
                        transition={{ delay: 0.2 }}
-                       className="bg-slate-900 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200"
+                       // ✅ FIX: Mobile pe padding aur radius kam kiya hai (p-5, rounded-2xl)
+                       className="bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] text-white shadow-xl md:shadow-2xl shadow-indigo-200 w-full"
                     >
-                      <h3 className="text-xl font-black mb-6">Summary</h3>
-                      <div className="space-y-4 mb-8">
+                      <h3 className="text-lg md:text-xl font-black mb-4 md:mb-6">Summary</h3>
+                      <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                         <div className="flex justify-between text-sm border-b border-slate-700 pb-3">
                           <span className="text-slate-400">Total Files</span>
                           <span className="font-bold">{files.length}</span>
@@ -673,48 +673,46 @@ function App() {
                         disabled={files.length < 2 || isMerging}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-2xl font-black text-lg shadow-lg transition-all flex items-center justify-center gap-3 relative overflow-hidden"
+                        className="w-full py-3 md:py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl md:rounded-2xl font-black text-base md:text-lg shadow-lg transition-all flex items-center justify-center gap-3 relative overflow-hidden"
                       >
                         {isMerging ? (
                            <>
-                             <Loader2 className="animate-spin" />
+                             <Loader2 className="animate-spin" size={20} />
                              Processing...
                            </>
                         ) : (
                            <>
-                             <FileStack />
+                             <FileStack size={20} />
                              Merge Files
                            </>
                         )}
-                        {/* Button Shine Effect */}
                         {!isMerging && files.length >= 2 && (
                           <div className="absolute inset-0 bg-white/20 -translate-x-full animate-[shimmer_2s_infinite]"></div>
                         )}
                       </motion.button>
                     </motion.div>
 
+                    {/* Success Card - FIXED FOR MOBILE */}
                     <AnimatePresence>
                     {mergedPdfUrl && (
-                      // ✅ FIX: Compact layout for mobile
                       <motion.div 
                         initial={{ scale: 0.8, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="bg-emerald-500 p-5 md:p-6 rounded-2xl md:rounded-[2rem] text-white shadow-xl shadow-emerald-200"
+                        // ✅ FIX: Mobile pe padding aur radius kam kiya hai
+                        className="bg-emerald-500 p-5 md:p-6 rounded-2xl md:rounded-[2rem] text-white shadow-xl shadow-emerald-200 w-full"
                       >
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="p-2 bg-white/20 rounded-full"><CheckCircle2 /></div>
-                          <span className="font-bold text-lg">Merge Success!</span>
+                          <div className="p-2 bg-white/20 rounded-full"><CheckCircle2 size={20} /></div>
+                          <span className="font-bold text-base md:text-lg">Merge Success!</span>
                         </div>
-                        <motion.a 
+                        <a 
                           href={mergedPdfUrl} 
                           download="merged-genzpdf.pdf" 
-                          whileHover={{ scale: 1.02, backgroundColor: "#f0fdf4" }} // white/green tint
-                          whileTap={{ scale: 0.98 }}
-                          className="w-full py-3.5 bg-white text-emerald-600 rounded-xl font-black text-center block hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer"
+                          className="w-full py-3 md:py-3.5 bg-white text-emerald-600 rounded-xl font-black text-center block hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer text-sm md:text-base flex items-center justify-center gap-2"
                         >
-                          <Download className="inline mr-2" size={18}/> Download PDF
-                        </motion.a>
+                          <Download size={18}/> Download PDF
+                        </a>
                       </motion.div>
                     )}
                     </AnimatePresence>
