@@ -1,3 +1,4 @@
+// App.tsx
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
@@ -398,6 +399,7 @@ function App() {
     setFiles(sorted);
   };
 
+  // ✅ UPDATED handleMerge with detailed error message
   const handleMerge = async () => {
     if (files.length === 0) return;
     setIsMerging(true);
@@ -406,8 +408,9 @@ function App() {
       const pdfBytes = await mergePdfs(originalFiles);
       const url = createPdfUrl(pdfBytes);
       setMergedPdfUrl(url);
-    } catch (error) {
-      alert("Merge failed. Please try again.");
+    } catch (error: any) {
+      // यहाँ अब आपको पता चलेगा कि किस फाइल में दिक्कत है
+      alert(error.message || "Merge failed. Please check if any PDF is password protected.");
     } finally {
       setIsMerging(false);
     }
