@@ -536,27 +536,24 @@ function App() {
                   transition={{ duration: 0.4 }}
                   className="text-center max-w-4xl mx-auto py-6 md:py-10"
                 >
-                  {/* 👇 1. यहाँ हमने वीडियो एनीमेशन जोड़ा है (Badge के ठीक ऊपर) 👇 */}
-                  <div className="flex justify-center mb-6">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl shadow-indigo-200/50 border-4 border-white ring-4 ring-indigo-50">
+                  {/* 👇 9:16 Video in Mobile Frame 👇 */}
+                  <div className="flex justify-center mb-8">
+                    <div className="relative w-[120px] h-[213px] md:w-[140px] md:h-[248px] bg-slate-900 rounded-[1.5rem] border-[4px] border-slate-900 shadow-2xl shadow-indigo-200 overflow-hidden">
                       <video 
                         autoPlay 
                         loop 
                         muted 
                         playsInline 
-                        className="w-full h-full object-cover scale-110" // scale-110 वीडियो को थोड़ा ज़ूम रखता है ताकि बॉर्डर न दिखे
+                        className="w-full h-full object-cover"
                       >
                         <source src="/merge-anim.mp4" type="video/mp4" />
-                        {/* अगर वीडियो लोड न हो तो बैकअप के लिए पुराना आइकॉन */}
-                        <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
-                           <Files size={40} className="text-indigo-600"/>
-                        </div>
                       </video>
                       
-                      {/* वीडियो के ऊपर एक शाइन इफेक्ट (Optional) */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 to-transparent pointer-events-none"></div>
+                      {/* Mobile Notch UI (Optional) */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg z-10"></div>
                     </div>
                   </div>
+                  {/* 👆 Video Code End 👆 */}
 
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 md:mb-8 border border-indigo-100">
                     <Zap size={12} /> Secure & Private
