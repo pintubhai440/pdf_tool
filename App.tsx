@@ -24,13 +24,12 @@ import {
   Menu,
   X,
   ChevronRight,
-  Lock // ✅ Protect Tool Icon
+  Lock 
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
-import { motion, AnimatePresence } from 'framer-motion'; // ✅ Added for animations
+import { motion, AnimatePresence } from 'framer-motion';
 
-// ✅ CORE IMPORTS
 import { FileUploader } from './components/FileUploader';
 import { FileList } from './components/FileList';
 import { AiAssistant } from './components/AiAssistant';
@@ -39,18 +38,17 @@ import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
-// ✅ LAZY LOAD TOOLS (Performance Optimization)
 const SplitTool = lazy(() => import('./components/SplitTool'));
 const ConverterTool = lazy(() => import('./components/ConverterTool'));
 const CompressTool = lazy(() => import('./components/CompressTool'));
 const ResizeTool = lazy(() => import('./components/ResizeTool'));
-const ProtectTool = lazy(() => import('./components/ProtectTool')); // ✅ Protect Tool
+const ProtectTool = lazy(() => import('./components/ProtectTool'));
 const About = lazy(() => import('./components/About'));
 const Contact = lazy(() => import('./components/Contact'));
 const Policy = lazy(() => import('./components/Policy'));
 const Terms = lazy(() => import('./components/Terms'));
 
-// ==================== 🚀 SEO CONFIGURATION (THE BRAIN) ====================
+// ... (SEO_METADATA and other constants remain same)
 const BASE_URL = "https://genzpdf.com";
 const SITE_NAME = "Genz PDF";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/social-preview.jpg`;
@@ -95,6 +93,7 @@ const SEO_METADATA: Record<AppMode, {
       { name: "Merge PDF", url: `${BASE_URL}/merge` }
     ]
   },
+  // ... (Other metadata remains same)
   split: {
     title: "Split PDF Online - Extract or Remove Pages Free | Genz PDF",
     description: "Separate PDF pages, extract pages from PDF free, remove pages from PDF online. Split large PDF files instantly in your browser.",
@@ -211,7 +210,7 @@ const SEO_METADATA: Record<AppMode, {
 };
 
 function App() {
-  // --- ROUTING LOGIC ---
+  // ... (Routing and state logic remains same)
   const getInitialMode = (): AppMode => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
@@ -220,7 +219,7 @@ function App() {
       if (path.includes('/convert')) return 'convert';
       if (path.includes('/compress')) return 'compress';
       if (path.includes('/resize')) return 'resize';
-      if (path.includes('/protect')) return 'protect'; // ✅ Added Route
+      if (path.includes('/protect')) return 'protect';
       if (path.includes('/about')) return 'about';
       if (path.includes('/contact')) return 'contact';
       if (path.includes('/policy')) return 'policy';
@@ -236,42 +235,31 @@ function App() {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // ✅ NEW: Ref for auto-scrolling to success message (integrated from first code)
   const successRef = useRef<HTMLDivElement>(null);
 
-  // --- HYBRID NAVIGATION (SPA + SEO) ---
-  // This allows Google to see href links, but users get instant SPA navigation
   const navigateTo = (targetMode: AppMode, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    
-    // Update URL without reload
     const path = targetMode === 'home' ? '/' : `/${targetMode}`;
     window.history.pushState({}, '', path);
-    
-    // Update State
     setMode(targetMode);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle Back/Forward Browser Buttons
   useEffect(() => {
     const handlePopState = () => setMode(getInitialMode());
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // ✅ NEW: Auto-scroll when merge is successful (integrated from first code)
   useEffect(() => {
     if (mergedPdfUrl && successRef.current) {
       setTimeout(() => {
         successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300); // Small delay to allow animation to start
+      }, 300);
     }
   }, [mergedPdfUrl]);
 
-  // --- DYNAMIC SEO INJECTION ---
   useEffect(() => {
     const meta = SEO_METADATA[mode] || SEO_METADATA.home;
     const url = mode === 'home' ? BASE_URL : `${BASE_URL}/${mode}`;
@@ -295,7 +283,6 @@ function App() {
     upsertMeta('viewport', 'width=device-width, initial-scale=1');
     upsertMeta('author', 'Genz PDF Team');
 
-    // Open Graph
     upsertMeta('og:title', meta.title, 'property');
     upsertMeta('og:description', meta.description, 'property');
     upsertMeta('og:url', url, 'property');
@@ -303,13 +290,11 @@ function App() {
     upsertMeta('og:site_name', SITE_NAME, 'property');
     upsertMeta('og:image', DEFAULT_OG_IMAGE, 'property');
 
-    // Twitter
     upsertMeta('twitter:card', 'summary_large_image', 'name');
     upsertMeta('twitter:title', meta.title, 'name');
     upsertMeta('twitter:description', meta.description, 'name');
     upsertMeta('twitter:image', DEFAULT_OG_IMAGE, 'name');
 
-    // Canonical
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement('link');
@@ -318,7 +303,6 @@ function App() {
     }
     linkCanonical.setAttribute('href', url);
 
-    // JSON-LD Schema
     const scriptsToRemove = ['json-ld-global', 'json-ld-page', 'json-ld-breadcrumb'];
     scriptsToRemove.forEach(id => {
       const oldScript = document.getElementById(id);
@@ -382,7 +366,6 @@ function App() {
     }
   }, [mode]);
 
-  // --- MERGE LOGIC ---
   const handleFilesSelected = (newFiles: File[]) => {
     const pdfFiles: PdfFile[] = newFiles.map((file) => ({
       id: uuidv4(),
@@ -411,7 +394,6 @@ function App() {
     setFiles(sorted);
   };
 
-  // ✅ UPDATED handleMerge with detailed error message
   const handleMerge = async () => {
     if (files.length === 0) return;
     setIsMerging(true);
@@ -421,17 +403,14 @@ function App() {
       const url = createPdfUrl(pdfBytes);
       setMergedPdfUrl(url);
     } catch (error: any) {
-      // यहाँ अब आपको पता चलेगा कि किस फाइल में दिक्कत है
       alert(error.message || "Merge failed. Please check if any PDF is password protected.");
     } finally {
       setIsMerging(false);
     }
   };
 
-  // --- NAVIGATION COMPONENT ---
   const NavButton = ({ targetMode, icon: Icon, label, mobile = false }: { targetMode: AppMode, icon: any, label: string, mobile?: boolean }) => {
     const isActive = (mode === targetMode) || (targetMode === 'home' && mode === 'home');
-
     return (
       <a
         href={targetMode === 'home' ? '/' : `/${targetMode}`}
@@ -458,10 +437,8 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
-      {/* --- HEADER --- */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
-          
           <a href="/" onClick={(e) => navigateTo('home', e)} className="flex items-center gap-3 group z-50 relative">
             <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200/50 group-hover:rotate-6 transition-transform duration-300">
               <img src="/logo.png" alt="Genz PDF Logo" className="w-6 h-6 md:w-7 md:h-7 object-contain brightness-0 invert" />
@@ -489,7 +466,6 @@ function App() {
               <Sparkles size={16} className="group-hover:animate-pulse" />
               <span>AI Assistant</span>
             </button>
-
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors z-50 relative"
@@ -501,7 +477,6 @@ function App() {
         </div>
       </header> 
 
-      {/* --- MOBILE MENU --- */}
       <div className={clsx(
         "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out flex flex-col pt-24 px-6 pb-8",
         isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
@@ -515,9 +490,7 @@ function App() {
           <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
           <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
           <NavButton targetMode="protect" icon={Lock} label="Protect PDF" mobile />
-          
           <div className="my-2 border-t border-slate-100"></div>
-          
           <button 
             onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
             className="w-full p-4 flex items-center gap-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl shadow-lg shadow-slate-200"
@@ -530,9 +503,7 @@ function App() {
         </div>
       </div>
 
-      {/* --- MAIN CONTENT --- */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-        
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center py-40 animate-in fade-in duration-500">
             <div className="relative">
@@ -548,7 +519,6 @@ function App() {
             <Home setMode={(m) => navigateTo(m)} />
           ) : mode === 'merge' ? (
             
-            /* --- MERGE TOOL UI (UPDATED) --- */
             <article className="min-h-[600px]">
               <input 
                 type="file" 
@@ -561,7 +531,6 @@ function App() {
 
               <AnimatePresence mode="wait">
               {files.length === 0 ? (
-                // ✨ Empty State Animation
                 <motion.div 
                   key="empty"
                   initial={{ opacity: 0, y: 20 }}
@@ -570,13 +539,14 @@ function App() {
                   transition={{ duration: 0.4 }}
                   className="text-center max-w-4xl mx-auto py-10"
                 >
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-wider mb-8 border border-indigo-100">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-wider mb-6 md:mb-8 border border-indigo-100">
                     <Zap size={14} /> Secure & Private
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-[900] text-slate-900 mb-6 tracking-tight leading-[1.1]">
+                  {/* ✅ REDUCED MOBILE TEXT SIZE */}
+                  <h1 className="text-2xl md:text-6xl font-[900] text-slate-900 mb-4 md:mb-6 tracking-tight leading-[1.1]">
                     Merge PDF Files <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Instantly</span>
                   </h1>
-                  <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
+                  <p className="text-sm md:text-lg text-slate-500 mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed">
                     Combine multiple PDFs into one document securely without uploading. Drag & drop, reorder, and merge offline.
                   </p>
                   
@@ -593,8 +563,7 @@ function App() {
                     />
                   </motion.div>
 
-                  {/* Feature Grid (Empty State) */}
-                  <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="mt-10 md:mt-20 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                     {[
                       { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser. Client-side processing." },
                       { icon: Scaling, title: "High Quality", desc: "Maintains original document resolution." },
@@ -605,41 +574,38 @@ function App() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 + (i * 0.1) }}
-                        className="group p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300"
+                        className="group p-5 md:p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300"
                       >
                         <feat.icon className="text-indigo-600 mb-4 group-hover:scale-110 transition-transform" size={32} />
-                        <h3 className="font-bold text-slate-800 text-lg mb-2">{feat.title}</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed">{feat.desc}</p>
+                        <h3 className="font-bold text-slate-800 text-base md:text-lg mb-2">{feat.title}</h3>
+                        <p className="text-slate-500 text-xs md:text-sm leading-relaxed">{feat.desc}</p>
                       </motion.div>
                     ))}
                   </div>
                 </motion.div>
               ) : (
-                // ✨ File List & Actions Animation
                 <motion.div 
                   key="list"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex flex-col gap-12" // flex-col so features appear below
+                  className="flex flex-col gap-6 md:gap-12"
                 >
                   
-                  {/* Main Interface Grid */}
-                  <div className="grid lg:grid-cols-3 gap-8 items-start">
-                    {/* Left: File List */}
-                    <div className="lg:col-span-2 space-y-6">
+                  <div className="grid lg:grid-cols-3 gap-6 md:gap-8 items-start">
+                    <div className="lg:col-span-2 space-y-4 md:space-y-6">
                       <motion.div 
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm"
+                        className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-3xl border border-slate-200/60 shadow-sm"
                       >
                         <div>
-                          <h1 className="text-2xl font-black text-slate-900">Merge Queue</h1>
-                          <p className="text-sm text-slate-400 font-medium">Reorder your files for the final output</p>
+                          <h1 className="text-lg md:text-2xl font-black text-slate-900">Merge Queue</h1>
+                          <p className="text-xs md:text-sm text-slate-400 font-medium">Reorder your files for the final output</p>
                         </div>
                         <div className="flex gap-2">
-                          <button onClick={() => handleSort(SortOrder.ASC)} className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors" title="Sort A-Z"><ArrowDownAZ size={20}/></button>
-                          <button onClick={() => handleSort(SortOrder.DESC)} className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors" title="Sort Z-A"><ArrowUpAZ size={20}/></button>
-                          <button onClick={handleClearAll} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors" title="Clear All"><Trash2 size={20}/></button>
+                          <button onClick={() => handleSort(SortOrder.ASC)} className="p-2 md:p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors" title="Sort A-Z"><ArrowDownAZ size={20}/></button>
+                          <button onClick={() => handleSort(SortOrder.DESC)} className="p-2 md:p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors" title="Sort Z-A"><ArrowUpAZ size={20}/></button>
+                          <button onClick={handleClearAll} className="p-2 md:p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors" title="Clear All"><Trash2 size={20}/></button>
                         </div>
                       </motion.div>
                       
@@ -652,28 +618,28 @@ function App() {
                         <FileList files={files} setFiles={setFiles} onRemove={handleRemoveFile} />
                         <button 
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full mt-4 py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all font-bold"
+                          className="w-full mt-4 py-3 md:py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all font-bold text-sm md:text-base"
                         >
                           <Plus size={20} /> Add More Documents
                         </button>
                       </motion.div>
                     </div>
 
-                    {/* Right: Actions Card */}
                     <div className="lg:sticky lg:top-24 space-y-4 md:space-y-6 w-full pb-8">
                       <motion.div 
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] text-white shadow-xl md:shadow-2xl shadow-indigo-200 w-full"
+                        // ✅ COMPACT PADDING FOR MOBILE (p-4 instead of p-5/8)
+                        className="bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] text-white shadow-xl md:shadow-2xl shadow-indigo-200 w-full"
                       >
-                        <h3 className="text-lg md:text-xl font-black mb-4 md:mb-6">Summary</h3>
-                        <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
-                          <div className="flex justify-between text-sm border-b border-slate-700 pb-3">
+                        <h3 className="text-base md:text-xl font-black mb-4 md:mb-6">Summary</h3>
+                        <div className="space-y-2 md:space-y-4 mb-4 md:mb-8">
+                          <div className="flex justify-between text-xs md:text-sm border-b border-slate-700 pb-3">
                             <span className="text-slate-400">Total Files</span>
                             <span className="font-bold">{files.length}</span>
                           </div>
-                          <div className="flex justify-between text-sm">
+                          <div className="flex justify-between text-xs md:text-sm">
                             <span className="text-slate-400">Status</span>
                             <span className="text-emerald-400 font-bold flex items-center gap-1">
                               <ShieldCheck size={14}/> Ready
@@ -681,21 +647,22 @@ function App() {
                           </div>
                         </div>
 
+                        {/* ✅ COMPACT MERGE BUTTON */}
                         <motion.button 
                           onClick={handleMerge} 
                           disabled={files.length < 2 || isMerging}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className="w-full py-3 md:py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl md:rounded-2xl font-black text-base md:text-lg shadow-lg transition-all flex items-center justify-center gap-3 relative overflow-hidden"
+                          className="w-full py-2.5 md:py-4 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-lg transition-all flex items-center justify-center gap-3 relative overflow-hidden"
                         >
                           {isMerging ? (
                             <>
-                              <Loader2 className="animate-spin" size={20} />
+                              <Loader2 className="animate-spin" size={18} />
                               Processing...
                             </>
                           ) : (
                             <>
-                              <FileStack size={20} />
+                              <FileStack size={18} />
                               Merge Files
                             </>
                           )}
@@ -705,7 +672,7 @@ function App() {
                         </motion.button>
                       </motion.div>
 
-                      {/* Success Card */}
+                      {/* ✅ COMPACT SUCCESS CARD */}
                       <AnimatePresence>
                       {mergedPdfUrl && (
                         <motion.div 
@@ -713,18 +680,18 @@ function App() {
                           initial={{ scale: 0.8, opacity: 0, y: 20 }}
                           animate={{ scale: 1, opacity: 1, y: 0 }}
                           exit={{ scale: 0.9, opacity: 0 }}
-                          className="bg-emerald-500 p-5 md:p-6 rounded-2xl md:rounded-[2rem] text-white shadow-xl shadow-emerald-200 w-full overflow-hidden"
+                          className="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-[2rem] text-white shadow-xl shadow-emerald-200 w-full overflow-hidden"
                         >
                           <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-white/20 rounded-full"><CheckCircle2 size={20} /></div>
-                            <span className="font-bold text-base md:text-lg">Merge Success!</span>
+                            <div className="p-1.5 md:p-2 bg-white/20 rounded-full"><CheckCircle2 size={18} /></div>
+                            <span className="font-bold text-sm md:text-lg">Merge Success!</span>
                           </div>
                           <a 
                             href={mergedPdfUrl} 
                             download="merged-genzpdf.pdf" 
-                            className="w-full py-3 md:py-3.5 bg-white text-emerald-600 rounded-xl font-black text-center block hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer text-sm md:text-base flex items-center justify-center gap-2"
+                            className="w-full py-2 md:py-3.5 bg-white text-emerald-600 rounded-xl font-black text-center block hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer text-xs md:text-base flex items-center justify-center gap-2"
                           >
-                            <Download size={18}/> Download PDF
+                            <Download size={16}/> Download PDF
                           </a>
                         </motion.div>
                       )}
@@ -732,8 +699,8 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Feature Grid (below file list) */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10">
+                  {/* Feature Grid Re-added */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 pb-10">
                     {[
                       { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser. Client-side processing." },
                       { icon: Scaling, title: "High Quality", desc: "Maintains original document resolution." },
@@ -744,11 +711,11 @@ function App() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 + (i * 0.1) }}
-                        className="group p-6 md:p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300"
+                        className="group p-5 md:p-8 bg-white rounded-3xl border border-slate-100 hover:border-indigo-100 hover:shadow-xl transition-all duration-300"
                       >
                         <feat.icon className="text-indigo-600 mb-4 group-hover:scale-110 transition-transform" size={32} />
-                        <h3 className="font-bold text-slate-800 text-lg mb-2">{feat.title}</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed">{feat.desc}</p>
+                        <h3 className="font-bold text-slate-800 text-base md:text-lg mb-2">{feat.title}</h3>
+                        <p className="text-slate-500 text-xs md:text-sm leading-relaxed">{feat.desc}</p>
                       </motion.div>
                     ))}
                   </div>
@@ -758,16 +725,13 @@ function App() {
               </AnimatePresence>
             </article>
           ) : mode === 'protect' ? (
-            /* --- PROTECT TOOL UI (RENDERED SEPARATELY LIKE MERGE TOOL) --- */
             <ProtectTool />
           ) : (
-            /* --- OTHER TOOLS --- */
             <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
               {mode === 'split' && <SplitTool />}
               {mode === 'convert' && <ConverterTool />}
               {mode === 'compress' && <CompressTool />}
               {mode === 'resize' && <ResizeTool />}
-              {/* Protect Tool yahan se hata diya gaya hai - ab upar render ho raha hai */}
               {mode === 'about' && <About />}
               {mode === 'contact' && <Contact />}
               {mode === 'policy' && <Policy />}
