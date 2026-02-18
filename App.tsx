@@ -236,6 +236,9 @@ function App() {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // ✅ NEW: Ref for auto-scrolling to success message (integrated from first code)
+  const successRef = useRef<HTMLDivElement>(null);
 
   // --- HYBRID NAVIGATION (SPA + SEO) ---
   // This allows Google to see href links, but users get instant SPA navigation
@@ -258,6 +261,15 @@ function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // ✅ NEW: Auto-scroll when merge is successful (integrated from first code)
+  useEffect(() => {
+    if (mergedPdfUrl && successRef.current) {
+      setTimeout(() => {
+        successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300); // Small delay to allow animation to start
+    }
+  }, [mergedPdfUrl]);
 
   // --- DYNAMIC SEO INJECTION ---
   useEffect(() => {
@@ -692,10 +704,11 @@ function App() {
                       </motion.button>
                     </motion.div>
 
-                    {/* Success Card - FIXED FOR MOBILE */}
+                    {/* Success Card - FIXED FOR MOBILE + AUTO SCROLL (ref added) */}
                     <AnimatePresence>
                     {mergedPdfUrl && (
                       <motion.div 
+                        ref={successRef} // ✅ SCROLL TARGET (integrated from first code)
                         initial={{ scale: 0.8, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0 }}
