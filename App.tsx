@@ -24,7 +24,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Lock 
+  Lock,
+  Mic                      // <-- ADDED: Mic icon for audio tool
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -38,6 +39,7 @@ import { Footer } from './components/Footer';
 import { PdfFile, SortOrder, AppMode } from './types';
 import { mergePdfs, createPdfUrl } from './services/pdfService';
 
+// Lazy loaded tools
 const SplitTool = lazy(() => import('./components/SplitTool'));
 const ConverterTool = lazy(() => import('./components/ConverterTool'));
 const CompressTool = lazy(() => import('./components/CompressTool'));
@@ -47,11 +49,13 @@ const About = lazy(() => import('./components/About'));
 const Contact = lazy(() => import('./components/Contact'));
 const Policy = lazy(() => import('./components/Policy'));
 const Terms = lazy(() => import('./components/Terms'));
+const AudioToTextTool = lazy(() => import('./components/AudioToTextTool'));   // <-- ADDED
 
 const BASE_URL = "https://genzpdf.com";
 const SITE_NAME = "Genz PDF";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/social-preview.jpg`;
 
+// Updated SEO metadata to include 'audio' mode
 const SEO_METADATA: Record<AppMode, {
   title: string;
   description: string;
@@ -204,6 +208,24 @@ const SEO_METADATA: Record<AppMode, {
     keywords: "terms of service, pdf terms",
     schema: { "@context": "https://schema.org", "@type": "WebPage", "name": "Terms of Service" },
     breadcrumb: [{ name: "Home", url: BASE_URL }, { name: "Terms", url: `${BASE_URL}/terms` }]
+  },
+  // NEW AUDIO MODE METADATA
+  audio: {
+    title: "Audio to Text Converter - Free Online Speech to Text | Genz PDF",
+    description: "Convert audio files to text instantly. Free online speech-to-text tool. No upload, secure and private. Supports MP3, WAV, M4A and more.",
+    keywords: "audio to text, speech to text, voice to text, audio transcription, mp3 to text, wav to text, free audio converter, online transcriber",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Audio to Text Tool",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    breadcrumb: [
+      { name: "Home", url: BASE_URL },
+      { name: "Audio to Text", url: `${BASE_URL}/audio` }
+    ]
   }
 };
 
@@ -221,6 +243,7 @@ function App() {
       if (path.includes('/contact')) return 'contact';
       if (path.includes('/policy')) return 'policy';
       if (path.includes('/terms')) return 'terms';
+      if (path.includes('/audio')) return 'audio';          // <-- ADDED
     }
     return 'home';
   };
@@ -453,6 +476,8 @@ function App() {
             <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
             <NavButton targetMode="resize" icon={Scaling} label="Resize" />
             <NavButton targetMode="protect" icon={Lock} label="Protect" />
+            {/* NEW AUDIO BUTTON IN DESKTOP NAV */}
+            <NavButton targetMode="audio" icon={Mic} label="Audio to Text" />
           </div>
 
           <div className="flex items-center gap-3">
@@ -487,6 +512,8 @@ function App() {
           <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
           <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
           <NavButton targetMode="protect" icon={Lock} label="Protect PDF" mobile />
+          {/* NEW AUDIO BUTTON IN MOBILE MENU */}
+          <NavButton targetMode="audio" icon={Mic} label="Audio to Text" mobile />
           <div className="my-2 border-t border-slate-100"></div>
           <button 
             onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
@@ -737,6 +764,8 @@ function App() {
             </article>
           ) : mode === 'protect' ? (
             <ProtectTool />
+          ) : mode === 'audio' ? (                        // <-- ADDED AUDIO ROUTE
+            <AudioToTextTool />
           ) : (
             <div className="bg-white p-4 md:p-12 rounded-[2rem] md:rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
               {mode === 'split' && <SplitTool />}
