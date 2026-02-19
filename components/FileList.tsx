@@ -45,7 +45,7 @@ const FileItem: React.FC<{ file: PdfFile; onRemove: (id: string) => void }> = ({
 
       {/* File info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">
+        <p className="text-sm font-bold text-slate-800 whitespace-normal break-all group-hover:text-indigo-600 transition-colors leading-tight">
           {file.name}
         </p>
         <p className="text-xs text-slate-500 font-medium bg-slate-100 inline-block px-2 py-0.5 rounded-md mt-1">
