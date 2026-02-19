@@ -24,7 +24,7 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({ isOpen, onClose }) => 
     {
       id: 'welcome',
       role: 'model',
-      text: "Hi! I'm your PDF Fusion assistant. I can help you organize your documents or answer questions about file management.",
+      text: "Hello! I am the GenzPDF AI system. I am here to assist you with Merging, Splitting, Compressing, Converting, and Protecting your documents with absolute security. How can I help you today? ⚡",
       timestamp: new Date(),
     },
   ]);
