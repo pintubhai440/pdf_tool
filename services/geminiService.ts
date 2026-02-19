@@ -6,10 +6,10 @@ import { GoogleGenAI } from "@google/genai";
 const getApiKeys = (): string[] => {
   // Vercel environment variable se key uthayenge
   const keysString = process.env.API_KEY || "";
-  
+
   // Comma se split karke array banayenge aur extra spaces hatayenge
   const keys = keysString.split(',').map(k => k.trim()).filter(k => k);
-  
+
   if (keys.length === 0) {
     console.error("No API Keys found in environment variables (API_KEY).");
   }
@@ -28,7 +28,7 @@ const generateContentWithRetry = async (modelName: string, params: any) => {
     try {
       // Current key ke saath naya client banayein
       const ai = new GoogleGenAI({ apiKey });
-      
+
       // Request bhejein
       const response = await ai.models.generateContent({
         model: modelName,
@@ -42,10 +42,10 @@ const generateContentWithRetry = async (modelName: string, params: any) => {
       // Sirf last ke 4 chars dikhayenge security ke liye
       const keySuffix = apiKey.slice(-4);
       console.warn(`Key ending in ...${keySuffix} failed. Switching to next key... Error:`, error.message);
-      
+
       lastError = error;
       // Continue to next key in the loop
-      continue; 
+      continue;
     }
   }
 
@@ -58,7 +58,7 @@ const generateContentWithRetry = async (modelName: string, params: any) => {
 // ---------------------------------------------------------
 export const analyzeDocumentImage = async (base64Image: string, mimeType: string): Promise<string> => {
   try {
-    // Hum 'gemini-2.0-flash' use kar rahe hain jo fast aur stable hai
+    // Hum 'gemini-2.5-flash' use kar rahe hain jo fast aur stable hai
     const response = await generateContentWithRetry('gemini-2.5-flash', {
       contents: {
         parts: [
@@ -86,46 +86,51 @@ export const analyzeDocumentImage = async (base64Image: string, mimeType: string
 // 4. Exported Function: AI Chat Assistance
 // ---------------------------------------------------------
 export const getAiAssistance = async (
-  prompt: string, 
+  prompt: string,
   history: { role: string; text: string }[]
 ): Promise<string> => {
-  
-  // Logic: Complex prompts ke liye bhi abhi hum Flash use kar rahe hain reliability ke liye.
-  // Agar future me Pro model chahiye ho, toh ternary operator uncomment kar sakte hain.
-  const isComplex = /plan|strategy|organize|structure|complex|reason/i.test(prompt);
-  const modelName = 'gemini-2.5-flash'; // Filhal dono ke liye Flash rakha hai fast response ke liye
+
+  const modelName = 'gemini-2.5-flash';
+
+  // 👇 यहाँ AI के लिए सख्त Rules (System Prompt) बनाये गए हैं
+  const systemPrompt = `You are the highly advanced AI Assistant for 'GenzPDF', an online PDF utility website. Act with a highly professional, efficient, and sophisticated persona, similar to Tony Stark's JARVIS.
+
+CRITICAL RULES:
+1. IDENTITY: Your name is the GenzPDF AI. Never refer to yourself as PDF Fusion.
+2. PLATFORM EXCLUSIVITY: When asked how to do something (e.g., merge, split, compress, convert, resize, or protect), ONLY explain how to do it using GenzPDF's tools. NEVER mention, recommend, or provide examples of competitors like Adobe Acrobat, iLovePDF, Smallpdf, or PDF24. 
+3. FEATURES KNOWLEDGE: You know everything about GenzPDF. The platform has: Merge PDF, Split PDF, Compress PDF, Convert PDF (to Word, JPG, PNG, TXT), Resize Image (JPG/PNG/WebP), and Protect PDF (AES-256 encryption). Tell users that all processing is 100% Client-Side, Secure, Free, and requires NO uploads.
+4. FORMATTING & TONE: Be direct, concise, and professional. Use appropriate emojis natively ⚡. Use Markdown formatting like **bold** for emphasis where needed, but absolutely NEVER output random asterisks or malformed markdown like "***jjjjj**".
+5. RELEVANCE: Answer exactly what the user asked, nothing more. Do not provide unprompted extra information or wander off-topic.`;
 
   try {
-    // History aur current prompt ko format karein
     const contents = [
-        ...history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
-        { role: 'user', parts: [{ text: prompt }] }
+      ...history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
+      { role: 'user', parts: [{ text: prompt }] }
     ];
 
     const response = await generateContentWithRetry(modelName, {
-        contents: contents,
-        // Search tool hata diya gaya hai taaki rotation simple rahe,
-        // par agar chahiye toh config: { tools: [{ googleSearch: {} }] } add kar sakte hain.
-        config: {} 
+      contents: contents,
+      config: {
+        systemInstruction: systemPrompt, // 👈 इसे यहाँ पास करें
+      }
     });
-    
+
     let text = response?.text || "";
-    
-    // Agar grounding metadata (sources) available hai toh unhe append karein
+
     const chunks = response?.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (chunks) {
-        const links = chunks
-            .map((c: any) => c.web?.uri)
-            .filter((uri: string) => uri)
-            .map((uri: string) => `\nSource: ${uri}`)
-            .join('');
-        if (links) text += `\n\n${links}`;
+      const links = chunks
+        .map((c: any) => c.web?.uri)
+        .filter((uri: string) => uri)
+        .map((uri: string) => `\nSource: ${uri}`)
+        .join('');
+      if (links) text += `\n\n${links}`;
     }
-    
+
     return text || "I couldn't generate a response.";
 
   } catch (error) {
     console.error("Error getting AI assistance after all retries:", error);
-    return "Sorry, all my AI keys are currently busy or exhausted. Please try again in a moment.";
+    return "System overloaded. Please try again in a moment. ⚡";
   }
 };
