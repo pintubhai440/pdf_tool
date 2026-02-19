@@ -435,7 +435,7 @@ function App() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-20 flex items-center justify-between"> {/* ✅ Header height reduced for mobile */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-20 flex items-center justify-between">
           <a href="/" onClick={(e) => navigateTo('home', e)} className="flex items-center gap-3 group z-50 relative">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200/50 group-hover:rotate-6 transition-transform duration-300">
               <img src="/logo.png" alt="Genz PDF Logo" className="w-5 h-5 md:w-7 md:h-7 object-contain brightness-0 invert" />
@@ -500,7 +500,7 @@ function App() {
         </div>
       </div>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-16"> {/* ✅ Reduced padding */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-16">
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center py-40 animate-in fade-in duration-500">
             <div className="relative">
@@ -515,8 +515,8 @@ function App() {
           {mode === 'home' ? (
             <Home setMode={(m) => navigateTo(m)} />
           ) : mode === 'merge' ? (
-            
-            <article className="min-h-[600px]">
+            // ========== MERGE SECTION WITH NEW BANNER ==========
+            <article className="min-h-[600px] flex flex-col w-full">
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -525,6 +525,19 @@ function App() {
                 accept=".pdf" 
                 className="hidden" 
               />
+
+              {/* RECTANGLE BANNER – ALWAYS VISIBLE */}
+              <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-lg border border-slate-200 bg-slate-900 relative">
+                <video 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline 
+                  className="w-full h-[180px] md:h-[350px] object-cover"
+                >
+                  <source src="/merge-anim.mp4" type="video/mp4" />
+                </video>
+              </div>
 
               <AnimatePresence mode="wait">
               {files.length === 0 ? (
@@ -536,29 +549,11 @@ function App() {
                   transition={{ duration: 0.4 }}
                   className="text-center max-w-4xl mx-auto py-6 md:py-10"
                 >
-                  {/* 👇 9:16 Video in Mobile Frame 👇 */}
-                  <div className="flex justify-center mb-8">
-                    <div className="relative w-[120px] h-[213px] md:w-[140px] md:h-[248px] bg-slate-900 rounded-[1.5rem] border-[4px] border-slate-900 shadow-2xl shadow-indigo-200 overflow-hidden">
-                      <video 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        className="w-full h-full object-cover"
-                      >
-                        <source src="/merge-anim.mp4" type="video/mp4" />
-                      </video>
-                      
-                      {/* Mobile Notch UI (Optional) */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-900 rounded-b-lg z-10"></div>
-                    </div>
-                  </div>
-                  {/* 👆 Video Code End 👆 */}
+                  {/* OLD MOBILE FRAME VIDEO REMOVED */}
 
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 md:mb-8 border border-indigo-100">
                     <Zap size={12} /> Secure & Private
                   </div>
-                  {/* ✅ ULTRA COMPACT MOBILE TEXT */}
                   <h1 className="text-xl md:text-6xl font-[900] text-slate-900 mb-3 md:mb-6 tracking-tight leading-[1.1]">
                     Merge PDF Files <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Instantly</span>
                   </h1>
@@ -604,7 +599,7 @@ function App() {
                   key="list"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex flex-col gap-4 md:gap-12" // ✅ Very tight gap
+                  className="flex flex-col gap-4 md:gap-12"
                 >
                   
                   <div className="grid lg:grid-cols-3 gap-4 md:gap-8 items-start">
@@ -646,7 +641,6 @@ function App() {
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        // ✅ ULTRA COMPACT PADDING (p-3)
                         className="bg-slate-900 p-3 md:p-8 rounded-xl md:rounded-[2.5rem] text-white shadow-xl md:shadow-2xl shadow-indigo-200 w-full"
                       >
                         <h3 className="text-sm md:text-xl font-black mb-2 md:mb-6">Summary</h3>
@@ -663,7 +657,6 @@ function App() {
                           </div>
                         </div>
 
-                        {/* ✅ ULTRA COMPACT MERGE BUTTON */}
                         <motion.button 
                           onClick={handleMerge} 
                           disabled={files.length < 2 || isMerging}
@@ -673,7 +666,6 @@ function App() {
                         >
                           {isMerging ? (
                             <>
-                              {/* 👇 2. स्पिनर की जगह छोटा वीडियो 👇 */}
                               <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white/50 relative">
                                  <video autoPlay loop muted playsInline className="w-full h-full object-cover">
                                     <source src="/processing-loop.mp4" type="video/mp4" />
@@ -693,7 +685,6 @@ function App() {
                         </motion.button>
                       </motion.div>
 
-                      {/* ✅ ULTRA COMPACT SUCCESS CARD */}
                       <AnimatePresence>
                       {mergedPdfUrl && (
                         <motion.div 
@@ -720,7 +711,6 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Feature Grid Re-added with Ultra Compact Styling */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 pb-10">
                     {[
                       { icon: ShieldCheck, title: "Privacy First", desc: "Files never leave your browser." },
