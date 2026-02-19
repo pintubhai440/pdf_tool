@@ -21,6 +21,6 @@ export enum SortOrder {
 
 export type AppView = 'home' | 'ai-chat';
 
-export type AppMode = 'home' | 'merge' | 'split' | 'convert' | 'compress' | 'resize' | 'protect' | 'audio' | 'about' | 'contact' | 'policy' | 'terms';
+export type AppMode = 'home' | 'merge' | 'split' | 'convert' | 'compress' | 'resize' | 'protect' | 'about' | 'contact' | 'policy' | 'terms';
 
 export type ConversionFormat = 'jpg' | 'png' | 'pdf' | 'txt' | 'json' | 'docx';
