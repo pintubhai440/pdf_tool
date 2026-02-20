@@ -12,7 +12,8 @@ import {
   Zap,
   Globe,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  PenTool // ✅ Added PenTool import
 } from 'lucide-react';
 import { AppMode } from '../types';
 import { ScrollHero } from './ScrollHero'; // 👈 Added ScrollHero import
@@ -257,6 +258,18 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
       border: 'hover:border-indigo-500/50',
       gradient: 'from-indigo-600 to-fuchsia-600',
       badge: 'New' // ✨ Special Badge
+    },
+    // ✍️ SIGN PDF TOOL (Premium)
+    {
+      id: 'signature',
+      title: 'Sign PDF',
+      desc: 'Add e-signatures, text, and dates anywhere on your PDF. Customize fonts and colors.',
+      icon: PenTool,
+      iconBg: 'bg-gradient-to-br from-teal-400 to-emerald-600',
+      shadow: 'hover:shadow-teal-500/20',
+      border: 'hover:border-teal-500/50',
+      gradient: 'from-teal-500 to-emerald-600',
+      badge: 'Premium'
     },
   ];
 
