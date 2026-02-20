@@ -4,7 +4,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import {
   PenTool, Download, Loader2, Type, Image as ImageIcon, Calendar,
   Trash2, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, RefreshCcw,
-  Bold, CopyCheck
+  Bold, CopyCheck, Plus, Minus
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 
@@ -30,12 +30,13 @@ interface SignatureElement {
   id: string;
   type: ElementType;
   content: string; 
-  x: number; // percentage
-  y: number; // percentage
+  x: number; 
+  y: number; 
   color?: string;
   font?: string;
   fontSize?: number;
   isBold?: boolean;
+  scale: number; // New scale property for resizing
 }
 
 export const SignatureTool: React.FC = () => {
@@ -47,7 +48,6 @@ export const SignatureTool: React.FC = () => {
   
   const [elements, setElements] = useState<Record<number, SignatureElement[]>>({});
   
-  // Toolbar states
   const [textColor, setTextColor] = useState('#0f172a');
   const [textFont, setTextFont] = useState('Helvetica');
   const [textContent, setTextContent] = useState('');
@@ -61,12 +61,10 @@ export const SignatureTool: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Drag state refs to prevent jumping
   const dragState = useRef<{ id: string | null; startX: number; startY: number; initialElX: number; initialElY: number }>({
     id: null, startX: 0, startY: 0, initialElX: 0, initialElY: 0
   });
 
-  // Inject Google Fonts for the UI
   useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=Great+Vibes&family=Homemade+Apple&family=Indie+Flower&family=Pacifico&family=Satisfy&display=swap';
@@ -105,8 +103,8 @@ export const SignatureTool: React.FC = () => {
   const renderPage = async (doc: any, pageNum: number) => {
     try {
       const page = await doc.getPage(pageNum);
-      // Increased scale for better resolution on mobile
-      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 1.2 : 1.5 });
+      // Increased scale to 2.0/2.5 to remove blurriness completely
+      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 2.0 : 2.5 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -138,12 +136,13 @@ export const SignatureTool: React.FC = () => {
       id: Math.random().toString(36).substr(2, 9),
       type,
       content: displayContent,
-      x: 30, // Default center-ish
+      x: 30, 
       y: 30, 
       color: textColor,
       font: textFont,
-      fontSize: type === 'text' || type === 'date' ? (window.innerWidth < 768 ? 18 : 22) : undefined, // Slightly bigger default
-      isBold: isBoldText
+      fontSize: type === 'text' || type === 'date' ? (window.innerWidth < 768 ? 16 : 22) : undefined,
+      isBold: isBoldText,
+      scale: 1 // Default scale
     };
 
     setElements(prev => ({
@@ -173,6 +172,23 @@ export const SignatureTool: React.FC = () => {
     }));
   };
 
+  // Zoom In / Zoom Out Element Size
+  const updateScale = (id: string, delta: number) => {
+    setElements(prev => {
+      const pageElements = prev[currentPage] || [];
+      return {
+        ...prev,
+        [currentPage]: pageElements.map(el => {
+          if (el.id === id) {
+            const newScale = Math.max(0.3, el.scale + delta); // Prevent making it invisible
+            return { ...el, scale: newScale };
+          }
+          return el;
+        })
+      };
+    });
+  };
+
   const applyToAllPages = () => {
     const currentElements = elements[currentPage] || [];
     if (currentElements.length === 0) {
@@ -193,7 +209,7 @@ export const SignatureTool: React.FC = () => {
     alert("Success! Applied to all pages.");
   };
 
-  // --- Smooth Drag Logic (No Jumps) ---
+  // Smooth Drag Logic
   const handlePointerDown = (e: React.PointerEvent, el: SignatureElement) => {
     e.preventDefault();
     e.stopPropagation();
@@ -219,9 +235,8 @@ export const SignatureTool: React.FC = () => {
     let newX = initialElX + deltaX;
     let newY = initialElY + deltaY;
 
-    // Boundaries 0% to 90%
-    newX = Math.max(0, Math.min(90, newX));
-    newY = Math.max(0, Math.min(95, newY));
+    newX = Math.max(0, Math.min(95, newX));
+    newY = Math.max(0, Math.min(98, newY));
 
     setElements(prev => {
       const pageElements = prev[currentPage] || [];
@@ -236,7 +251,6 @@ export const SignatureTool: React.FC = () => {
     dragState.current.id = null;
   };
 
-  // --- PDF Save Logic ---
   const handleSave = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -245,17 +259,15 @@ export const SignatureTool: React.FC = () => {
       const pdf = await PDFDocument.load(arrayBuffer);
       
       const getPdfFont = async (fontValue: string, isBold?: boolean) => {
-        // Check if it's a handwriting font
         const customFont = FONT_OPTIONS.Handwriting.find(f => f.value === fontValue);
         if (customFont) {
           try {
             const fontBytes = await fetch(customFont.url).then(res => res.arrayBuffer());
             return await pdf.embedFont(fontBytes);
           } catch (e) {
-            console.error("Failed to load custom font, falling back to Helvetica");
+            console.error("Failed to load custom font");
           }
         }
-        // Standard Fonts
         if (fontValue === 'Times-Roman') return await pdf.embedFont(isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman);
         if (fontValue === 'Courier') return await pdf.embedFont(isBold ? StandardFonts.CourierBold : StandardFonts.Courier);
         return await pdf.embedFont(isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
@@ -283,26 +295,29 @@ export const SignatureTool: React.FC = () => {
 
           if (el.type === 'text' || el.type === 'date') {
             const pdfFont = await getPdfFont(el.font || 'Helvetica', el.isBold);
-            // Slightly adjusted scale factor for custom fonts
-            const size = (el.fontSize || 16) * 1.3; 
+            // Apply scale multiplier to font size
+            const size = (el.fontSize || 16) * 1.3 * el.scale; 
             page.drawText(el.content, {
               x,
               y: y - size, 
               size,
               font: pdfFont,
-              color: el.color ? hexToRgb(el.color) : rgb(0,0,0)
+              color: el.color ? hexToRgb(el.color) : rgb(0,0,0),
+              opacity: 0.9 // Blends naturally with paper
             });
           } else if (el.type === 'image') {
             const isPng = el.content.startsWith('data:image/png');
             const imgBytes = await fetch(el.content).then(res => res.arrayBuffer());
             const image = isPng ? await pdf.embedPng(imgBytes) : await pdf.embedJpg(imgBytes);
             
-            const imgDims = image.scaleToFit(150, 150);
+            // Apply scale multiplier to image dimensions
+            const imgDims = image.scaleToFit(150 * el.scale, 150 * el.scale);
             page.drawImage(image, {
               x,
               y: y - imgDims.height,
               width: imgDims.width,
-              height: imgDims.height
+              height: imgDims.height,
+              opacity: 0.9 // Blends naturally
             });
           }
         }
@@ -329,17 +344,17 @@ export const SignatureTool: React.FC = () => {
   };
 
   return (
-    // P-2 for mobile to utilize maximum width, rounded adjusted for mobile
-    <div className="min-h-[80vh] bg-slate-50 rounded-xl md:rounded-3xl p-2 sm:p-4 md:p-8 shadow-xl border border-slate-100 w-full overflow-hidden">
-      <div className="text-center mb-4 md:mb-8">
-        <h1 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight mb-2 md:mb-3">
+    // Further reduced padding and gap for maximum mobile view space
+    <div className="min-h-[80vh] bg-slate-50 rounded-lg md:rounded-3xl p-1.5 sm:p-3 md:p-8 shadow-xl border border-slate-100 w-full overflow-hidden">
+      <div className="text-center mb-3 md:mb-8">
+        <h1 className="text-xl md:text-5xl font-black text-slate-900 tracking-tight mb-1 md:mb-3">
           Sign <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-600">PDF Document</span>
         </h1>
-        <p className="text-slate-500 font-medium text-xs md:text-base">Add text, dates, or upload your signature image securely.</p>
+        <p className="text-slate-500 font-medium text-[10px] md:text-base">Add text, dates, or upload your signature image securely.</p>
       </div>
 
       {!file ? (
-        <div className="max-w-2xl mx-auto bg-white p-4 md:p-12 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
+        <div className="max-w-2xl mx-auto bg-white p-4 md:p-12 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-200">
           <FileUploader 
             onFilesSelected={handleFileSelected} 
             allowMultiple={false} 
@@ -348,57 +363,56 @@ export const SignatureTool: React.FC = () => {
           />
         </div>
       ) : downloadUrl ? (
-        <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-3xl text-center shadow-lg border border-slate-200 animate-in zoom-in-95">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+        <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl text-center shadow-lg border border-slate-200 animate-in zoom-in-95">
+          <div className="w-14 h-14 md:w-20 md:h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
             <CheckCircle2 size={32} className="md:w-10 md:h-10" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold mb-2">Document Signed!</h2>
-          <p className="text-slate-500 text-sm md:text-base mb-6 md:mb-8">Your signature has been applied successfully.</p>
+          <h2 className="text-lg md:text-2xl font-bold mb-2">Document Signed!</h2>
+          <p className="text-slate-500 text-xs md:text-base mb-6 md:mb-8">Your signature has been applied successfully.</p>
           <div className="flex flex-col gap-3">
-            <a href={downloadUrl} download={`signed-${file.name}`} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all text-sm md:text-base">
-              <Download size={20} /> Download PDF
+            <a href={downloadUrl} download={`signed-${file.name}`} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 md:py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all text-sm md:text-base">
+              <Download size={18} /> Download PDF
             </a>
-            <button onClick={handleReset} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl transition-all text-sm md:text-base">
+            <button onClick={handleReset} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 md:py-3 px-6 rounded-xl transition-all text-sm md:text-base">
               Sign Another File
             </button>
           </div>
         </div>
       ) : (
-        <div className="grid lg:grid-cols-4 gap-3 md:gap-8 w-full mx-auto">
+        <div className="grid lg:grid-cols-4 gap-2 md:gap-8 w-full mx-auto">
           
-          {/* Sidebar Controls - Maximized Space for Mobile */}
-          <div className="lg:col-span-1 flex flex-col gap-3 md:gap-6 order-2 lg:order-1">
-            <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-              <h3 className="font-bold text-slate-800 mb-2 md:mb-3 flex items-center gap-2 text-xs md:text-base"><Type size={16} className="text-teal-600"/> Add Text / Name</h3>
+          {/* Sidebar Controls - Optimized for tight mobile screens */}
+          <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 order-2 lg:order-1">
+            <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Type size={14} className="text-teal-600"/> Add Text / Name</h3>
               <input 
                 type="text" 
                 placeholder="Type your name..." 
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg mb-2 md:mb-3 focus:ring-2 focus:ring-teal-500 outline-none text-xs md:text-sm"
+                className="w-full px-2 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-teal-500 outline-none text-[11px] md:text-sm"
               />
               
-              <div className="flex flex-wrap gap-2 mb-3 md:mb-4 items-center">
-                {/* Circle Color Picker */}
-                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-300 shrink-0 shadow-sm cursor-pointer hover:scale-105 transition-transform">
+              {/* Force elements in a single row without hiding the bold button */}
+              <div className="flex flex-nowrap items-center justify-between gap-1.5 mb-2 md:mb-4">
+                <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-slate-300 shrink-0 shadow-sm cursor-pointer hover:scale-105 transition-transform">
                   <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0" title="Choose Color" />
                 </div>
                 
-                {/* Categorized Font Selector */}
                 <select 
                   value={textFont} 
                   onChange={(e) => setTextFont(e.target.value)} 
-                  className="flex-1 px-2 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none w-full min-w-[120px]"
+                  className="flex-1 px-1 md:px-2 py-1 md:py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none w-full min-w-0"
                   style={{ fontFamily: FONT_OPTIONS.Handwriting.find(f => f.value === textFont) ? textFont : 'sans-serif' }}
                 >
-                  <optgroup label="📝 Handwriting / Signature">
+                  <optgroup label="📝 Signatures">
                     {FONT_OPTIONS.Handwriting.map(font => (
-                      <option key={font.value} value={font.value} style={{ fontFamily: font.value, fontSize: '16px' }}>
+                      <option key={font.value} value={font.value} style={{ fontFamily: font.value, fontSize: '14px' }}>
                         {font.label}
                       </option>
                     ))}
                   </optgroup>
-                  <optgroup label="📄 Standard Fonts">
+                  <optgroup label="📄 Standard">
                     {FONT_OPTIONS.Standard.map(font => (
                       <option key={font.value} value={font.value}>
                         {font.label}
@@ -407,90 +421,87 @@ export const SignatureTool: React.FC = () => {
                   </optgroup>
                 </select>
 
-                {/* Bold Toggle */}
                 <button 
                   onClick={() => setIsBoldText(!isBoldText)} 
-                  className={`p-1.5 md:p-2 rounded-lg border transition-colors ${isBoldText ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                  className={`w-7 h-7 md:w-8 md:h-8 shrink-0 flex items-center justify-center rounded-lg border transition-colors ${isBoldText ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
                   title="Bold Text"
                 >
-                  <Bold size={14} className="md:w-4 md:h-4" />
+                  <Bold size={12} className="md:w-4 md:h-4" />
                 </button>
               </div>
 
               <button 
                 onClick={() => textContent.trim() && addElement('text', textContent)}
-                className="w-full py-2 bg-slate-900 text-white rounded-lg font-bold text-xs md:text-sm hover:bg-teal-600 transition-colors"
+                className="w-full py-1.5 md:py-2 bg-slate-900 text-white rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-600 transition-colors"
               >
                 Add Text
               </button>
             </div>
 
-            <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-               <h3 className="font-bold text-slate-800 mb-2 md:mb-3 flex items-center gap-2 text-xs md:text-base"><ImageIcon size={16} className="text-teal-600"/> Upload Signature</h3>
-               <input type="file" accept="image/png, image/jpeg" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-               <button onClick={() => fileInputRef.current?.click()} className="w-full py-2 md:py-3 border-2 border-dashed border-teal-300 text-teal-700 bg-teal-50 rounded-lg font-bold text-xs md:text-sm hover:bg-teal-100 transition-colors">
-                 Upload Image
-               </button>
-            </div>
+            <div className="flex flex-row md:flex-col gap-2 md:gap-6">
+              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><ImageIcon size={14} className="text-teal-600"/> Image</h3>
+                 <input type="file" accept="image/png, image/jpeg" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
+                 <button onClick={() => fileInputRef.current?.click()} className="w-full py-1.5 md:py-3 border-2 border-dashed border-teal-300 text-teal-700 bg-teal-50 rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-100 transition-colors">
+                   Upload
+                 </button>
+              </div>
 
-            <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-               <h3 className="font-bold text-slate-800 mb-2 md:mb-3 flex items-center gap-2 text-xs md:text-base"><Calendar size={16} className="text-teal-600"/> Add Date</h3>
-               <div className="flex gap-2 mb-2 md:mb-3">
-                 <input 
-                   type="date" 
-                   value={selectedDate}
-                   onChange={(e) => setSelectedDate(e.target.value)}
-                   className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs md:text-sm outline-none"
-                 />
-               </div>
-               <button 
-                 onClick={() => addElement('date', selectedDate)} 
-                 className="w-full py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg font-bold text-xs md:text-sm transition-colors"
-               >
-                 Insert Date
-               </button>
+              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Calendar size={14} className="text-teal-600"/> Date</h3>
+                 <div className="flex gap-2 mb-2">
+                   <input 
+                     type="date" 
+                     value={selectedDate}
+                     onChange={(e) => setSelectedDate(e.target.value)}
+                     className="w-full px-1 py-1 md:py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none"
+                   />
+                 </div>
+                 <button 
+                   onClick={() => addElement('date', selectedDate)} 
+                   className="w-full py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg font-bold text-[11px] md:text-sm transition-colors"
+                 >
+                   Add Date
+                 </button>
+              </div>
             </div>
             
-            {/* Save Button */}
-            <div className="sticky bottom-2 z-10 pt-1 md:pt-2">
+            <div className="sticky bottom-2 z-10 pt-1">
               <button
                 onClick={handleSave}
                 disabled={isProcessing}
-                className="w-full py-3 md:py-4 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl shadow-teal-500/20 flex justify-center items-center gap-2 transition-transform hover:-translate-y-1"
+                className="w-full py-2.5 md:py-4 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl md:rounded-2xl font-black text-[13px] md:text-lg shadow-xl shadow-teal-500/20 flex justify-center items-center gap-2 transition-transform hover:-translate-y-1"
               >
-                {isProcessing ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : <><Download size={18} /> Save PDF</>}
+                {isProcessing ? <><Loader2 className="animate-spin" size={16} /> Processing...</> : <><Download size={16} /> Save PDF</>}
               </button>
-              {error && <p className="text-red-500 text-xs md:text-sm font-medium mt-2 flex items-center gap-1"><AlertCircle size={14}/> {error}</p>}
+              {error && <p className="text-red-500 text-[10px] md:text-sm font-medium mt-1 flex items-center gap-1"><AlertCircle size={12}/> {error}</p>}
             </div>
           </div>
 
-          {/* PDF Viewer Area - Optimized for Mobile Full Width */}
-          <div className="lg:col-span-3 order-1 lg:order-2 flex flex-col w-full min-h-[50vh]">
-            <div className="bg-slate-800 p-2 md:p-3 rounded-t-xl md:rounded-t-2xl flex flex-wrap items-center justify-between text-white gap-2">
-              <span className="font-medium text-[10px] md:text-sm truncate max-w-[100px] md:max-w-[200px]">{file.name}</span>
-              <div className="flex items-center gap-1 md:gap-4 bg-slate-700/50 rounded-lg px-1.5 md:px-2 py-1">
-                <button onClick={() => changePage(-1)} disabled={currentPage === 1} className="p-1 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronLeft size={16}/></button>
-                <span className="text-[10px] md:text-sm font-bold whitespace-nowrap">Page {currentPage} / {numPages}</span>
-                <button onClick={() => changePage(1)} disabled={currentPage === numPages} className="p-1 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronRight size={16}/></button>
+          <div className="lg:col-span-3 order-1 lg:order-2 flex flex-col w-full min-h-[50vh] max-w-full">
+            <div className="bg-slate-800 p-1.5 md:p-3 rounded-t-lg md:rounded-t-2xl flex flex-wrap items-center justify-between text-white gap-2">
+              <span className="font-medium text-[9px] md:text-sm truncate max-w-[120px] md:max-w-[200px]">{file.name}</span>
+              <div className="flex items-center gap-1 md:gap-4 bg-slate-700/50 rounded-md md:rounded-lg px-1 md:px-2 py-0.5 md:py-1">
+                <button onClick={() => changePage(-1)} disabled={currentPage === 1} className="p-0.5 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronLeft size={14}/></button>
+                <span className="text-[9px] md:text-sm font-bold whitespace-nowrap">Pg {currentPage} / {numPages}</span>
+                <button onClick={() => changePage(1)} disabled={currentPage === numPages} className="p-0.5 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronRight size={14}/></button>
               </div>
-              <button onClick={handleReset} className="text-red-400 hover:text-red-300 text-[10px] md:text-sm font-bold flex items-center gap-1"><RefreshCcw size={12} className="md:w-3.5 md:h-3.5"/> Reset</button>
+              <button onClick={handleReset} className="text-red-400 hover:text-red-300 text-[9px] md:text-sm font-bold flex items-center gap-1"><RefreshCcw size={10} className="md:w-3.5 md:h-3.5"/> Reset</button>
             </div>
             
-            {/* Apply to All Pages Button */}
             {(elements[currentPage]?.length > 0 && numPages > 1) && (
-              <div className="bg-indigo-50 border-b border-indigo-100 p-1.5 md:p-2 flex justify-center">
+              <div className="bg-indigo-50 border-b border-indigo-100 p-1.5 flex justify-center">
                  <button 
                    onClick={applyToAllPages}
-                   className="flex items-center gap-1.5 md:gap-2 text-indigo-700 font-bold text-[10px] md:text-sm bg-white px-3 md:px-4 py-1.5 rounded-full shadow-sm hover:bg-indigo-600 hover:text-white transition-all border border-indigo-200"
+                   className="flex items-center gap-1 text-indigo-700 font-bold text-[10px] md:text-sm bg-white px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-sm hover:bg-indigo-600 hover:text-white transition-all border border-indigo-200"
                  >
-                   <CopyCheck size={14} className="md:w-4 md:h-4"/> Apply to All Pages
+                   <CopyCheck size={12} className="md:w-4 md:h-4"/> Apply to All Pages
                  </button>
               </div>
             )}
             
-            {/* Container level pointer events for smooth drag */}
             <div 
-              className="bg-slate-200 p-0 sm:p-2 md:p-6 rounded-b-xl md:rounded-b-2xl flex-1 flex justify-center overflow-x-auto shadow-inner relative touch-none"
+              className="bg-slate-200 p-0 sm:p-2 md:p-6 rounded-b-lg md:rounded-b-2xl flex-1 flex justify-center overflow-x-auto shadow-inner relative touch-none"
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
@@ -509,30 +520,38 @@ export const SignatureTool: React.FC = () => {
                       key={el.id}
                       style={{ left: `${el.x}%`, top: `${el.y}%`, position: 'absolute' }}
                       onPointerDown={(e) => handlePointerDown(e, el)}
-                      className="cursor-move absolute z-50 p-1 md:p-2 border border-dashed border-transparent hover:border-indigo-500 group select-none shadow-sm hover:shadow-md bg-white/30 backdrop-blur-[1px] rounded"
+                      // mix-blend-multiply added to make signatures blend with paper flawlessly
+                      className="cursor-move absolute z-50 p-1 md:p-2 border border-dashed border-transparent hover:border-indigo-500 group select-none shadow-sm hover:shadow-md bg-transparent mix-blend-multiply rounded"
                     >
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }}
-                        className="absolute -top-3 -right-3 bg-red-500 text-white p-1 md:p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg"
-                        title="Delete"
-                      >
-                        <Trash2 size={10} className="md:w-3 md:h-3" />
-                      </button>
+                      {/* Control Panel (Trash & Resize buttons) */}
+                      <div className="absolute -top-7 -right-2 hidden group-hover:flex items-center bg-slate-800 text-white rounded-md shadow-lg overflow-hidden z-50">
+                        <button onClick={(e) => { e.stopPropagation(); updateScale(el.id, -0.1); }} className="p-1.5 hover:bg-slate-700" title="Decrease Size"><Minus size={12} /></button>
+                        <div className="w-px h-3 bg-slate-600"></div>
+                        <button onClick={(e) => { e.stopPropagation(); updateScale(el.id, 0.1); }} className="p-1.5 hover:bg-slate-700" title="Increase Size"><Plus size={12} /></button>
+                        <div className="w-px h-3 bg-slate-600"></div>
+                        <button onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }} className="p-1.5 hover:bg-red-500 text-red-300 hover:text-white" title="Delete"><Trash2 size={12} /></button>
+                      </div>
 
                       {el.type === 'text' || el.type === 'date' ? (
                         <span 
                           style={{ 
                             color: el.color, 
                             fontFamily: el.font === 'Times-Roman' ? 'Times New Roman' : el.font === 'Courier' ? 'Courier New' : el.font, 
-                            fontSize: `${el.fontSize || 16}px`,
+                            fontSize: `${(el.fontSize || 16) * el.scale}px`,
                             fontWeight: el.isBold ? 'bold' : 'normal'
                           }} 
-                          className="whitespace-nowrap pointer-events-none drop-shadow-sm leading-none"
+                          className="whitespace-nowrap pointer-events-none opacity-90 leading-none block"
                         >
                           {el.content}
                         </span>
                       ) : (
-                        <img src={el.content} draggable="false" alt="Signature" className="max-w-[100px] md:max-w-[150px] object-contain pointer-events-none" />
+                        <img 
+                          src={el.content} 
+                          draggable="false" 
+                          alt="Signature" 
+                          style={{ width: `${150 * el.scale}px` }}
+                          className="object-contain pointer-events-none opacity-90 block" 
+                        />
                       )}
                     </div>
                   ))}
