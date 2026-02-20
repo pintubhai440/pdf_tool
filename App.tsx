@@ -453,7 +453,7 @@ function App() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-20 flex items-center justify-between">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 h-14 md:h-20 flex items-center justify-between gap-4 lg:gap-8 overflow-hidden">
           <a href="/" onClick={(e) => navigateTo('home', e)} className="flex items-center gap-3 group z-50 relative">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200/50 group-hover:rotate-6 transition-transform duration-300">
               <img src="/logo.png" alt="Genz PDF Logo" className="w-5 h-5 md:w-7 md:h-7 object-contain brightness-0 invert" />
@@ -463,7 +463,7 @@ function App() {
             </span>
           </a>
 
-          <div className="hidden md:flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner">
+          <div className="hidden md:flex items-center gap-1 xl:gap-2 bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner flex-shrink-0">
             <NavButton targetMode="home" icon={HomeIcon} label="Home" />
             <NavButton targetMode="merge" icon={Files} label="Merge" />
             <NavButton targetMode="split" icon={Scissors} label="Split" />
