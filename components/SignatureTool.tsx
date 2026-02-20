@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 
-// Font Collection with Direct TTF Links for PDF embedding
 const FONT_OPTIONS = {
   Standard: [
     { label: 'Arial / Helvetica (Clean)', value: 'Helvetica', isStandard: true },
@@ -36,7 +35,7 @@ interface SignatureElement {
   font?: string;
   fontSize?: number;
   isBold?: boolean;
-  scale: number; // New scale property for resizing
+  scale: number;
 }
 
 export const SignatureTool: React.FC = () => {
@@ -47,6 +46,7 @@ export const SignatureTool: React.FC = () => {
   const [pageImage, setPageImage] = useState<string>('');
   
   const [elements, setElements] = useState<Record<number, SignatureElement[]>>({});
+  const [activeElementId, setActiveElementId] = useState<string | null>(null); // New state for sticky controls
   
   const [textColor, setTextColor] = useState('#0f172a');
   const [textFont, setTextFont] = useState('Helvetica');
@@ -84,6 +84,7 @@ export const SignatureTool: React.FC = () => {
       setFile(files[0]);
       setElements({});
       setCurrentPage(1);
+      setActiveElementId(null);
       setDownloadUrl(null);
       setError(null);
       
@@ -103,7 +104,6 @@ export const SignatureTool: React.FC = () => {
   const renderPage = async (doc: any, pageNum: number) => {
     try {
       const page = await doc.getPage(pageNum);
-      // Increased scale to 2.0/2.5 to remove blurriness completely
       const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 2.0 : 2.5 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -122,6 +122,7 @@ export const SignatureTool: React.FC = () => {
     if (newPage >= 1 && newPage <= numPages) {
       setCurrentPage(newPage);
       renderPage(pdfDoc, newPage);
+      setActiveElementId(null);
     }
   };
 
@@ -136,19 +137,20 @@ export const SignatureTool: React.FC = () => {
       id: Math.random().toString(36).substr(2, 9),
       type,
       content: displayContent,
-      x: 30, 
-      y: 30, 
+      x: 20, 
+      y: 20, 
       color: textColor,
       font: textFont,
       fontSize: type === 'text' || type === 'date' ? (window.innerWidth < 768 ? 16 : 22) : undefined,
       isBold: isBoldText,
-      scale: 1 // Default scale
+      scale: 1 
     };
 
     setElements(prev => ({
       ...prev,
       [currentPage]: [...(prev[currentPage] || []), newEl]
     }));
+    setActiveElementId(newEl.id);
     if (type === 'text') setTextContent(''); 
   };
 
@@ -170,9 +172,9 @@ export const SignatureTool: React.FC = () => {
       ...prev,
       [currentPage]: (prev[currentPage] || []).filter(el => el.id !== id)
     }));
+    setActiveElementId(null);
   };
 
-  // Zoom In / Zoom Out Element Size
   const updateScale = (id: string, delta: number) => {
     setElements(prev => {
       const pageElements = prev[currentPage] || [];
@@ -180,7 +182,7 @@ export const SignatureTool: React.FC = () => {
         ...prev,
         [currentPage]: pageElements.map(el => {
           if (el.id === id) {
-            const newScale = Math.max(0.3, el.scale + delta); // Prevent making it invisible
+            const newScale = Math.max(0.3, el.scale + delta);
             return { ...el, scale: newScale };
           }
           return el;
@@ -209,10 +211,10 @@ export const SignatureTool: React.FC = () => {
     alert("Success! Applied to all pages.");
   };
 
-  // Smooth Drag Logic
   const handlePointerDown = (e: React.PointerEvent, el: SignatureElement) => {
     e.preventDefault();
     e.stopPropagation();
+    setActiveElementId(el.id);
     dragState.current = {
       id: el.id,
       startX: e.clientX,
@@ -251,9 +253,14 @@ export const SignatureTool: React.FC = () => {
     dragState.current.id = null;
   };
 
+  const handleBackgroundClick = () => {
+    setActiveElementId(null);
+  };
+
   const handleSave = async () => {
     if (!file) return;
     setIsProcessing(true);
+    setActiveElementId(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await PDFDocument.load(arrayBuffer);
@@ -281,6 +288,7 @@ export const SignatureTool: React.FC = () => {
       };
 
       const pages = pdf.getPages();
+      const baseImgWidth = window.innerWidth < 768 ? 100 : 150;
 
       for (const [pageNum, pageElements] of Object.entries(elements)) {
         const pageIndex = parseInt(pageNum) - 1;
@@ -291,33 +299,38 @@ export const SignatureTool: React.FC = () => {
 
         for (const el of pageElements) {
           const x = (el.x / 100) * width;
-          const y = height - ((el.y / 100) * height); 
-
+          
           if (el.type === 'text' || el.type === 'date') {
             const pdfFont = await getPdfFont(el.font || 'Helvetica', el.isBold);
-            // Apply scale multiplier to font size
-            const size = (el.fontSize || 16) * 1.3 * el.scale; 
+            const size = (el.fontSize || 16) * 1.5 * el.scale; 
+            
+            // Adjusted Y calculation for exact text baseline match
+            const y = height - ((el.y / 100) * height) - (size * 0.75); 
+            
             page.drawText(el.content, {
               x,
-              y: y - size, 
+              y, 
               size,
               font: pdfFont,
               color: el.color ? hexToRgb(el.color) : rgb(0,0,0),
-              opacity: 0.9 // Blends naturally with paper
+              opacity: 0.85 // Ink absorption effect
             });
           } else if (el.type === 'image') {
             const isPng = el.content.startsWith('data:image/png');
             const imgBytes = await fetch(el.content).then(res => res.arrayBuffer());
             const image = isPng ? await pdf.embedPng(imgBytes) : await pdf.embedJpg(imgBytes);
             
-            // Apply scale multiplier to image dimensions
-            const imgDims = image.scaleToFit(150 * el.scale, 150 * el.scale);
+            const imgDims = image.scaleToFit(baseImgWidth * el.scale, baseImgWidth * el.scale);
+            
+            // Adjusted Y calculation for image bottom edge
+            const y = height - ((el.y / 100) * height) - imgDims.height;
+            
             page.drawImage(image, {
               x,
-              y: y - imgDims.height,
+              y,
               width: imgDims.width,
               height: imgDims.height,
-              opacity: 0.9 // Blends naturally
+              opacity: 0.85 // Ink absorption effect
             });
           }
         }
@@ -339,12 +352,12 @@ export const SignatureTool: React.FC = () => {
     setFile(null);
     setPdfDoc(null);
     setElements({});
+    setActiveElementId(null);
     setDownloadUrl(null);
     setPageImage('');
   };
 
   return (
-    // Further reduced padding and gap for maximum mobile view space
     <div className="min-h-[80vh] bg-slate-50 rounded-lg md:rounded-3xl p-1.5 sm:p-3 md:p-8 shadow-xl border border-slate-100 w-full overflow-hidden">
       <div className="text-center mb-3 md:mb-8">
         <h1 className="text-xl md:text-5xl font-black text-slate-900 tracking-tight mb-1 md:mb-3">
@@ -381,7 +394,6 @@ export const SignatureTool: React.FC = () => {
       ) : (
         <div className="grid lg:grid-cols-4 gap-2 md:gap-8 w-full mx-auto">
           
-          {/* Sidebar Controls - Optimized for tight mobile screens */}
           <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 order-2 lg:order-1">
             <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
               <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Type size={14} className="text-teal-600"/> Add Text / Name</h3>
@@ -393,8 +405,8 @@ export const SignatureTool: React.FC = () => {
                 className="w-full px-2 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-teal-500 outline-none text-[11px] md:text-sm"
               />
               
-              {/* Force elements in a single row without hiding the bold button */}
-              <div className="flex flex-nowrap items-center justify-between gap-1.5 mb-2 md:mb-4">
+              {/* FIXED: Using flex-wrap so the Bold button drops to next line if space is tight */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-2 md:mb-4">
                 <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-slate-300 shrink-0 shadow-sm cursor-pointer hover:scale-105 transition-transform">
                   <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0" title="Choose Color" />
                 </div>
@@ -402,7 +414,7 @@ export const SignatureTool: React.FC = () => {
                 <select 
                   value={textFont} 
                   onChange={(e) => setTextFont(e.target.value)} 
-                  className="flex-1 px-1 md:px-2 py-1 md:py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none w-full min-w-0"
+                  className="flex-1 px-1 md:px-2 py-1 md:py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none min-w-[100px]"
                   style={{ fontFamily: FONT_OPTIONS.Handwriting.find(f => f.value === textFont) ? textFont : 'sans-serif' }}
                 >
                   <optgroup label="📝 Signatures">
@@ -438,17 +450,18 @@ export const SignatureTool: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex flex-row md:flex-col gap-2 md:gap-6">
-              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><ImageIcon size={14} className="text-teal-600"/> Image</h3>
+            {/* FIXED: Stacked Image and Date vertically for mobile */}
+            <div className="flex flex-col gap-2 md:gap-6">
+              <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><ImageIcon size={14} className="text-teal-600"/> Upload Image</h3>
                  <input type="file" accept="image/png, image/jpeg" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                  <button onClick={() => fileInputRef.current?.click()} className="w-full py-1.5 md:py-3 border-2 border-dashed border-teal-300 text-teal-700 bg-teal-50 rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-100 transition-colors">
                    Upload
                  </button>
               </div>
 
-              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Calendar size={14} className="text-teal-600"/> Date</h3>
+              <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Calendar size={14} className="text-teal-600"/> Add Date</h3>
                  <div className="flex gap-2 mb-2">
                    <input 
                      type="date" 
@@ -505,6 +518,7 @@ export const SignatureTool: React.FC = () => {
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
+              onPointerDown={handleBackgroundClick} // Click outside to clear selection
             >
               {pageImage ? (
                 <div 
@@ -520,17 +534,36 @@ export const SignatureTool: React.FC = () => {
                       key={el.id}
                       style={{ left: `${el.x}%`, top: `${el.y}%`, position: 'absolute' }}
                       onPointerDown={(e) => handlePointerDown(e, el)}
-                      // mix-blend-multiply added to make signatures blend with paper flawlessly
-                      className="cursor-move absolute z-50 p-1 md:p-2 border border-dashed border-transparent hover:border-indigo-500 group select-none shadow-sm hover:shadow-md bg-transparent mix-blend-multiply rounded"
+                      className={`cursor-move absolute z-50 p-1 md:p-2 border border-dashed rounded transition-colors bg-transparent mix-blend-multiply ${activeElementId === el.id ? 'border-indigo-500 shadow-md' : 'border-transparent hover:border-slate-300'}`}
                     >
-                      {/* Control Panel (Trash & Resize buttons) */}
-                      <div className="absolute -top-7 -right-2 hidden group-hover:flex items-center bg-slate-800 text-white rounded-md shadow-lg overflow-hidden z-50">
-                        <button onClick={(e) => { e.stopPropagation(); updateScale(el.id, -0.1); }} className="p-1.5 hover:bg-slate-700" title="Decrease Size"><Minus size={12} /></button>
-                        <div className="w-px h-3 bg-slate-600"></div>
-                        <button onClick={(e) => { e.stopPropagation(); updateScale(el.id, 0.1); }} className="p-1.5 hover:bg-slate-700" title="Increase Size"><Plus size={12} /></button>
-                        <div className="w-px h-3 bg-slate-600"></div>
-                        <button onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }} className="p-1.5 hover:bg-red-500 text-red-300 hover:text-white" title="Delete"><Trash2 size={12} /></button>
-                      </div>
+                      {/* FIXED: Sticky Control Panel (Shows only when element is active/clicked) */}
+                      {activeElementId === el.id && (
+                        <div className="absolute -top-10 -right-2 flex items-center bg-slate-800 text-white rounded-md shadow-xl z-[60]">
+                          <button 
+                            onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, -0.1); }} 
+                            className="p-2 hover:bg-slate-700 rounded-l-md" 
+                            title="Decrease Size"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <div className="w-px h-4 bg-slate-600"></div>
+                          <button 
+                            onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, 0.1); }} 
+                            className="p-2 hover:bg-slate-700" 
+                            title="Increase Size"
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <div className="w-px h-4 bg-slate-600"></div>
+                          <button 
+                            onPointerDown={(e) => { e.stopPropagation(); deleteElement(el.id); }} 
+                            className="p-2 hover:bg-red-500 text-red-300 hover:text-white rounded-r-md" 
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
 
                       {el.type === 'text' || el.type === 'date' ? (
                         <span 
@@ -549,7 +582,7 @@ export const SignatureTool: React.FC = () => {
                           src={el.content} 
                           draggable="false" 
                           alt="Signature" 
-                          style={{ width: `${150 * el.scale}px` }}
+                          style={{ width: `${(window.innerWidth < 768 ? 100 : 150) * el.scale}px` }}
                           className="object-contain pointer-events-none opacity-90 block" 
                         />
                       )}
