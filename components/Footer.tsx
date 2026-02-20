@@ -156,6 +156,7 @@ export const Footer: React.FC<FooterProps> = ({ setMode }) => {
                   { id: 'compress', label: 'Compress PDF', position: 4, url: '/compress-pdf' },
                   { id: 'resize', label: 'Resize PDF', position: 5, url: '/resize-pdf' },
                   { id: 'protect', label: 'Protect PDF', position: 6, url: '/protect-pdf' }, // ✅ Added Protect PDF
+                  { id: 'signature', label: 'Sign PDF', position: 7, url: '/signature' }, // ✅ Added Sign PDF
                 ].map((item) => (
                   <li
                     key={item.id}
