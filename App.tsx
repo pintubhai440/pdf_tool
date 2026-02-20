@@ -25,7 +25,7 @@ import {
   X,
   ChevronRight,
   Lock,
-  PenTool // <-- PenTool added here
+  PenTool
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
@@ -44,7 +44,7 @@ const ConverterTool = lazy(() => import('./components/ConverterTool'));
 const CompressTool = lazy(() => import('./components/CompressTool'));
 const ResizeTool = lazy(() => import('./components/ResizeTool'));
 const ProtectTool = lazy(() => import('./components/ProtectTool'));
-const SignatureTool = lazy(() => import('./components/SignatureTool')); // <-- New lazy load
+const SignatureTool = lazy(() => import('./components/SignatureTool'));
 const About = lazy(() => import('./components/About'));
 const Contact = lazy(() => import('./components/Contact'));
 const Policy = lazy(() => import('./components/Policy'));
@@ -179,7 +179,6 @@ const SEO_METADATA: Record<AppMode, {
       { name: "Protect PDF", url: `${BASE_URL}/protect` }
     ]
   },
-  // New Signature tool metadata
   signature: {
     title: "Sign PDF Online - E-Signature & Date | Genz PDF",
     description: "Add text or image signatures to your PDF files. Customize fonts, colors, and place your signature anywhere. 100% free and secure.",
@@ -235,7 +234,7 @@ function App() {
       if (path.includes('/compress')) return 'compress';
       if (path.includes('/resize')) return 'resize';
       if (path.includes('/protect')) return 'protect';
-      if (path.includes('/signature')) return 'signature'; // <-- new route
+      if (path.includes('/signature')) return 'signature';
       if (path.includes('/about')) return 'about';
       if (path.includes('/contact')) return 'contact';
       if (path.includes('/policy')) return 'policy';
@@ -472,7 +471,7 @@ function App() {
             <NavButton targetMode="compress" icon={Minimize2} label="Compress" />
             <NavButton targetMode="resize" icon={Scaling} label="Resize" />
             <NavButton targetMode="protect" icon={Lock} label="Protect" />
-            <NavButton targetMode="signature" icon={PenTool} label="Sign" /> {/* New desktop menu item */}
+            <NavButton targetMode="signature" icon={PenTool} label="Sign" />
           </div>
 
           <div className="flex items-center gap-3">
@@ -507,7 +506,7 @@ function App() {
           <NavButton targetMode="compress" icon={Minimize2} label="Compress PDF" mobile />
           <NavButton targetMode="resize" icon={Scaling} label="Resize Image" mobile />
           <NavButton targetMode="protect" icon={Lock} label="Protect PDF" mobile />
-          <NavButton targetMode="signature" icon={PenTool} label="Sign PDF" mobile /> {/* New mobile menu item */}
+          <NavButton targetMode="signature" icon={PenTool} label="Sign PDF" mobile />
           <div className="my-2 border-t border-slate-100"></div>
           <button 
             onClick={() => { setIsAiOpen(true); setIsMobileMenuOpen(false); }}
@@ -536,7 +535,6 @@ function App() {
           {mode === 'home' ? (
             <Home setMode={(m) => navigateTo(m)} />
           ) : mode === 'merge' ? (
-            // ========== MERGE SECTION WITH NEW BANNER ==========
             <article className="min-h-[600px] flex flex-col w-full">
               <input 
                 type="file" 
@@ -547,7 +545,6 @@ function App() {
                 className="hidden" 
               />
 
-              {/* RECTANGLE BANNER – ALWAYS VISIBLE */}
               <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-lg border border-slate-200 bg-slate-900 relative">
                 <video 
                   autoPlay 
@@ -570,8 +567,6 @@ function App() {
                   transition={{ duration: 0.4 }}
                   className="text-center max-w-4xl mx-auto py-6 md:py-10"
                 >
-                  {/* OLD MOBILE FRAME VIDEO REMOVED */}
-
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 md:mb-8 border border-indigo-100">
                     <Zap size={12} /> Secure & Private
                   </div>
@@ -622,7 +617,6 @@ function App() {
                   animate={{ opacity: 1 }}
                   className="flex flex-col gap-4 md:gap-12"
                 >
-                  
                   <div className="grid lg:grid-cols-3 gap-4 md:gap-8 items-start">
                     <div className="lg:col-span-2 space-y-3 md:space-y-6">
                       <motion.div 
@@ -758,7 +752,7 @@ function App() {
             </article>
           ) : mode === 'protect' ? (
             <ProtectTool />
-          ) : mode === 'signature' ? ( // <-- New condition for SignatureTool
+          ) : mode === 'signature' ? (
             <SignatureTool />
           ) : (
             <div className="bg-white p-4 md:p-12 rounded-[2rem] md:rounded-[2.5rem] shadow-xl border border-slate-100 min-h-[500px]">
