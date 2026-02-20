@@ -104,8 +104,8 @@ export const SignatureTool: React.FC = () => {
   const renderPage = async (doc: any, pageNum: number) => {
     try {
       const page = await doc.getPage(pageNum);
-      // FIXED: Mobile PDF rendering scale reduced by ~30% for better layout fit
-      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 1.4 : 2.5 });
+      // FIXED: Mobile ke liye scale 0.8 (45% smaller), desktop pe 1.8
+      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 0.8 : 1.8 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -264,6 +264,9 @@ export const SignatureTool: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
+    // FIXED: Wait for custom fonts to load so handwriting doesn't fallback to Arial
+    await document.fonts.ready;
+
     const resMultiplier = 4; // High resolution
     const baseSize = 30; 
     const fontSize = baseSize * resMultiplier;
@@ -278,6 +281,7 @@ export const SignatureTool: React.FC = () => {
     canvas.width = textWidth + (20 * resMultiplier);
     canvas.height = textHeight;
 
+    // Canvas size change hone par font reset ho jata hai, isliye yahan wapas set kiya
     ctx.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px "${fontFamily}", sans-serif`;
     ctx.fillStyle = colorHex || '#000000';
     ctx.textBaseline = 'top';
