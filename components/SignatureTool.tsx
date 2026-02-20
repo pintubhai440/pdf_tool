@@ -4,7 +4,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import {
   PenTool, Download, Loader2, Type, Image as ImageIcon, Calendar,
   Trash2, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, RefreshCcw,
-  Bold, CopyCheck, Plus, Minus
+  Bold, CopyCheck, Plus, Minus, FileSignature, Settings2, ShieldCheck, Zap, Layers
 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 
@@ -48,7 +48,7 @@ export const SignatureTool: React.FC = () => {
   const [elements, setElements] = useState<Record<number, SignatureElement[]>>({});
   const [activeElementId, setActiveElementId] = useState<string | null>(null);
   
-  const [textColor, setTextColor] = useState('#0f172a');
+  const [textColor, setTextColor] = useState('#1e293b');
   const [textFont, setTextFont] = useState('Helvetica');
   const [textContent, setTextContent] = useState('');
   const [isBoldText, setIsBoldText] = useState(false);
@@ -104,7 +104,7 @@ export const SignatureTool: React.FC = () => {
   const renderPage = async (doc: any, pageNum: number) => {
     try {
       const page = await doc.getPage(pageNum);
-      // FIXED: Mobile ke liye scale 0.8 (45% smaller), desktop pe 1.8
+      // Scale down on mobile for better fit
       const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 0.8 : 1.8 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -258,13 +258,13 @@ export const SignatureTool: React.FC = () => {
     setActiveElementId(null);
   };
 
-  // MAGIC FIX: Convert Handwriting Text to High-Res Image for PDF embedding
+  // Convert custom fonts to high-res image for PDF embedding
   const createTextImageForPDF = async (text: string, font: string, isBold: boolean, colorHex: string) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // FIXED: Wait for custom fonts to load so handwriting doesn't fallback to Arial
+    // Wait for custom fonts to load (critical for handwriting)
     await document.fonts.ready;
 
     const resMultiplier = 4; // High resolution
@@ -281,7 +281,6 @@ export const SignatureTool: React.FC = () => {
     canvas.width = textWidth + (20 * resMultiplier);
     canvas.height = textHeight;
 
-    // Canvas size change hone par font reset ho jata hai, isliye yahan wapas set kiya
     ctx.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px "${fontFamily}", sans-serif`;
     ctx.fillStyle = colorHex || '#000000';
     ctx.textBaseline = 'top';
@@ -330,11 +329,9 @@ export const SignatureTool: React.FC = () => {
           const x = (el.x / 100) * width;
           
           if (el.type === 'text' || el.type === 'date') {
-            
             const isHandwriting = FONT_OPTIONS.Handwriting.some(f => f.value === el.font);
             
             if (isHandwriting) {
-              // MAGIC FIX: Use Canvas to draw custom font and embed as PNG perfectly
               const textImg = await createTextImageForPDF(el.content, el.font || 'Helvetica', !!el.isBold, el.color || '#000000');
               if (textImg) {
                 const imgBytes = await fetch(textImg.dataUrl).then(res => res.arrayBuffer());
@@ -350,7 +347,6 @@ export const SignatureTool: React.FC = () => {
                 page.drawImage(image, { x, y, width: finalWidth, height: finalHeight, opacity: 0.85 });
               }
             } else {
-              // Standard Font Logic
               const pdfFont = await getStandardPdfFont(el.font || 'Helvetica', el.isBold);
               const size = (el.fontSize || 16) * 1.5 * el.scale; 
               const y = height - ((el.y / 100) * height) - (size * 0.75); 
@@ -396,161 +392,196 @@ export const SignatureTool: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[80vh] bg-slate-50 rounded-lg md:rounded-3xl p-1.5 sm:p-3 md:p-8 shadow-xl border border-slate-100 w-full overflow-hidden">
-      <div className="text-center mb-3 md:mb-8">
-        <h1 className="text-xl md:text-5xl font-black text-slate-900 tracking-tight mb-1 md:mb-3">
-          Sign <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-600">PDF Document Online Free </span>
+    <div className="min-h-[85vh] bg-zinc-50/50 rounded-2xl md:rounded-[2rem] p-3 sm:p-6 md:p-8 shadow-2xl shadow-zinc-200/50 border border-zinc-200/60 w-full overflow-hidden backdrop-blur-sm">
+      
+      {/* Premium Header */}
+      <div className="text-center mb-8 md:mb-12">
+        <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm border border-zinc-100 mb-4">
+          <FileSignature className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
+        </div>
+        <h1 className="text-3xl md:text-5xl font-black text-zinc-900 tracking-tight mb-3">
+          eSign PDF <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">Securely Online</span>
         </h1>
-        <p className="text-slate-500 font-medium text-[10px] md:text-base">Add text, dates, or upload your signature image securely.</p>
+        <p className="text-zinc-500 font-medium text-sm md:text-lg max-w-2xl mx-auto">
+          Add custom signatures, text, and dates to your documents instantly. All processing happens locally in your browser for maximum privacy.
+        </p>
       </div>
 
+      {/* Uploader State */}
       {!file ? (
-        <div className="max-w-2xl mx-auto bg-white p-4 md:p-12 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-200">
+        <div className="max-w-3xl mx-auto bg-white p-6 md:p-14 rounded-3xl shadow-xl shadow-zinc-200/40 border border-zinc-100 transition-all hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-100">
           <FileUploader 
             onFilesSelected={handleFileSelected} 
             allowMultiple={false} 
             acceptedFileTypes={['application/pdf']} 
-            label="Drop PDF to Sign" 
+            label="Drop your PDF here to Sign" 
           />
         </div>
       ) : downloadUrl ? (
-        <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl text-center shadow-lg border border-slate-200 animate-in zoom-in-95">
-          <div className="w-14 h-14 md:w-20 md:h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-            <CheckCircle2 size={32} className="md:w-10 md:h-10" />
+        
+        /* Success State */
+        <div className="max-w-md mx-auto bg-white p-8 md:p-10 rounded-3xl text-center shadow-2xl shadow-zinc-200/50 border border-zinc-100 animate-in zoom-in-95 fade-in duration-300">
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-green-400 to-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30 ring-8 ring-emerald-50">
+            <CheckCircle2 size={40} strokeWidth={2.5} />
           </div>
-          <h2 className="text-lg md:text-2xl font-bold mb-2">Document Signed!</h2>
-          <p className="text-slate-500 text-xs md:text-base mb-6 md:mb-8">Your signature has been applied successfully.</p>
-          <div className="flex flex-col gap-3">
-            <a href={downloadUrl} download={`signed-${file.name}`} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 md:py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all text-sm md:text-base">
-              <Download size={18} /> Download PDF
+          <h2 className="text-2xl md:text-3xl font-black text-zinc-900 mb-3">Document Signed!</h2>
+          <p className="text-zinc-500 text-sm md:text-base mb-8">Your signature has been securely applied to the PDF.</p>
+          <div className="flex flex-col gap-4">
+            <a href={downloadUrl} download={`signed-${file.name}`} className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 md:py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 text-base">
+              <Download size={20} /> Download Signed PDF
             </a>
-            <button onClick={handleReset} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 md:py-3 px-6 rounded-xl transition-all text-sm md:text-base">
-              Sign Another File
+            <button onClick={handleReset} className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3.5 md:py-4 px-6 rounded-2xl transition-all text-base border border-zinc-200 hover:border-zinc-300">
+              Sign Another Document
             </button>
           </div>
         </div>
       ) : (
-        <div className="grid lg:grid-cols-4 gap-2 md:gap-8 w-full mx-auto">
+
+        /* Main Workspace */
+        <div className="flex flex-col lg:flex-row gap-6 w-full mx-auto relative items-start">
           
-          <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 order-2 lg:order-1">
-            <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-              <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Type size={14} className="text-teal-600"/> Add Text / Name</h3>
-              <input 
-                type="text" 
-                placeholder="Type your name..." 
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-                className="w-full px-2 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-teal-500 outline-none text-[11px] md:text-sm"
-              />
-              
-              <div className="flex flex-wrap items-center gap-1.5 mb-2 md:mb-4">
-                <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-slate-300 shrink-0 shadow-sm cursor-pointer hover:scale-105 transition-transform">
-                  <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0" title="Choose Color" />
-                </div>
+          {/* Left Sidebar (Tools) */}
+          <div className="w-full lg:w-80 shrink-0 flex flex-col gap-4 order-2 lg:order-1 lg:sticky lg:top-4">
+            
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-zinc-200 flex flex-col gap-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Settings2 size={18} className="text-indigo-600" />
+                <h3 className="font-bold text-zinc-800 text-sm uppercase tracking-wider">Signature Tools</h3>
+              </div>
+
+              {/* Text Tool */}
+              <div className="space-y-3 p-4 bg-zinc-50/80 rounded-xl border border-zinc-100">
+                <h4 className="font-semibold text-zinc-700 text-xs flex items-center gap-1.5"><Type size={14}/> Text / Name</h4>
+                <input 
+                  type="text" 
+                  placeholder="Type your name..." 
+                  value={textContent}
+                  onChange={(e) => setTextContent(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                />
                 
-                <select 
-                  value={textFont} 
-                  onChange={(e) => setTextFont(e.target.value)} 
-                  className="flex-1 px-1 md:px-2 py-1 md:py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none min-w-[100px]"
-                  style={{ fontFamily: FONT_OPTIONS.Handwriting.find(f => f.value === textFont) ? textFont : 'sans-serif' }}
-                >
-                  <optgroup label="📝 Signatures">
-                    {FONT_OPTIONS.Handwriting.map(font => (
-                      <option key={font.value} value={font.value} style={{ fontFamily: font.value, fontSize: '14px' }}>
-                        {font.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="📄 Standard">
-                    {FONT_OPTIONS.Standard.map(font => (
-                      <option key={font.value} value={font.value}>
-                        {font.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
+                <div className="flex items-center gap-2">
+                  <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-md shrink-0 cursor-pointer hover:scale-105 transition-transform ring-1 ring-zinc-200">
+                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0" title="Choose Color" />
+                  </div>
+                  
+                  <select 
+                    value={textFont} 
+                    onChange={(e) => setTextFont(e.target.value)} 
+                    className="flex-1 px-3 py-2 bg-white border border-zinc-200 rounded-xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500"
+                    style={{ fontFamily: FONT_OPTIONS.Handwriting.find(f => f.value === textFont) ? textFont : 'sans-serif' }}
+                  >
+                    <optgroup label="📝 Signatures">
+                      {FONT_OPTIONS.Handwriting.map(font => (
+                        <option key={font.value} value={font.value} style={{ fontFamily: font.value, fontSize: '14px' }}>{font.label}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="📄 Standard">
+                      {FONT_OPTIONS.Standard.map(font => (
+                        <option key={font.value} value={font.value}>{font.label}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+
+                  <button 
+                    onClick={() => setIsBoldText(!isBoldText)} 
+                    className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-xl border transition-all ${isBoldText ? 'bg-zinc-800 text-white border-zinc-800 shadow-md' : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 shadow-sm'}`}
+                    title="Toggle Bold"
+                  >
+                    <Bold size={14} />
+                  </button>
+                </div>
 
                 <button 
-                  onClick={() => setIsBoldText(!isBoldText)} 
-                  className={`w-7 h-7 md:w-8 md:h-8 shrink-0 flex items-center justify-center rounded-lg border transition-colors ${isBoldText ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}`}
-                  title="Bold Text"
+                  onClick={() => textContent.trim() && addElement('text', textContent)}
+                  className="w-full py-2.5 bg-zinc-900 text-white rounded-xl font-semibold text-sm hover:bg-indigo-600 transition-colors shadow-sm"
                 >
-                  <Bold size={12} className="md:w-4 md:h-4" />
+                  Insert Text
                 </button>
               </div>
 
-              <button 
-                onClick={() => textContent.trim() && addElement('text', textContent)}
-                className="w-full py-1.5 md:py-2 bg-slate-900 text-white rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-600 transition-colors"
-              >
-                Add Text
-              </button>
-            </div>
-
-            <div className="flex flex-row md:flex-col gap-2 md:gap-6">
-              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><ImageIcon size={14} className="text-teal-600"/> Upload Image</h3>
+              {/* Image Tool */}
+              <div className="space-y-3 p-4 bg-zinc-50/80 rounded-xl border border-zinc-100">
+                 <h4 className="font-semibold text-zinc-700 text-xs flex items-center gap-1.5"><ImageIcon size={14}/> Upload Signature Image</h4>
                  <input type="file" accept="image/png, image/jpeg" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                 <button onClick={() => fileInputRef.current?.click()} className="w-full py-1.5 md:py-3 border-2 border-dashed border-teal-300 text-teal-700 bg-teal-50 rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-100 transition-colors">
-                   Upload
+                 <button onClick={() => fileInputRef.current?.click()} className="w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-700 bg-indigo-50/50 rounded-xl font-semibold text-sm hover:bg-indigo-100 hover:border-indigo-300 transition-all">
+                   Select Image...
                  </button>
               </div>
 
-              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
-                 <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Calendar size={14} className="text-teal-600"/> Add Date</h3>
-                 <div className="flex gap-2 mb-2">
+              {/* Date Tool */}
+              <div className="space-y-3 p-4 bg-zinc-50/80 rounded-xl border border-zinc-100">
+                 <h4 className="font-semibold text-zinc-700 text-xs flex items-center gap-1.5"><Calendar size={14}/> Insert Date</h4>
+                 <div className="flex gap-2">
                    <input 
                      type="date" 
                      value={selectedDate}
                      onChange={(e) => setSelectedDate(e.target.value)}
-                     className="w-full px-1 py-1 md:py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] md:text-sm outline-none"
+                     className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500"
                    />
                  </div>
                  <button 
                    onClick={() => addElement('date', selectedDate)} 
-                   className="w-full py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg font-bold text-[11px] md:text-sm transition-colors"
+                   className="w-full py-2.5 bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 rounded-xl font-semibold text-sm transition-colors shadow-sm"
                  >
-                   Add Date
+                   Insert Date
                  </button>
               </div>
             </div>
             
-            <div className="sticky bottom-2 z-10 pt-1">
+            {/* Save Button */}
+            <div className="sticky bottom-4 z-10 pt-2">
               <button
                 onClick={handleSave}
                 disabled={isProcessing}
-                className="w-full py-2.5 md:py-4 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl md:rounded-2xl font-black text-[13px] md:text-lg shadow-xl shadow-teal-500/20 flex justify-center items-center gap-2 transition-transform hover:-translate-y-1"
+                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl font-bold text-base md:text-lg shadow-xl shadow-indigo-500/25 flex justify-center items-center gap-2 transition-transform hover:-translate-y-1 disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {isProcessing ? <><Loader2 className="animate-spin" size={16} /> Processing...</> : <><Download size={16} /> Save PDF</>}
+                {isProcessing ? <><Loader2 className="animate-spin" size={20} /> Generating PDF...</> : <><Download size={20} /> Finish & Download</>}
               </button>
-              {error && <p className="text-red-500 text-[10px] md:text-sm font-medium mt-1 flex items-center gap-1"><AlertCircle size={12}/> {error}</p>}
+              {error && <p className="text-red-500 text-xs font-medium mt-2 flex items-center justify-center gap-1.5"><AlertCircle size={14}/> {error}</p>}
             </div>
           </div>
 
-          <div className="lg:col-span-3 order-1 lg:order-2 flex flex-col w-full min-h-[50vh] max-w-full">
-            <div className="bg-slate-800 p-1.5 md:p-3 rounded-t-lg md:rounded-t-2xl flex flex-wrap items-center justify-between text-white gap-2">
-              <span className="font-medium text-[9px] md:text-sm truncate max-w-[120px] md:max-w-[200px]">{file.name}</span>
-              <div className="flex items-center gap-1 md:gap-4 bg-slate-700/50 rounded-md md:rounded-lg px-1 md:px-2 py-0.5 md:py-1">
-                <button onClick={() => changePage(-1)} disabled={currentPage === 1} className="p-0.5 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronLeft size={14}/></button>
-                <span className="text-[9px] md:text-sm font-bold whitespace-nowrap">Pg {currentPage} / {numPages}</span>
-                <button onClick={() => changePage(1)} disabled={currentPage === numPages} className="p-0.5 md:p-1.5 hover:bg-slate-600 rounded disabled:opacity-50"><ChevronRight size={14}/></button>
-              </div>
-              <button onClick={handleReset} className="text-red-400 hover:text-red-300 text-[9px] md:text-sm font-bold flex items-center gap-1"><RefreshCcw size={10} className="md:w-3.5 md:h-3.5"/> Reset</button>
-            </div>
+          {/* Right Sidebar (PDF Workspace) */}
+          <div className="flex-1 w-full bg-white rounded-3xl border border-zinc-200 shadow-sm flex flex-col overflow-hidden min-h-[60vh] order-1 lg:order-2">
             
-            {(elements[currentPage]?.length > 0 && numPages > 1) && (
-              <div className="bg-indigo-50 border-b border-indigo-100 p-1.5 flex justify-center">
+            {/* Toolbar Top */}
+            <div className="bg-zinc-900 px-4 py-3 flex flex-wrap items-center justify-between text-zinc-100 gap-3 border-b border-zinc-800">
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-sm truncate max-w-[150px] md:max-w-[250px]">{file.name}</span>
+                {elements[currentPage]?.length > 0 && numPages > 1 && (
                  <button 
                    onClick={applyToAllPages}
-                   className="flex items-center gap-1 text-indigo-700 font-bold text-[10px] md:text-sm bg-white px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-sm hover:bg-indigo-600 hover:text-white transition-all border border-indigo-200"
+                   className="hidden md:flex items-center gap-1.5 text-indigo-300 font-semibold text-xs bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-full transition-all border border-indigo-500/20"
                  >
-                   <CopyCheck size={12} className="md:w-4 md:h-4"/> Apply to All Pages
+                   <CopyCheck size={14}/> Apply to All Pages
+                 </button>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-3 bg-zinc-800 rounded-xl p-1 border border-zinc-700">
+                <button onClick={() => changePage(-1)} disabled={currentPage === 1} className="p-1.5 hover:bg-zinc-700 rounded-lg disabled:opacity-40 transition-colors"><ChevronLeft size={16}/></button>
+                <span className="text-sm font-bold whitespace-nowrap px-2">Page {currentPage} of {numPages}</span>
+                <button onClick={() => changePage(1)} disabled={currentPage === numPages} className="p-1.5 hover:bg-zinc-700 rounded-lg disabled:opacity-40 transition-colors"><ChevronRight size={16}/></button>
+              </div>
+
+              <button onClick={handleReset} className="text-zinc-400 hover:text-red-400 text-sm font-semibold flex items-center gap-1.5 transition-colors">
+                <RefreshCcw size={14} /> Start Over
+              </button>
+            </div>
+
+            {/* Mobile apply to all (visible only on small screens) */}
+            {elements[currentPage]?.length > 0 && numPages > 1 && (
+              <div className="md:hidden bg-indigo-50 border-b border-indigo-100 p-2 flex justify-center">
+                 <button onClick={applyToAllPages} className="flex items-center gap-1.5 text-indigo-700 font-bold text-xs bg-white px-4 py-1.5 rounded-full shadow-sm border border-indigo-200">
+                   <CopyCheck size={14}/> Apply to All Pages
                  </button>
               </div>
             )}
             
+            {/* PDF Canvas Area */}
             <div 
-              className="bg-slate-200 p-0 sm:p-2 md:p-6 rounded-b-lg md:rounded-b-2xl flex-1 flex justify-center overflow-x-auto shadow-inner relative touch-none"
+              className="bg-zinc-100 p-4 md:p-8 flex-1 flex justify-center overflow-auto relative touch-none shadow-inner"
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
@@ -559,8 +590,7 @@ export const SignatureTool: React.FC = () => {
               {pageImage ? (
                 <div 
                   ref={containerRef} 
-                  // FIXED: Added max-w-[75vw] for mobile so the PDF looks 30% smaller, leaving space for tools!
-                  className="relative shadow-2xl bg-white select-none origin-top transition-transform max-w-[75vw] md:max-w-full m-auto" 
+                  className="relative bg-white select-none origin-top max-w-[85vw] md:max-w-full m-auto shadow-[0_0_40px_rgba(0,0,0,0.08)] ring-1 ring-zinc-200" 
                   style={{ width: 'fit-content' }}
                 >
                   <img src={pageImage} alt={`Page ${currentPage}`} className="max-w-full h-auto pointer-events-none block" />
@@ -570,33 +600,15 @@ export const SignatureTool: React.FC = () => {
                       key={el.id}
                       style={{ left: `${el.x}%`, top: `${el.y}%`, position: 'absolute' }}
                       onPointerDown={(e) => handlePointerDown(e, el)}
-                      className={`cursor-move absolute z-50 p-1 md:p-2 border border-dashed rounded transition-colors bg-transparent mix-blend-multiply ${activeElementId === el.id ? 'border-indigo-500 shadow-md' : 'border-transparent hover:border-slate-300'}`}
+                      className={`cursor-move absolute z-50 p-2 rounded transition-colors bg-transparent mix-blend-multiply ${activeElementId === el.id ? 'border-2 border-indigo-500 border-dashed shadow-sm' : 'border-2 border-transparent hover:border-zinc-300 hover:border-dashed'}`}
                     >
                       {activeElementId === el.id && (
-                        <div className="absolute -top-10 -right-2 flex items-center bg-slate-800 text-white rounded-md shadow-xl z-[60]">
-                          <button 
-                            onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, -0.1); }} 
-                            className="p-2 hover:bg-slate-700 rounded-l-md" 
-                            title="Decrease Size"
-                          >
-                            <Minus size={14} />
-                          </button>
-                          <div className="w-px h-4 bg-slate-600"></div>
-                          <button 
-                            onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, 0.1); }} 
-                            className="p-2 hover:bg-slate-700" 
-                            title="Increase Size"
-                          >
-                            <Plus size={14} />
-                          </button>
-                          <div className="w-px h-4 bg-slate-600"></div>
-                          <button 
-                            onPointerDown={(e) => { e.stopPropagation(); deleteElement(el.id); }} 
-                            className="p-2 hover:bg-red-500 text-red-300 hover:text-white rounded-r-md" 
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center bg-zinc-900 text-white rounded-xl shadow-xl z-[60] border border-zinc-800 overflow-hidden">
+                          <button onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, -0.1); }} className="p-2.5 hover:bg-zinc-800 transition-colors" title="Decrease Size"><Minus size={14} /></button>
+                          <div className="w-px h-5 bg-zinc-700"></div>
+                          <button onPointerDown={(e) => { e.stopPropagation(); updateScale(el.id, 0.1); }} className="p-2.5 hover:bg-zinc-800 transition-colors" title="Increase Size"><Plus size={14} /></button>
+                          <div className="w-px h-5 bg-zinc-700"></div>
+                          <button onPointerDown={(e) => { e.stopPropagation(); deleteElement(el.id); }} className="p-2.5 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors" title="Delete"><Trash2 size={14} /></button>
                         </div>
                       )}
 
@@ -625,8 +637,9 @@ export const SignatureTool: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full min-h-[300px]">
-                  <Loader2 className="w-8 h-8 md:w-10 md:h-10 animate-spin text-teal-600" />
+                <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-zinc-400 gap-4">
+                  <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+                  <p className="font-medium text-sm animate-pulse">Rendering document...</p>
                 </div>
               )}
             </div>
@@ -635,56 +648,68 @@ export const SignatureTool: React.FC = () => {
         </div>
       )}
 
-      {/* --- SEO & INFO SECTION --- */}
-      <div className="max-w-4xl mx-auto mt-16 p-6 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-600 text-sm md:text-base">
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">How to Sign a PDF Document Online?</h2>
-        <p className="mb-4">Adding an electronic signature to your PDF is fast and easy with Genz PDF. Follow these simple steps:</p>
-        <ol className="list-decimal list-inside space-y-2 mb-8 ml-2">
-          <li><strong>Upload your PDF:</strong> Click on the upload box or drag and drop your document.</li>
-          <li><strong>Create your Signature:</strong> Use the text tool to type your name in cursive fonts, or upload an image of your actual signature.</li>
-          <li><strong>Position & Resize:</strong> Drag the signature to the correct spot on the page and adjust the size.</li>
-          <li><strong>Add Date:</strong> Quickly insert the current date using the calendar tool.</li>
-          <li><strong>Download:</strong> Click 'Save PDF' to download your securely signed document instantly.</li>
-        </ol>
+      {/* Premium SEO & Info Section (merged with detailed content from second code) */}
+      <div className="max-w-5xl mx-auto mt-20 p-8 md:p-12 bg-white rounded-[2rem] shadow-xl shadow-zinc-200/40 border border-zinc-100 text-zinc-600">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-black text-zinc-900 mb-4">Enterprise-Grade PDF Signing, <span className="text-indigo-600">Free Forever.</span></h2>
+          <p className="text-lg max-w-2xl mx-auto">Skip the expensive software. Add your electronic signature directly from your browser with bank-level privacy standards.</p>
+        </div>
 
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">Why choose our Free PDF Signer?</h2>
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          <div>
-            <h3 className="font-bold text-slate-800 mb-1">🛡️ 100% Secure & Private</h3>
-            <p className="text-sm">Unlike other tools, we do not upload your files to any server. Your document is processed entirely inside your browser (Client-side), ensuring military-grade privacy.</p>
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><ShieldCheck size={24}/></div>
+            <h3 className="text-lg font-bold text-zinc-900 mb-2">100% Client-Side Privacy</h3>
+            <p className="text-sm leading-relaxed">Your files never touch our servers. All document rendering and signing happens right on your device, guaranteeing absolute security for sensitive contracts.</p>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-800 mb-1">✍️ Multiple Signature Types</h3>
-            <p className="text-sm">Choose from realistic handwriting fonts (Pacifico, Great Vibes) or upload a scanned PNG/JPG image of your physical signature.</p>
+          <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><Zap size={24}/></div>
+            <h3 className="text-lg font-bold text-zinc-900 mb-2">Lightning Fast Editing</h3>
+            <p className="text-sm leading-relaxed">No account creation or credit card required. Just drag and drop your PDF, add your signature via text or image, and download instantly.</p>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-800 mb-1">⚡ Apply to All Pages</h3>
-            <p className="text-sm">Need to sign every page of a 50-page contract? Just place your signature once and hit "Apply to All Pages" with a single click.</p>
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-800 mb-1">📱 Mobile Friendly</h3>
-            <p className="text-sm">Easily e-sign documents on the go. Our tool is perfectly optimized for smartphones and tablets.</p>
+          <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><Layers size={24}/></div>
+            <h3 className="text-lg font-bold text-zinc-900 mb-2">Multi-Page Support</h3>
+            <p className="text-sm leading-relaxed">Signing a 50-page document? Drop your signature on page one and use our bulk apply feature to stamp it across all pages in seconds.</p>
           </div>
         </div>
 
-        {/* --- FAQ SECTION --- */}
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">Frequently Asked Questions</h2>
-        <div className="space-y-4">
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-2">Is it really safe to sign my PDF online here?</h3>
-            <p className="text-sm text-slate-600">Yes, absolutely. We never upload your PDF to our servers. All the processing happens directly inside your web browser. This means your sensitive contracts and documents stay completely private and secure on your own device.</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-2">Is this PDF signature tool truly free?</h3>
-            <p className="text-sm text-slate-600">Yes, it is 100% free to use. There are no hidden fees, we do not add any annoying watermarks to your signed documents, and you don't even need to create an account to get started.</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-2">Can I sign a PDF from my mobile phone?</h3>
-            <p className="text-sm text-slate-600">Yes. Genz PDF is fully optimized for mobile browsers. You can easily upload, add your signature, place dates, and download the signed file right from your smartphone or tablet without installing any app.</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-2">How do I add my actual handwritten signature?</h3>
-            <p className="text-sm text-slate-600">You can take a clear photo of your signature on a white piece of paper, crop it, and then use the "Upload Image" feature to place it anywhere on your PDF document.</p>
+        {/* How-to section from second code */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-zinc-900 mb-4">How to Sign a PDF Document Online?</h2>
+          <p className="mb-4">Adding an electronic signature to your PDF is fast and easy with Genz PDF. Follow these simple steps:</p>
+          <ol className="list-decimal list-inside space-y-2 mb-8 ml-2">
+            <li><strong>Upload your PDF:</strong> Click on the upload box or drag and drop your document.</li>
+            <li><strong>Create your Signature:</strong> Use the text tool to type your name in cursive fonts, or upload an image of your actual signature.</li>
+            <li><strong>Position & Resize:</strong> Drag the signature to the correct spot on the page and adjust the size.</li>
+            <li><strong>Add Date:</strong> Quickly insert the current date using the calendar tool.</li>
+            <li><strong>Download:</strong> Click 'Save PDF' to download your securely signed document instantly.</li>
+          </ol>
+        </div>
+
+        {/* FAQ SECTION (expanded from second code) */}
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-zinc-900 mb-6 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div className="p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:border-indigo-200 transition-colors">
+              <h3 className="font-bold text-zinc-900 mb-2">Is this legally binding?</h3>
+              <p className="text-sm text-zinc-600">In most countries, electronic signatures are legally binding for most business and personal transactions. Our tool helps you visually append your mark, acting as a standard e-signature.</p>
+            </div>
+            <div className="p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:border-indigo-200 transition-colors">
+              <h3 className="font-bold text-zinc-900 mb-2">Is it really safe to sign my PDF online here?</h3>
+              <p className="text-sm text-zinc-600">Yes, absolutely. We never upload your PDF to our servers. All the processing happens directly inside your web browser. This means your sensitive contracts and documents stay completely private and secure on your own device.</p>
+            </div>
+            <div className="p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:border-indigo-200 transition-colors">
+              <h3 className="font-bold text-zinc-900 mb-2">Is this PDF signature tool truly free?</h3>
+              <p className="text-sm text-zinc-600">Yes, it is 100% free to use. There are no hidden fees, we do not add any annoying watermarks to your signed documents, and you don't even need to create an account to get started.</p>
+            </div>
+            <div className="p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:border-indigo-200 transition-colors">
+              <h3 className="font-bold text-zinc-900 mb-2">Can I sign a PDF from my mobile phone?</h3>
+              <p className="text-sm text-zinc-600">Yes. Genz PDF is fully optimized for mobile browsers. You can easily upload, add your signature, place dates, and download the signed file right from your smartphone or tablet without installing any app.</p>
+            </div>
+            <div className="p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:border-indigo-200 transition-colors">
+              <h3 className="font-bold text-zinc-900 mb-2">How do I add my actual handwritten signature?</h3>
+              <p className="text-sm text-zinc-600">You can take a clear photo of your signature on a white piece of paper, crop it, and then use the "Upload Image" feature to place it anywhere on your PDF document.</p>
+            </div>
           </div>
         </div>
       </div>
