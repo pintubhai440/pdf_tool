@@ -49,7 +49,7 @@ export const SignatureTool: React.FC = () => {
   const [elements, setElements] = useState<Record<number, SignatureElement[]>>({});
   const [activeElementId, setActiveElementId] = useState<string | null>(null);
   
-  const [textColor, setTextColor] = useState('#4c1d95'); // Deep violet
+  const [textColor, setTextColor] = useState('#4c1d95'); 
   const [textFont, setTextFont] = useState('Helvetica');
   const [textContent, setTextContent] = useState('');
   const [isBoldText, setIsBoldText] = useState(false);
@@ -66,7 +66,6 @@ export const SignatureTool: React.FC = () => {
     id: null, startX: 0, startY: 0, initialElX: 0, initialElY: 0
   });
 
-  // Load handwriting fonts
   useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=Great+Vibes&family=Homemade+Apple&family=Indie+Flower&family=Pacifico&family=Satisfy&display=swap';
@@ -74,7 +73,6 @@ export const SignatureTool: React.FC = () => {
     document.head.appendChild(link);
   }, []);
 
-  // Set PDF.js worker
   useEffect(() => {
     const lib = (pdfjsLib as any).default || pdfjsLib;
     if (lib?.GlobalWorkerOptions) {
@@ -667,9 +665,8 @@ export const SignatureTool: React.FC = () => {
         </div>
       )}
 
-      {/* --- PREMIUM SEO & INFO SECTION (Merged from both codes) --- */}
+      {/* --- PREMIUM SEO & INFO SECTION (merged) --- */}
       <div className="max-w-6xl mx-auto mt-24 relative z-10">
-        {/* Feature cards from first code (colorful) */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Pro-Level Features, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-fuchsia-600">Zero Cost.</span></h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">Experience the smoothest document signing interface right in your browser. No downloads, no subscriptions.</p>
@@ -693,7 +690,7 @@ export const SignatureTool: React.FC = () => {
           </div>
         </div>
 
-        {/* Detailed How-to & FAQ from second code (adapted to match the design) */}
+        {/* How-to & FAQ Section (from second code) */}
         <div className="bg-white/80 backdrop-blur-md rounded-[2rem] p-8 md:p-12 shadow-2xl shadow-slate-200/60 border border-white text-slate-700">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">How to Sign a PDF Document Online?</h2>
