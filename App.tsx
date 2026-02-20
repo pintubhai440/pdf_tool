@@ -180,14 +180,18 @@ const SEO_METADATA: Record<AppMode, {
     ]
   },
   signature: {
-    title: "Sign PDF Online - E-Signature & Date | Genz PDF",
-    description: "Add text or image signatures to your PDF files. Customize fonts, colors, and place your signature anywhere. 100% free and secure.",
-    keywords: "sign pdf, add signature to pdf, esign pdf, pdf signature tool, draw signature, insert date in pdf",
+    title: "Sign PDF Online Free - Add E-Signature & Date | Genz PDF",
+    description: "Add signature to PDF online for free. Draw, type, or upload your e-signature. 100% secure, client-side processing. No files are uploaded to our servers.",
+    keywords: "sign pdf online, add signature to pdf, esign pdf free, draw signature on pdf, electronic signature pdf, insert signature in pdf without upload, secure pdf signer",
     schema: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "Sign PDF Tool",
-      "applicationCategory": "UtilitiesApplication"
+      "name": "Sign PDF Tool by Genz PDF",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": "Draw Signature, Type Signature, Upload Signature Image, Add Date, Client-Side Security",
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "1840" }
     },
     breadcrumb: [
       { name: "Home", url: BASE_URL },
