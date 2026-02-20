@@ -15,11 +15,11 @@ const FONT_OPTIONS = {
     { label: 'Courier (Typewriter)', value: 'Courier', isStandard: true },
   ],
   Handwriting: [
-    { label: 'Pacifico (Thick Brush)', value: 'Pacifico', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/pacifico/Pacifico-Regular.ttf' },
-    { label: 'Indie Flower (Casual)', value: 'Indie Flower', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/indieflower/IndieFlower-Regular.ttf' },
-    { label: 'Satisfy (Smooth Pen)', value: 'Satisfy', url: 'https://raw.githubusercontent.com/google/fonts/main/apache/satisfy/Satisfy-Regular.ttf' },
-    { label: 'Great Vibes (Elegant)', value: 'Great Vibes', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/GreatVibes-Regular.ttf' },
-    { label: 'Homemade Apple (Real Ink)', value: 'Homemade Apple', url: 'https://raw.githubusercontent.com/google/fonts/main/apache/homemadeapple/HomemadeApple-Regular.ttf' }
+    { label: 'Pacifico (Thick Brush)', value: 'Pacifico' },
+    { label: 'Indie Flower (Casual)', value: 'Indie Flower' },
+    { label: 'Satisfy (Smooth Pen)', value: 'Satisfy' },
+    { label: 'Great Vibes (Elegant)', value: 'Great Vibes' },
+    { label: 'Homemade Apple (Real Ink)', value: 'Homemade Apple' }
   ]
 };
 
@@ -46,7 +46,7 @@ export const SignatureTool: React.FC = () => {
   const [pageImage, setPageImage] = useState<string>('');
   
   const [elements, setElements] = useState<Record<number, SignatureElement[]>>({});
-  const [activeElementId, setActiveElementId] = useState<string | null>(null); // New state for sticky controls
+  const [activeElementId, setActiveElementId] = useState<string | null>(null);
   
   const [textColor, setTextColor] = useState('#0f172a');
   const [textFont, setTextFont] = useState('Helvetica');
@@ -104,7 +104,8 @@ export const SignatureTool: React.FC = () => {
   const renderPage = async (doc: any, pageNum: number) => {
     try {
       const page = await doc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 2.0 : 2.5 });
+      // FIXED: Mobile PDF rendering scale reduced by ~30% for better layout fit
+      const viewport = page.getViewport({ scale: window.innerWidth < 768 ? 1.4 : 2.5 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -257,6 +258,39 @@ export const SignatureTool: React.FC = () => {
     setActiveElementId(null);
   };
 
+  // MAGIC FIX: Convert Handwriting Text to High-Res Image for PDF embedding
+  const createTextImageForPDF = async (text: string, font: string, isBold: boolean, colorHex: string) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const resMultiplier = 4; // High resolution
+    const baseSize = 30; 
+    const fontSize = baseSize * resMultiplier;
+
+    const fontFamily = font === 'Times-Roman' ? 'Times New Roman' : font === 'Courier' ? 'Courier New' : font;
+    ctx.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px "${fontFamily}", sans-serif`;
+    
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
+    const textHeight = fontSize * 1.5;
+
+    canvas.width = textWidth + (20 * resMultiplier);
+    canvas.height = textHeight;
+
+    ctx.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px "${fontFamily}", sans-serif`;
+    ctx.fillStyle = colorHex || '#000000';
+    ctx.textBaseline = 'top';
+    ctx.fillText(text, 5 * resMultiplier, fontSize * 0.2);
+
+    return {
+      dataUrl: canvas.toDataURL('image/png'),
+      width: canvas.width / resMultiplier,
+      height: canvas.height / resMultiplier,
+      baseSize
+    };
+  };
+
   const handleSave = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -265,16 +299,7 @@ export const SignatureTool: React.FC = () => {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await PDFDocument.load(arrayBuffer);
       
-      const getPdfFont = async (fontValue: string, isBold?: boolean) => {
-        const customFont = FONT_OPTIONS.Handwriting.find(f => f.value === fontValue);
-        if (customFont) {
-          try {
-            const fontBytes = await fetch(customFont.url).then(res => res.arrayBuffer());
-            return await pdf.embedFont(fontBytes);
-          } catch (e) {
-            console.error("Failed to load custom font");
-          }
-        }
+      const getStandardPdfFont = async (fontValue: string, isBold?: boolean) => {
         if (fontValue === 'Times-Roman') return await pdf.embedFont(isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman);
         if (fontValue === 'Courier') return await pdf.embedFont(isBold ? StandardFonts.CourierBold : StandardFonts.Courier);
         return await pdf.embedFont(isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
@@ -301,36 +326,45 @@ export const SignatureTool: React.FC = () => {
           const x = (el.x / 100) * width;
           
           if (el.type === 'text' || el.type === 'date') {
-            const pdfFont = await getPdfFont(el.font || 'Helvetica', el.isBold);
-            const size = (el.fontSize || 16) * 1.5 * el.scale; 
             
-            // Adjusted Y calculation for exact text baseline match
-            const y = height - ((el.y / 100) * height) - (size * 0.75); 
+            const isHandwriting = FONT_OPTIONS.Handwriting.some(f => f.value === el.font);
             
-            page.drawText(el.content, {
-              x,
-              y, 
-              size,
-              font: pdfFont,
-              color: el.color ? hexToRgb(el.color) : rgb(0,0,0),
-              opacity: 0.85 // Ink absorption effect
-            });
+            if (isHandwriting) {
+              // MAGIC FIX: Use Canvas to draw custom font and embed as PNG perfectly
+              const textImg = await createTextImageForPDF(el.content, el.font || 'Helvetica', !!el.isBold, el.color || '#000000');
+              if (textImg) {
+                const imgBytes = await fetch(textImg.dataUrl).then(res => res.arrayBuffer());
+                const image = await pdf.embedPng(imgBytes);
+                
+                const uiFontSize = (el.fontSize || 16) * 1.5 * el.scale;
+                const scaleRatio = uiFontSize / textImg.baseSize;
+                
+                const finalWidth = textImg.width * scaleRatio;
+                const finalHeight = textImg.height * scaleRatio;
+                const y = height - ((el.y / 100) * height) - (finalHeight * 0.8);
+                
+                page.drawImage(image, { x, y, width: finalWidth, height: finalHeight, opacity: 0.85 });
+              }
+            } else {
+              // Standard Font Logic
+              const pdfFont = await getStandardPdfFont(el.font || 'Helvetica', el.isBold);
+              const size = (el.fontSize || 16) * 1.5 * el.scale; 
+              const y = height - ((el.y / 100) * height) - (size * 0.75); 
+              page.drawText(el.content, {
+                x, y, size, font: pdfFont, color: el.color ? hexToRgb(el.color) : rgb(0,0,0), opacity: 0.85
+              });
+            }
+
           } else if (el.type === 'image') {
             const isPng = el.content.startsWith('data:image/png');
             const imgBytes = await fetch(el.content).then(res => res.arrayBuffer());
             const image = isPng ? await pdf.embedPng(imgBytes) : await pdf.embedJpg(imgBytes);
             
             const imgDims = image.scaleToFit(baseImgWidth * el.scale, baseImgWidth * el.scale);
-            
-            // Adjusted Y calculation for image bottom edge
             const y = height - ((el.y / 100) * height) - imgDims.height;
             
             page.drawImage(image, {
-              x,
-              y,
-              width: imgDims.width,
-              height: imgDims.height,
-              opacity: 0.85 // Ink absorption effect
+              x, y, width: imgDims.width, height: imgDims.height, opacity: 0.85 
             });
           }
         }
@@ -405,7 +439,6 @@ export const SignatureTool: React.FC = () => {
                 className="w-full px-2 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-teal-500 outline-none text-[11px] md:text-sm"
               />
               
-              {/* FIXED: Using flex-wrap so the Bold button drops to next line if space is tight */}
               <div className="flex flex-wrap items-center gap-1.5 mb-2 md:mb-4">
                 <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-slate-300 shrink-0 shadow-sm cursor-pointer hover:scale-105 transition-transform">
                   <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0" title="Choose Color" />
@@ -450,9 +483,8 @@ export const SignatureTool: React.FC = () => {
               </button>
             </div>
 
-            {/* FIXED: Stacked Image and Date vertically for mobile */}
-            <div className="flex flex-col gap-2 md:gap-6">
-              <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-6">
+              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
                  <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><ImageIcon size={14} className="text-teal-600"/> Upload Image</h3>
                  <input type="file" accept="image/png, image/jpeg" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                  <button onClick={() => fileInputRef.current?.click()} className="w-full py-1.5 md:py-3 border-2 border-dashed border-teal-300 text-teal-700 bg-teal-50 rounded-lg font-bold text-[11px] md:text-sm hover:bg-teal-100 transition-colors">
@@ -460,7 +492,7 @@ export const SignatureTool: React.FC = () => {
                  </button>
               </div>
 
-              <div className="bg-white p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+              <div className="bg-white flex-1 p-2.5 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
                  <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-[11px] md:text-base"><Calendar size={14} className="text-teal-600"/> Add Date</h3>
                  <div className="flex gap-2 mb-2">
                    <input 
@@ -518,25 +550,24 @@ export const SignatureTool: React.FC = () => {
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
-              onPointerDown={handleBackgroundClick} // Click outside to clear selection
+              onPointerDown={handleBackgroundClick} 
             >
               {pageImage ? (
                 <div 
                   ref={containerRef} 
-                  className="relative shadow-2xl bg-white select-none origin-top transition-transform max-w-full m-auto" 
+                  // FIXED: Added max-w-[75vw] for mobile so the PDF looks 30% smaller, leaving space for tools!
+                  className="relative shadow-2xl bg-white select-none origin-top transition-transform max-w-[75vw] md:max-w-full m-auto" 
                   style={{ width: 'fit-content' }}
                 >
-                  <img src={pageImage} alt={`Page ${currentPage}`} className="max-w-[100vw] sm:max-w-full h-auto pointer-events-none block" />
+                  <img src={pageImage} alt={`Page ${currentPage}`} className="max-w-full h-auto pointer-events-none block" />
                   
-                  {/* Render elements for current page */}
-                  {(elements[currentPage] || []).map(el => (
+                  {elements[currentPage]?.map(el => (
                     <div
                       key={el.id}
                       style={{ left: `${el.x}%`, top: `${el.y}%`, position: 'absolute' }}
                       onPointerDown={(e) => handlePointerDown(e, el)}
                       className={`cursor-move absolute z-50 p-1 md:p-2 border border-dashed rounded transition-colors bg-transparent mix-blend-multiply ${activeElementId === el.id ? 'border-indigo-500 shadow-md' : 'border-transparent hover:border-slate-300'}`}
                     >
-                      {/* FIXED: Sticky Control Panel (Shows only when element is active/clicked) */}
                       {activeElementId === el.id && (
                         <div className="absolute -top-10 -right-2 flex items-center bg-slate-800 text-white rounded-md shadow-xl z-[60]">
                           <button 
