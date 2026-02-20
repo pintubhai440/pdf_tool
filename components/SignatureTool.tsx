@@ -634,6 +634,61 @@ export const SignatureTool: React.FC = () => {
 
         </div>
       )}
+
+      {/* --- SEO & INFO SECTION --- */}
+      <div className="max-w-4xl mx-auto mt-16 p-6 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-600 text-sm md:text-base">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">How to Sign a PDF Document Online?</h2>
+        <p className="mb-4">Adding an electronic signature to your PDF is fast and easy with Genz PDF. Follow these simple steps:</p>
+        <ol className="list-decimal list-inside space-y-2 mb-8 ml-2">
+          <li><strong>Upload your PDF:</strong> Click on the upload box or drag and drop your document.</li>
+          <li><strong>Create your Signature:</strong> Use the text tool to type your name in cursive fonts, or upload an image of your actual signature.</li>
+          <li><strong>Position & Resize:</strong> Drag the signature to the correct spot on the page and adjust the size.</li>
+          <li><strong>Add Date:</strong> Quickly insert the current date using the calendar tool.</li>
+          <li><strong>Download:</strong> Click 'Save PDF' to download your securely signed document instantly.</li>
+        </ol>
+
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Why choose our Free PDF Signer?</h2>
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div>
+            <h3 className="font-bold text-slate-800 mb-1">🛡️ 100% Secure & Private</h3>
+            <p className="text-sm">Unlike other tools, we do not upload your files to any server. Your document is processed entirely inside your browser (Client-side), ensuring military-grade privacy.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800 mb-1">✍️ Multiple Signature Types</h3>
+            <p className="text-sm">Choose from realistic handwriting fonts (Pacifico, Great Vibes) or upload a scanned PNG/JPG image of your physical signature.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800 mb-1">⚡ Apply to All Pages</h3>
+            <p className="text-sm">Need to sign every page of a 50-page contract? Just place your signature once and hit "Apply to All Pages" with a single click.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800 mb-1">📱 Mobile Friendly</h3>
+            <p className="text-sm">Easily e-sign documents on the go. Our tool is perfectly optimized for smartphones and tablets.</p>
+          </div>
+        </div>
+
+        {/* --- FAQ SECTION --- */}
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-2">Is it really safe to sign my PDF online here?</h3>
+            <p className="text-sm text-slate-600">Yes, absolutely. We never upload your PDF to our servers. All the processing happens directly inside your web browser. This means your sensitive contracts and documents stay completely private and secure on your own device.</p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-2">Is this PDF signature tool truly free?</h3>
+            <p className="text-sm text-slate-600">Yes, it is 100% free to use. There are no hidden fees, we do not add any annoying watermarks to your signed documents, and you don't even need to create an account to get started.</p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-2">Can I sign a PDF from my mobile phone?</h3>
+            <p className="text-sm text-slate-600">Yes. Genz PDF is fully optimized for mobile browsers. You can easily upload, add your signature, place dates, and download the signed file right from your smartphone or tablet without installing any app.</p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-2">How do I add my actual handwritten signature?</h3>
+            <p className="text-sm text-slate-600">You can take a clear photo of your signature on a white piece of paper, crop it, and then use the "Upload Image" feature to place it anywhere on your PDF document.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
