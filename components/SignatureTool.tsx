@@ -399,7 +399,7 @@ export const SignatureTool: React.FC = () => {
     <div className="min-h-[80vh] bg-slate-50 rounded-lg md:rounded-3xl p-1.5 sm:p-3 md:p-8 shadow-xl border border-slate-100 w-full overflow-hidden">
       <div className="text-center mb-3 md:mb-8">
         <h1 className="text-xl md:text-5xl font-black text-slate-900 tracking-tight mb-1 md:mb-3">
-          Sign <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-600">PDF Document</span>
+          Sign <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-600">PDF Document Online Free </span>
         </h1>
         <p className="text-slate-500 font-medium text-[10px] md:text-base">Add text, dates, or upload your signature image securely.</p>
       </div>
